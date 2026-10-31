@@ -1,17 +1,25 @@
 /**
  * Kitchen app – Google Sheet sync.
  *
- * Paste this into Extensions → Apps Script of a new Google Sheet,
- * then Deploy → New deployment → Web app (see README.md).
+ * Paste this into Extensions → Apps Script of your Google Sheet, then
+ * Deploy → New deployment → Web app (see README.md).
  *
- * The app sends all its recipes; this script merges them with the
- * Sheet ("last change wins" per recipe) and sends the merged list back.
+ * This script doesn't need to know what a recipe contains: it stores
+ * each item as one block of data (JSON), so new app features work
+ * without changing this script. A few columns are kept readable for you
+ * (title, owner, last change).
+ *
+ * The app sends all its items; the script merges them with the Sheet
+ * and sends the merged list back:
+ *   - the newest version of each item wins ("updatedAt");
+ *   - lists of timestamped entries (like each person's star rating)
+ *     are merged entry by entry, so two phones never overwrite each other.
  */
 
-const SHEET_NAME = "Recipes";
-// New columns are only ever added at the end, so older Sheets keep working.
-const HEADERS = ["id", "title", "text", "tags", "notes", "updatedAt", "deleted", "servings", "ratings", "owner", "copyOf"];
-// Deleted recipes are kept as small markers so the deletion reaches
+// One sheet (tab) per kind of data. "recipes" keeps its old tab name.
+const SHEET_NAMES = { recipes: "Recipes" };
+const HEADERS = ["id", "title", "owner", "updatedAt", "deleted", "data"];
+// Deleted items are kept as small markers so the deletion reaches
 // every phone. After this many days the markers are removed.
 const DELETED_KEEP_DAYS = 90;
 
@@ -20,15 +28,20 @@ function doPost(e) {
   lock.waitLock(20000);
   try {
     const request = JSON.parse(e.postData.contents);
-    const sheet = getSheet_();
-    let recipes = readRecipes_(sheet);
+    // Older app versions send { recipes: [...] }; newer may name a collection.
+    const collection = request.collection || "recipes";
+    const incoming = request.items || request.recipes || [];
+    const sheet = getSheet_(collection);
+    let items = readItems_(sheet);
 
     if (request.action === "sync") {
-      recipes = merge_(recipes, request.recipes || []);
-      recipes = dropOldDeleted_(recipes);
-      writeRecipes_(sheet, recipes);
+      items = mergeItems_(items, incoming);
+      items = dropOldDeleted_(items);
+      writeItems_(sheet, items);
     }
-    return json_({ ok: true, recipes: recipes });
+    const reply = { ok: true, items: items };
+    reply[collection] = items; // so the app can read data.recipes
+    return json_(reply);
   } catch (error) {
     return json_({ ok: false, error: String(error) });
   } finally {
@@ -38,129 +51,179 @@ function doPost(e) {
 
 // Opening the link in a browser shows the recipes as JSON (a quick check).
 function doGet() {
-  return json_({ ok: true, app: "kitchen", recipes: readRecipes_(getSheet_()) });
+  return json_({ ok: true, app: "kitchen", recipes: readItems_(getSheet_("recipes")) });
 }
 
-function getSheet_() {
+function getSheet_(collection) {
+  if (!/^[a-z][a-z0-9-]{0,30}$/.test(collection)) {
+    throw new Error("Unknown collection: " + collection);
+  }
+  const name = SHEET_NAMES[collection] || collection;
   const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
-  let sheet = spreadsheet.getSheetByName(SHEET_NAME);
+  let sheet = spreadsheet.getSheetByName(name);
   if (!sheet) {
-    sheet = spreadsheet.insertSheet(SHEET_NAME);
+    sheet = spreadsheet.insertSheet(name);
+    sheet.getRange(1, 1, 1, HEADERS.length).setValues([HEADERS]).setFontWeight("bold");
     sheet.setFrozenRows(1);
   }
-  // Always (re)write the header row, so columns added in updates appear.
-  sheet.getRange(1, 1, 1, HEADERS.length).setValues([HEADERS]).setFontWeight("bold");
   return sheet;
 }
 
-function readRecipes_(sheet) {
-  const rowCount = sheet.getLastRow() - 1;
-  if (rowCount < 1) {
+// Reads all rows. Understands this script's format (a "data" column)
+// and the older one-column-per-field format, which it converts.
+function readItems_(sheet) {
+  const lastRow = sheet.getLastRow();
+  const lastColumn = sheet.getLastColumn();
+  if (lastRow < 2 || lastColumn < 1) {
     return [];
   }
-  const rows = sheet.getRange(2, 1, rowCount, HEADERS.length).getValues();
-  return rows
-    .filter(function (row) { return row[0]; })
-    .map(function (row) {
-      return {
-        id: String(row[0]),
-        title: String(row[1]),
-        text: String(row[2]),
-        tags: String(row[3]).split(",").map(function (t) { return t.trim(); }).filter(String),
-        notes: String(row[4]),
-        updatedAt: Number(row[5]) || 0,
-        deleted: row[6] === true || String(row[6]).toUpperCase() === "TRUE",
-        servings: Number(row[7]) || null,
-        ratings: parseRatings_(row[8]),
-        owner: String(row[9] || ""),
-        copyOf: String(row[10] || ""),
-      };
-    });
+  const values = sheet.getRange(1, 1, lastRow, lastColumn).getValues();
+  const headers = values[0].map(String);
+  const dataColumn = headers.indexOf("data");
+  const items = [];
+
+  for (let i = 1; i < values.length; i++) {
+    const row = values[i];
+    let item = null;
+    if (dataColumn >= 0) {
+      try {
+        item = JSON.parse(row[dataColumn] || "null");
+      } catch (error) {
+        item = null; // a damaged row is skipped, not fatal
+      }
+    } else {
+      item = fromOldRow_(headers, row);
+    }
+    if (item && item.id) {
+      items.push(item);
+    }
+  }
+  return items;
 }
 
-function writeRecipes_(sheet, recipes) {
-  const oldRows = sheet.getLastRow() - 1;
-  if (oldRows > 0) {
-    sheet.getRange(2, 1, oldRows, HEADERS.length).clearContent();
+// Old format: one column per field (id, title, text, tags, ratings …).
+function fromOldRow_(headers, row) {
+  const item = {};
+  headers.forEach(function (header, index) {
+    if (header) {
+      item[header] = row[index];
+    }
+  });
+  if (!item.id) {
+    return null;
   }
-  if (!recipes.length) {
+  item.id = String(item.id);
+  item.updatedAt = Number(item.updatedAt) || 0;
+  item.deleted = item.deleted === true || String(item.deleted).toUpperCase() === "TRUE";
+  if (typeof item.tags === "string") {
+    item.tags = item.tags.split(",").map(function (t) { return t.trim(); }).filter(String);
+  }
+  if (typeof item.ratings === "string") {
+    try {
+      item.ratings = JSON.parse(item.ratings || "{}");
+    } catch (error) {
+      item.ratings = {};
+    }
+  }
+  if (item.servings !== undefined) {
+    item.servings = Number(item.servings) || null;
+  }
+  return item;
+}
+
+function writeItems_(sheet, items) {
+  // Clear everything (also old-format columns), then write fresh.
+  const lastRow = sheet.getLastRow();
+  const lastColumn = sheet.getLastColumn();
+  if (lastRow > 0 && lastColumn > 0) {
+    sheet.getRange(1, 1, lastRow, lastColumn).clearContent();
+  }
+  sheet.getRange(1, 1, 1, HEADERS.length).setValues([HEADERS]).setFontWeight("bold");
+  sheet.setFrozenRows(1);
+  if (!items.length) {
     return;
   }
-  const rows = recipes.map(function (r) {
+  const rows = items.map(function (item) {
     return [
-      r.id, r.title, r.text, (r.tags || []).join(", "), r.notes, r.updatedAt,
-      r.deleted ? "TRUE" : "FALSE", r.servings || "", JSON.stringify(r.ratings || {}),
-      r.owner || "", r.copyOf || "",
+      item.id,
+      item.title || "",
+      item.owner || "",
+      item.updatedAt ? new Date(item.updatedAt).toISOString() : "",
+      item.deleted ? "TRUE" : "FALSE",
+      JSON.stringify(item),
     ];
   });
   const range = sheet.getRange(2, 1, rows.length, HEADERS.length);
-  // Plain text, so a recipe line starting with "=" is never read as a formula.
+  // Plain text, so nothing is ever read as a formula or a date.
   range.setNumberFormat("@");
   range.setValues(rows);
 }
 
-function parseRatings_(value) {
-  if (value && typeof value === "object") {
-    return value;
+// True for an object like { "Kadi": { stars: 5, at: 123 }, … }:
+// every entry is an object with a numeric "at" time.
+function isTimestampedMap_(value) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return false;
   }
-  try {
-    const parsed = JSON.parse(value || "{}");
-    return parsed && typeof parsed === "object" ? parsed : {};
-  } catch (error) {
-    return {};
-  }
+  const keys = Object.keys(value);
+  return keys.length > 0 && keys.every(function (key) {
+    const entry = value[key];
+    return entry && typeof entry === "object" && typeof entry.at === "number";
+  });
 }
 
-// For each person, their most recent rating wins.
-function mergeRatings_(a, b) {
+// For each key, the entry with the latest "at" wins.
+function mergeTimestampedMaps_(a, b) {
   const result = {};
-  [a || {}, b || {}].forEach(function (ratings) {
-    Object.keys(ratings).forEach(function (name) {
-      const r = ratings[name];
-      if (r && (!result[name] || Number(r.at) > Number(result[name].at))) {
-        result[name] = { stars: Number(r.stars) || 0, at: Number(r.at) || 0 };
+  [a || {}, b || {}].forEach(function (map) {
+    Object.keys(map).forEach(function (key) {
+      if (!result[key] || map[key].at > result[key].at) {
+        result[key] = map[key];
       }
     });
   });
   return result;
 }
 
-// The newest version of each recipe wins; ratings merge person by person.
-function merge_(stored, incoming) {
+function mergeItems_(stored, incoming) {
   const byId = {};
-  stored.concat(incoming).forEach(function (r) {
-    if (!r || !r.id) {
+  stored.concat(incoming).forEach(function (item) {
+    if (!item || !item.id) {
       return;
     }
-    const clean = {
-      id: String(r.id),
-      title: String(r.title || ""),
-      text: String(r.text || ""),
-      tags: Array.isArray(r.tags) ? r.tags : [],
-      notes: String(r.notes || ""),
-      updatedAt: Number(r.updatedAt) || 0,
-      deleted: r.deleted === true,
-      servings: Number(r.servings) || null,
-      ratings: parseRatings_(r.ratings),
-      owner: String(r.owner || ""),
-      copyOf: String(r.copyOf || ""),
-    };
-    const existing = byId[r.id];
+    item.updatedAt = Number(item.updatedAt) || 0;
+    const existing = byId[item.id];
     if (!existing) {
-      byId[r.id] = clean;
+      byId[item.id] = item;
       return;
     }
-    const winner = clean.updatedAt > existing.updatedAt ? clean : existing;
-    winner.ratings = winner.deleted ? {} : mergeRatings_(existing.ratings, clean.ratings);
-    byId[r.id] = winner;
+    const newer = item.updatedAt > existing.updatedAt ? item : existing;
+    const older = newer === item ? existing : item;
+    const merged = JSON.parse(JSON.stringify(newer));
+    if (!merged.deleted) {
+      Object.keys(older).forEach(function (field) {
+        const a = older[field];
+        const b = merged[field];
+        if ((isTimestampedMap_(a) || isTimestampedMap_(b)) &&
+            (a === undefined || isTimestampedMap_(a) || isEmptyObject_(a)) &&
+            (b === undefined || isTimestampedMap_(b) || isEmptyObject_(b))) {
+          merged[field] = mergeTimestampedMaps_(a, b);
+        }
+      });
+    }
+    byId[item.id] = merged;
   });
   return Object.keys(byId).map(function (id) { return byId[id]; });
 }
 
-function dropOldDeleted_(recipes) {
+function isEmptyObject_(value) {
+  return value && typeof value === "object" && !Array.isArray(value) && Object.keys(value).length === 0;
+}
+
+function dropOldDeleted_(items) {
   const cutoff = Date.now() - DELETED_KEEP_DAYS * 24 * 60 * 60 * 1000;
-  return recipes.filter(function (r) {
-    return !r.deleted || r.updatedAt > cutoff;
+  return items.filter(function (item) {
+    return !item.deleted || item.updatedAt > cutoff;
   });
 }
 

@@ -1,5 +1,8 @@
 # Changelog
 
+## 2026-10-31 h
+- New `Code.gs` that stores each recipe as one block of data: future app features no longer need script updates. It converts an existing Sheet automatically on its first sync (ratings, owners and everything else kept). **Paste it once and deploy a new version.**
+
 ## 2026-10-31 g
 - Recipes have an owner: whoever adds a recipe owns it ("Added by Kadi"). The app asks whose phone it is before the first save.
 - Only the owner can edit, delete or mark "Cooked today". Others can view and rate it, and **Make my copy** to adjust it as their own recipe, linked to the original ("copy of … (Kadi)").

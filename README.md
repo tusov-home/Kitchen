@@ -56,7 +56,7 @@ Recipes are always saved on the device first, so the app works offline. With syn
 6. In the Kitchen app: **⚙ → Web app link**, paste it, press **Save and sync**. A green dot in the top bar means synced.
 7. Send the same link to the other phone (e.g. in a private message) and paste it there too.
 
-**When `Code.gs` changes in an update** (the CHANGELOG says so), paste the new code over the old one, save, then: Deploy → Manage deployments → ✏ Edit → Version: *New version* → Deploy. The link stays the same.
+**`Code.gs` should rarely change:** it stores whole recipes without needing to know their fields. If an update ever does change it (the CHANGELOG says so), paste the new code over the old one, save, then: Deploy → Manage deployments → ✏ Edit → Version: *New version* → Deploy. The link stays the same.
 
 Sync status dot: green = synced, amber = offline (will sync later), red = sync problem (tap ⚙ to see the message).
 
@@ -94,14 +94,14 @@ js/ui/editor.js       add/edit form
 js/ui/settings.js     settings dialog: sync, backup, privacy
 js/ui/shortcuts.js    all keyboard shortcuts in one table
 js/ui/toast.js        short pop-up messages
-apps-script/Code.gs   the Google Sheet side of sync
+apps-script/Code.gs   the Google Sheet side of sync (stores each item as JSON; one tab per collection)
 tests/                unit tests and browser tests (made-up recipes only)
 ```
 
 ## Tests
 
 ```
-node --test tests/*.test.mjs     # pure helpers
+node --test tests/*.test.mjs     # pure helpers + Code.gs against a fake Sheet
 python tests/app_test.py         # browser: Android phone + laptop with keyboard, fake Sheet
 ```
 
