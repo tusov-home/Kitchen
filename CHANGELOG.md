@@ -1,5 +1,8 @@
 # Changelog
 
+## 2026-10-31 f
+- Installed app's bottom bar and start-up screen use the dark background (we both use dark mode). Reinstall the app to pick this up straight away.
+
 ## 2026-10-31 e
 - Star ratings (1–5) per person: each phone asks once whose phone it is. Tap the same star again to clear. The list shows the average.
 - Servings: found automatically from "Serves 2" (editable in the form). The − / + stepper on a recipe scales the ingredient amounts and highlights them; the method (temperatures, times) is never changed.
