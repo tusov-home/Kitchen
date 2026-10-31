@@ -52,21 +52,34 @@ export function renderList() {
     title.textContent = recipe.title;
     link.appendChild(title);
 
+    // Info line: ★ 4.5 · Kadi · quick · weekend
     const average = averageRating(recipe);
-    if (recipe.tags.length || average !== null) {
+    const parts = [];
+    if (average !== null) {
+      const stars = document.createElement("span");
+      stars.className = "card-stars";
+      stars.textContent = "★ " + (Math.round(average * 10) / 10);
+      stars.setAttribute("aria-label", "Rated " + average.toFixed(1) + " of 5");
+      parts.push(stars);
+    }
+    if (recipe.owner) {
+      const owner = document.createElement("span");
+      owner.className = "card-owner";
+      owner.textContent = recipe.owner;
+      parts.push(owner);
+    }
+    if (recipe.tags.length) {
+      parts.push(recipe.tags.join(" · "));
+    }
+    if (parts.length) {
       const infoLine = document.createElement("span");
       infoLine.className = "recipe-card-tags";
-      if (average !== null) {
-        const stars = document.createElement("span");
-        stars.className = "card-stars";
-        stars.textContent = "★ " + (Math.round(average * 10) / 10);
-        stars.setAttribute("aria-label", "Rated " + average.toFixed(1) + " of 5");
-        infoLine.appendChild(stars);
-        if (recipe.tags.length) {
+      parts.forEach(function (part, index) {
+        if (index > 0) {
           infoLine.append("  ·  ");
         }
-      }
-      infoLine.append(recipe.tags.join(" · "));
+        infoLine.append(part);
+      });
       link.appendChild(infoLine);
     }
 

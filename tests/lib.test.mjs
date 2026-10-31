@@ -170,3 +170,24 @@ test("without an ingredients heading, only bullet amounts scale", () => {
   assert.match(html, /<span class="scaled">4<\/span> onions/);
   assert.match(html, /Fry 2 onions 5 minutes/);
 });
+
+// ---------- Owners ----------
+import { canEdit, copyForEditing } from "../js/lib/recipes.js";
+
+test("only the owner can edit; recipes without owner are open", () => {
+  assert.equal(canEdit({ owner: "Kadi" }, "Kadi"), true);
+  assert.equal(canEdit({ owner: "Kadi" }, "Tõnis"), false);
+  assert.equal(canEdit({ owner: "" }, "Tõnis"), true);
+  assert.equal(canEdit({ owner: "Kadi" }, ""), false);
+});
+
+test("a copy keeps the recipe but not notes, ratings or owner", () => {
+  const original = {
+    id: "o1", title: "Ragu", text: "# Ragu\n\nSlow cook.", tags: ["weekend"], servings: 4,
+    notes: "Kadi's note", ratings: { Kadi: { stars: 5, at: 1 } }, owner: "Kadi",
+  };
+  const copy = copyForEditing(original);
+  assert.deepEqual(copy, { title: "Ragu", text: "Slow cook.", tags: ["weekend"], servings: 4, notes: "", copyOf: "o1" });
+  copy.tags.push("spicy");
+  assert.deepEqual(original.tags, ["weekend"], "original tags untouched");
+});

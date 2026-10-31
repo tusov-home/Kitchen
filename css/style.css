@@ -345,6 +345,22 @@ button.tag {
   text-align: left;
 }
 
+/* ---------- Owner ---------- */
+
+.owner-line {
+  margin: -0.25rem 0 0.75rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.owner-line a {
+  color: var(--accent);
+}
+
+.card-owner {
+  font-weight: 600;
+}
+
 /* ---------- Ratings ---------- */
 
 .rating-box {

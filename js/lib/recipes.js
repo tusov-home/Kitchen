@@ -2,6 +2,7 @@
 //
 // A recipe looks like:
 // { id, title, text, tags: ["quick"], notes, servings: 2,
+//   owner: "Kadi", copyOf: "<id of the recipe it was copied from>" or "",
 //   ratings: { "Tõnis": { stars: 4, at: 1730000000000 } },
 //   updatedAt: 1730000000000, deleted: false }
 
@@ -133,6 +134,27 @@ export function mergeRecipes(listA, listB) {
   return [...byId.values()];
 }
 
+// Only the owner may change a recipe. Recipes from before owners
+// existed (no owner) can be changed by anyone.
+export function canEdit(recipe, myName) {
+  return !recipe.owner || recipe.owner === myName;
+}
+
+// The starting point for "Make my copy": same recipe, new owner,
+// empty notes and ratings, and a link back to the original.
+export function copyForEditing(recipe) {
+  return {
+    title: recipe.title,
+    // Without the title line, so renaming the copy doesn't leave the
+    // old title behind inside the text.
+    text: bodyWithoutTitle(recipe.text, recipe.title),
+    tags: recipe.tags.slice(),
+    servings: recipe.servings,
+    notes: "",
+    copyOf: recipe.id,
+  };
+}
+
 // Average stars of everyone who rated, or null if nobody has.
 export function averageRating(recipe) {
   const stars = Object.values(recipe.ratings || {})
@@ -195,6 +217,8 @@ export function normaliseRecipe(raw) {
     notes: String(raw.notes || ""),
     servings: servings >= 1 && servings <= 50 ? Math.round(servings) : null,
     ratings: cleanRatings,
+    owner: String(raw.owner || ""),
+    copyOf: String(raw.copyOf || ""),
     updatedAt: Number(raw.updatedAt) || 0,
     deleted: raw.deleted === true || raw.deleted === "TRUE" || raw.deleted === "true",
   };

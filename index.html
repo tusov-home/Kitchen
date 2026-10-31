@@ -43,9 +43,11 @@
       <span class="spacer"></span>
       <button id="cooked-today" class="button" type="button" title="Add today's date to the notes">✓ Cooked today</button>
       <a id="edit-link" class="button" title="Edit (E)">Edit</a>
+      <a id="copy-link" class="button" title="Make your own copy to adjust (C)">Make my copy</a>
     </div>
     <article class="recipe">
       <h1 id="recipe-title"></h1>
+      <p id="recipe-owner" class="owner-line"></p>
       <div id="recipe-tags" class="tags"></div>
 
       <section class="rating-box" aria-label="Ratings">
@@ -76,6 +78,7 @@
   <main id="view-edit" class="view" hidden>
     <form id="edit-form" class="edit-form">
       <h1 id="edit-heading">Add recipe</h1>
+      <p id="edit-based-on" class="hint" hidden></p>
 
       <label for="edit-text">Recipe <span class="hint">paste it from Claude — the first line becomes the title</span></label>
       <textarea id="edit-text" rows="14" required></textarea>
@@ -107,7 +110,7 @@
       <h2>Settings</h2>
 
       <h3>This phone</h3>
-      <label for="my-name">Your name <span class="hint">shown next to your star ratings</span></label>
+      <label for="my-name">Your name <span class="hint">marks your recipes and ratings — keep it the same, or you'll lose editing rights to your recipes</span></label>
       <input id="my-name" type="text" autocomplete="given-name" placeholder="e.g. Tõnis">
 
       <h3>Sync with Google Sheet</h3>
@@ -155,8 +158,8 @@
   <!-- Asked once per phone, before the first rating -->
   <dialog id="name-dialog" class="dialog">
     <form method="dialog" class="dialog-body" id="name-form">
-      <h2>Who's rating on this phone?</h2>
-      <p class="hint">Your name is shown next to your stars, so you can both rate each dish. You can change it later in ⚙ Settings.</p>
+      <h2>Whose phone is this?</h2>
+      <p class="hint">Your name marks the recipes you add and your star ratings. The other person can view and rate your recipes, and make their own copy to adjust. Use the same name every time.</p>
       <label for="name-input">Your name</label>
       <input id="name-input" type="text" autocomplete="given-name" required>
       <div class="actions">

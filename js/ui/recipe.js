@@ -1,10 +1,11 @@
 // Shows one recipe, ready to cook from: ratings, notes, a servings
 // stepper and the recipe text with amounts scaled to the servings.
 import * as state from "../state.js";
-import { bodyWithoutTitle, cookedNote } from "../lib/recipes.js";
+import { bodyWithoutTitle, cookedNote, canEdit } from "../lib/recipes.js";
 import { renderMarkdown } from "../lib/markdown.js";
 import { formatAmount, stepServings } from "../lib/scale.js";
 import { renderRating } from "./rating.js";
+import { getMyName } from "./name.js";
 import { showToast } from "./toast.js";
 
 const title = document.getElementById("recipe-title");
@@ -13,6 +14,8 @@ const notesBox = document.getElementById("recipe-notes-box");
 const notes = document.getElementById("recipe-notes");
 const body = document.getElementById("recipe-body");
 const editLink = document.getElementById("edit-link");
+const copyLink = document.getElementById("copy-link");
+const ownerLine = document.getElementById("recipe-owner");
 const cookedButton = document.getElementById("cooked-today");
 const servingsDown = document.getElementById("servings-down");
 const servingsUp = document.getElementById("servings-up");
@@ -68,9 +71,43 @@ export function renderRecipe(id) {
   notesBox.hidden = !recipe.notes;
   notes.textContent = recipe.notes;
 
+  renderOwner(recipe);
   renderServingsAndBody(recipe);
-  editLink.href = "#/r/" + encodeURIComponent(id) + "/edit";
   return true;
+}
+
+// "Added by Kadi · copy of Miso Aubergine (Tõnis)", and which buttons
+// you get: the owner can edit; everyone can rate and make a copy.
+function renderOwner(recipe) {
+  ownerLine.replaceChildren();
+  if (recipe.owner) {
+    ownerLine.append("Added by " + recipe.owner);
+  }
+  const original = recipe.copyOf ? state.getRecipe(recipe.copyOf) : null;
+  if (original) {
+    ownerLine.append(recipe.owner ? " · copy of " : "Copy of ");
+    const link = document.createElement("a");
+    link.href = "#/r/" + encodeURIComponent(original.id);
+    link.textContent = original.title;
+    ownerLine.append(link);
+    if (original.owner) {
+      ownerLine.append(" (" + original.owner + ")");
+    }
+  }
+  ownerLine.hidden = ownerLine.childNodes.length === 0;
+
+  const mine = canEdit(recipe, getMyName());
+  editLink.hidden = !mine;
+  cookedButton.hidden = !mine;
+  editLink.href = "#/r/" + encodeURIComponent(recipe.id) + "/edit";
+  copyLink.href = "#/copy/" + encodeURIComponent(recipe.id);
+  // For someone else's recipe, copying is the main action.
+  copyLink.className = mine ? "button" : "primary";
+}
+
+export function canEditCurrent() {
+  const recipe = state.getRecipe(currentId);
+  return Boolean(recipe && canEdit(recipe, getMyName()));
 }
 
 // direction: +1 for more, -1 for fewer servings.

@@ -1,32 +1,18 @@
 // Star ratings on the recipe screen: your own stars to tap, and
-// everyone's ratings listed. Each phone remembers whose phone it is.
+// everyone's ratings listed. Anyone can rate any recipe.
 import * as state from "../state.js";
-import * as storage from "../storage.js";
 import { ratingList } from "../lib/recipes.js";
+import { getMyName, withMyName } from "./name.js";
 import { showToast } from "./toast.js";
 
 const myLabel = document.getElementById("my-rating-label");
 const myStars = document.getElementById("my-stars");
 const allRatings = document.getElementById("all-ratings");
-const nameDialog = document.getElementById("name-dialog");
-const nameForm = document.getElementById("name-form");
-const nameInput = document.getElementById("name-input");
-const nameCancel = document.getElementById("name-cancel");
 
 let currentRecipe = null;
-// A rating tapped before the name was known; applied after saving the name.
-let waitingStars = null;
 
 function starText(stars) {
   return "★".repeat(stars) + "☆".repeat(5 - stars);
-}
-
-export function getMyName() {
-  return storage.loadSettings().myName;
-}
-
-export function setMyName(name) {
-  storage.saveSettings(Object.assign(storage.loadSettings(), { myName: name.trim() }));
 }
 
 export function renderRating(recipe) {
@@ -73,36 +59,15 @@ export function rate(stars) {
   if (!currentRecipe) {
     return;
   }
-  const name = getMyName();
-  if (!name) {
-    waitingStars = stars;
-    nameInput.value = "";
-    nameDialog.showModal();
-    return;
-  }
-  const mine = currentRecipe.ratings[name] ? currentRecipe.ratings[name].stars : 0;
-  const newStars = mine === stars ? 0 : stars;
-  state.setRating(currentRecipe.id, name, newStars);
-  showToast(newStars ? "Rated " + starText(newStars) : "Rating cleared");
-}
-
-export function initRating() {
-  nameForm.addEventListener("submit", function (event) {
-    event.preventDefault();
-    const name = nameInput.value.trim();
-    if (!name) {
+  const recipeId = currentRecipe.id;
+  withMyName(function (name) {
+    const recipe = state.getRecipe(recipeId);
+    if (!recipe) {
       return;
     }
-    setMyName(name);
-    nameDialog.close();
-    if (waitingStars) {
-      const stars = waitingStars;
-      waitingStars = null;
-      rate(stars);
-    }
-  });
-  nameCancel.addEventListener("click", function () {
-    waitingStars = null;
-    nameDialog.close();
+    const mine = recipe.ratings[name] ? recipe.ratings[name].stars : 0;
+    const newStars = mine === stars ? 0 : stars;
+    state.setRating(recipeId, name, newStars);
+    showToast(newStars ? "Rated " + starText(newStars) : "Rating cleared");
   });
 }

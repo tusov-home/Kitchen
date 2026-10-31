@@ -10,7 +10,7 @@
 
 const SHEET_NAME = "Recipes";
 // New columns are only ever added at the end, so older Sheets keep working.
-const HEADERS = ["id", "title", "text", "tags", "notes", "updatedAt", "deleted", "servings", "ratings"];
+const HEADERS = ["id", "title", "text", "tags", "notes", "updatedAt", "deleted", "servings", "ratings", "owner", "copyOf"];
 // Deleted recipes are kept as small markers so the deletion reaches
 // every phone. After this many days the markers are removed.
 const DELETED_KEEP_DAYS = 90;
@@ -72,6 +72,8 @@ function readRecipes_(sheet) {
         deleted: row[6] === true || String(row[6]).toUpperCase() === "TRUE",
         servings: Number(row[7]) || null,
         ratings: parseRatings_(row[8]),
+        owner: String(row[9] || ""),
+        copyOf: String(row[10] || ""),
       };
     });
 }
@@ -88,6 +90,7 @@ function writeRecipes_(sheet, recipes) {
     return [
       r.id, r.title, r.text, (r.tags || []).join(", "), r.notes, r.updatedAt,
       r.deleted ? "TRUE" : "FALSE", r.servings || "", JSON.stringify(r.ratings || {}),
+      r.owner || "", r.copyOf || "",
     ];
   });
   const range = sheet.getRange(2, 1, rows.length, HEADERS.length);
@@ -139,6 +142,8 @@ function merge_(stored, incoming) {
       deleted: r.deleted === true,
       servings: Number(r.servings) || null,
       ratings: parseRatings_(r.ratings),
+      owner: String(r.owner || ""),
+      copyOf: String(r.copyOf || ""),
     };
     const existing = byId[r.id];
     if (!existing) {

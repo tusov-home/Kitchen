@@ -95,6 +95,12 @@ def test_phone(p, sheet):
     page.screenshot(path=SHOTS / "phone-2-edit.png")
     page.click("button[type=submit]")
 
+    # First save asks whose phone this is; the recipe is then Kadi's
+    expect(page.locator("#name-dialog")).to_be_visible()
+    page.fill("#name-input", "Kadi")
+    page.click("#name-form button[type=submit]")
+    expect(page.locator("#recipe-owner")).to_have_text("Added by Kadi")
+
     expect(page.locator("#recipe-title")).to_have_text("Miso Aubergine with Soba")
     assert page.locator("#recipe-body h1").count() == 0, "title must not repeat"
     expect(page.locator("#recipe-body ol li")).to_have_count(3)
@@ -102,11 +108,8 @@ def test_phone(p, sheet):
     page.click("#cooked-today")
     expect(page.locator("#recipe-notes")).to_contain_text("Cooked")
 
-    # First rating asks whose phone this is
+    # Rating (name is already known)
     page.locator("#my-stars .star").nth(3).click()
-    expect(page.locator("#name-dialog")).to_be_visible()
-    page.fill("#name-input", "Kadi")
-    page.click("#name-form button[type=submit]")
     expect(page.locator("#my-stars .star.filled")).to_have_count(4)
     expect(page.locator("#my-rating-label")).to_have_text("Kadi's rating")
     expect(page.locator("#all-ratings")).to_contain_text("Kadi")
@@ -188,6 +191,38 @@ def test_laptop_second_device(p, sheet):
     synced = list(sheet.recipes.values())[0]["ratings"]
     assert set(synced) == {"Kadi", "Tõnis"}, synced
 
+    # Kadi's recipe is view-only for Tõnis: no Edit, but "Make my copy"
+    page.click(".recipe-card")
+    expect(page.locator("#view-recipe")).to_be_visible()
+    expect(page.locator("#recipe-owner")).to_have_text("Added by Kadi")
+    expect(page.locator("#edit-link")).to_be_hidden()
+    expect(page.locator("#cooked-today")).to_be_hidden()
+    page.keyboard.press("e")
+    expect(page.locator("#toast")).to_contain_text("Only the owner")
+    expect(page.locator("#view-recipe")).to_be_visible()
+    # Opening the edit address directly is refused too
+    page.goto(page.url + "/edit")
+    expect(page.locator("#view-recipe")).to_be_visible()
+    expect(page.locator("#view-edit")).to_be_hidden()
+
+    # Copy it and adjust: becomes Tõnis's own recipe, linked to the original
+    page.keyboard.press("c")
+    expect(page.locator("#edit-heading")).to_have_text("Make your copy")
+    expect(page.locator("#edit-based-on")).to_contain_text("by Kadi")
+    page.fill("#edit-title", "Spicy Miso Aubergine")
+    page.keyboard.press("Control+s")
+    expect(page.locator("#recipe-title")).to_have_text("Spicy Miso Aubergine")
+    owner = page.locator("#recipe-owner")
+    expect(owner).to_contain_text("Added by Tõnis")
+    expect(owner).to_contain_text("copy of Miso Aubergine with Soba (Kadi)")
+    expect(page.locator("#edit-link")).to_be_visible()
+    expect(page.locator("#all-ratings")).to_be_hidden()  # a copy starts unrated
+    expect(page.locator("#recipe-body")).not_to_contain_text("Miso Aubergine with Soba")
+    page.screenshot(path=SHOTS / "laptop-0-copy.png")
+    page.click(".brand")
+    expect(page.locator(".recipe-card")).to_have_count(2)
+    expect(page.locator(".card-owner")).to_have_count(2)
+
     # Keyboard: / search, N new, Ctrl+S save, Esc back, E edit, ? help
     page.keyboard.press("/")
     page.keyboard.type("zzz")
@@ -210,7 +245,7 @@ def test_laptop_second_device(p, sheet):
 
     page.keyboard.press("Escape")
     expect(page.locator("#view-list")).to_be_visible()
-    expect(page.locator(".recipe-card")).to_have_count(2)
+    expect(page.locator(".recipe-card")).to_have_count(3)
 
     # Tag filter
     page.click("button.tag:has-text('weekday')")
@@ -231,7 +266,7 @@ def test_laptop_second_device(p, sheet):
     expect(page.locator("#delete-recipe")).to_be_visible()
     page.once("dialog", lambda d: d.accept())
     page.click("#delete-recipe")
-    expect(page.locator(".recipe-card")).to_have_count(1)
+    expect(page.locator(".recipe-card")).to_have_count(2)
     page.wait_for_timeout(2500)  # sync runs shortly after a change
     deleted = [r for r in sheet.recipes.values() if r["deleted"]]
     assert len(deleted) == 1, "deletion reached the Sheet"
@@ -264,6 +299,8 @@ def test_installable_and_offline(p):
     page.click("#add-recipe")
     page.fill("#edit-text", "Offline omelette\n- 3 eggs")
     page.click("button[type=submit]")
+    page.fill("#name-input", "Kadi")
+    page.click("#name-form button[type=submit]")
     expect(page.locator("#recipe-title")).to_have_text("Offline omelette")
 
     real_errors = [e for e in errors if "ERR_INTERNET_DISCONNECTED" not in e]

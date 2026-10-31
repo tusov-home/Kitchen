@@ -4,8 +4,10 @@ import * as state from "./state.js";
 import * as sync from "./sync.js";
 import { parseRoute, trackHistory, go, goBack } from "./ui/router.js";
 import { initList, renderList, focusSearch } from "./ui/list.js";
-import { initRecipe, renderRecipe, changeServings } from "./ui/recipe.js";
-import { initRating, rate } from "./ui/rating.js";
+import { initRecipe, renderRecipe, changeServings, canEditCurrent } from "./ui/recipe.js";
+import { showToast } from "./ui/toast.js";
+import { rate } from "./ui/rating.js";
+import { initName } from "./ui/name.js";
 import { initEditor, openEditor, saveFromEditor, cancelEditor } from "./ui/editor.js";
 import { initSettings, setSettingsStatus } from "./ui/settings.js";
 import { initShortcuts } from "./ui/shortcuts.js";
@@ -43,7 +45,14 @@ function route() {
       return;
     }
   } else if (current.screen === "edit") {
-    if (!openEditor(current.id)) {
+    const result = openEditor(current.id, current.copyFrom);
+    if (result === "locked") {
+      // Someone else's recipe: show it instead of the edit form.
+      showToast("Only the owner can edit this — make your own copy instead");
+      go("#/r/" + encodeURIComponent(current.id), true);
+      return;
+    }
+    if (result !== "ok") {
       go("#/", true);
       return;
     }
@@ -79,7 +88,7 @@ document.getElementById("add-recipe").addEventListener("click", function () {
 
 initList();
 initRecipe();
-initRating();
+initName();
 initEditor();
 initSettings();
 
@@ -87,7 +96,14 @@ initShortcuts(
   {
     addRecipe: () => go("#/new"),
     focusSearch: focusSearch,
-    editRecipe: () => go("#/r/" + encodeURIComponent(current.id) + "/edit"),
+    editRecipe: function () {
+      if (canEditCurrent()) {
+        go("#/r/" + encodeURIComponent(current.id) + "/edit");
+      } else {
+        showToast("Only the owner can edit this — press C to make your copy");
+      }
+    },
+    copyRecipe: () => go("#/copy/" + encodeURIComponent(current.id)),
     rate1: () => rate(1),
     rate2: () => rate(2),
     rate3: () => rate(3),

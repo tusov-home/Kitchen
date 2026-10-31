@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-31 g
+- Recipes have an owner: whoever adds a recipe owns it ("Added by Kadi"). The app asks whose phone it is before the first save.
+- Only the owner can edit, delete or mark "Cooked today". Others can view and rate it, and **Make my copy** to adjust it as their own recipe, linked to the original ("copy of … (Kadi)").
+- Recipes from before this update have no owner; the first person to edit one becomes its owner.
+- Shortcut: C to make a copy.
+- Sheet sync stores owner and copy link. **Update `Code.gs` in Apps Script and deploy a new version.**
+
 ## 2026-10-31 f
 - Installed app's bottom bar and start-up screen use the dark background (we both use dark mode). Reinstall the app to pick this up straight away.
 

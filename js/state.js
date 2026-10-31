@@ -45,6 +45,10 @@ export function saveRecipe(input) {
     servings: input.servings || null,
     // Ratings are changed only through setRating, so keep them on edits.
     ratings: input.ratings || (existing ? existing.ratings : {}),
+    // The owner stays the same once set; a recipe from before owners
+    // existed gets the person who first saves it.
+    owner: (existing && existing.owner) || input.owner || "",
+    copyOf: input.copyOf || (existing ? existing.copyOf : "") || "",
     updatedAt: Date.now(),
     deleted: false,
   };
@@ -85,7 +89,7 @@ export function setRating(id, name, stars) {
 export function deleteRecipe(id) {
   recipes = recipes.filter((r) => r.id !== id);
   recipes.push({
-    id: id, title: "", text: "", tags: [], notes: "", servings: null, ratings: {},
+    id: id, title: "", text: "", tags: [], notes: "", servings: null, ratings: {}, owner: "", copyOf: "",
     updatedAt: Date.now(), deleted: true,
   });
   changed();

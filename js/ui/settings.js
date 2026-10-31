@@ -3,7 +3,7 @@ import * as state from "../state.js";
 import * as storage from "../storage.js";
 import * as sync from "../sync.js";
 import { showToast } from "./toast.js";
-import { getMyName, setMyName } from "./rating.js";
+import { getMyName, setMyName } from "./name.js";
 
 const dialog = document.getElementById("settings");
 const openButton = document.getElementById("open-settings");
