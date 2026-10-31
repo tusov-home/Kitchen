@@ -1,34 +1,73 @@
-// All keyboard shortcuts live here, in one table: key -> action name.
-const SHORTCUTS = {
-  n: "addRecipe",
-};
+// All keyboard shortcuts live here, in one table.
+// "where" says on which screen a shortcut works: list, recipe, edit or any.
+// "whileTyping: true" means it also works inside text boxes.
+const SHORTCUTS = [
+  { keys: "n", label: "N", action: "addRecipe", where: ["list", "recipe"], text: "Add recipe" },
+  { keys: "/", label: "/", action: "focusSearch", where: ["list"], text: "Search" },
+  { keys: "e", label: "E", action: "editRecipe", where: ["recipe"], text: "Edit recipe" },
+  { keys: "ctrl+s", label: "Ctrl+S", action: "save", where: ["edit"], whileTyping: true, text: "Save recipe" },
+  { keys: "escape", label: "Esc", action: "back", where: ["recipe", "edit"], whileTyping: true, text: "Back / cancel" },
+  { keys: "?", label: "?", action: "showHelp", where: ["any"], text: "Show this list" },
+];
 
-// True while the user is typing, so shortcuts don't steal their keys.
 function isTyping(target) {
   const tag = target.tagName;
-  return (
-    tag === "INPUT" ||
-    tag === "TEXTAREA" ||
-    tag === "SELECT" ||
-    target.isContentEditable
-  );
+  return tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || target.isContentEditable;
 }
 
-// actions: an object like { addRecipe: function () { ... } }
-export function initShortcuts(actions) {
-  document.addEventListener("keydown", function (event) {
-    if (isTyping(event.target)) {
-      return;
-    }
-    // Leave Ctrl/Cmd/Alt combinations to the browser.
-    if (event.ctrlKey || event.metaKey || event.altKey) {
-      return;
-    }
+// Turns a key press into "ctrl+s", "n", "escape", "?" …
+// Cmd on a Mac counts as Ctrl.
+function keyName(event) {
+  const key = event.key.toLowerCase();
+  if (event.ctrlKey || event.metaKey) {
+    return "ctrl+" + key;
+  }
+  if (event.altKey) {
+    return "alt+" + key;
+  }
+  return key;
+}
 
-    const actionName = SHORTCUTS[event.key.toLowerCase()];
-    if (actionName && actions[actionName]) {
+function fillHelpTable() {
+  const table = document.getElementById("shortcut-table");
+  table.replaceChildren();
+  for (const shortcut of SHORTCUTS) {
+    const row = table.insertRow();
+    const keyCell = row.insertCell();
+    const kbd = document.createElement("kbd");
+    kbd.textContent = shortcut.label;
+    keyCell.appendChild(kbd);
+    row.insertCell().textContent = shortcut.text;
+  }
+}
+
+// actions: { addRecipe: fn, ... }
+// getScreen: function returning "list", "recipe" or "edit"
+export function initShortcuts(actions, getScreen) {
+  fillHelpTable();
+
+  document.addEventListener("keydown", function (event) {
+    // Let open dialogs handle their own keys (Esc closes them).
+    if (document.querySelector("dialog[open]")) {
+      return;
+    }
+    const name = keyName(event);
+    const typing = isTyping(event.target);
+    const screen = getScreen();
+
+    for (const shortcut of SHORTCUTS) {
+      if (shortcut.keys !== name) {
+        continue;
+      }
+      if (typing && !shortcut.whileTyping) {
+        continue;
+      }
+      if (!shortcut.where.includes("any") && !shortcut.where.includes(screen)) {
+        continue;
+      }
       event.preventDefault();
-      actions[actionName]();
+      actions[shortcut.action]();
+      return;
     }
   });
 }

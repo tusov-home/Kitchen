@@ -1,37 +1,86 @@
 # Kitchen
 
-A small kitchen management app for our household: recipes first, then meal plans and shopping lists.
+Our household recipe book. When a recipe worked out with Claude is just how we want it, we paste it here, so we can find it again and cook it exactly the same way.
 
 Plain HTML, CSS and JavaScript modules. No build step: GitHub Pages serves the files as they are.
 
 ## Use it
 
-Open `index.html` through a web server (or the GitHub Pages link once enabled).
-To run it locally: `python -m http.server` in this folder, then open http://localhost:8000.
+- **Add a recipe:** copy the recipe from Claude, press **+ Add recipe** and paste. The first line becomes the title (you can change it). Add tags like `quick, weekend, chicken`.
+- **Find it again:** search by name, tag or ingredient, or tap a tag to filter.
+- **Cook it:** open the recipe. **✓ Cooked today** adds the date to the notes; **Edit** lets you change anything and add notes ("less chilli next time").
+- **Android:** in Chrome, use ⋮ → *Add to Home screen* so it opens like an app.
 
 ## Keyboard shortcuts
 
-| Key | Action |
-|---|---|
-| `N` | Add recipe |
+| Key | Action | Where |
+|---|---|---|
+| `N` | Add recipe | list, recipe |
+| `/` | Search | list |
+| `E` | Edit recipe | recipe |
+| `Ctrl+S` | Save | edit form |
+| `Esc` | Back / cancel | recipe, edit form |
+| `?` | Show all shortcuts | everywhere |
+
+## Sync between phones (Google Sheet, one-time setup, ~10 minutes)
+
+Recipes are always saved on the device first, so the app works offline. With sync set up, every phone and laptop shares the same recipes through a Google Sheet in your Drive.
+
+1. Create a new Google Sheet, e.g. **Kitchen recipes**.
+2. In the Sheet: **Extensions → Apps Script**. Delete the sample code and paste everything from [`apps-script/Code.gs`](apps-script/Code.gs). Save (`Ctrl+S`).
+3. **Deploy → New deployment**. Click the gear next to *Select type* and choose **Web app**.
+   - *Execute as:* **Me**
+   - *Who has access:* **Anyone**
+4. Press **Deploy**, allow access with your Google account (Google shows a warning because it's your own unverified script: *Advanced → Go to … (unsafe)* is expected here).
+5. Copy the **Web app URL** (ends with `/exec`).
+6. In the Kitchen app: **⚙ → Web app link**, paste it, press **Save and sync**. A green dot in the top bar means synced.
+7. Send the same link to the other phone (e.g. in a private message) and paste it there too.
+
+**If you change `Code.gs` later:** Deploy → Manage deployments → ✏ Edit → Version: *New version* → Deploy. The link stays the same.
+
+Sync status dot: green = synced, amber = offline (will sync later), red = sync problem (tap ⚙ to see the message).
+
+## Privacy
+
+- Recipes are stored on each device (browser storage) and, with sync, in your own Google Sheet.
+- **The web app link works like a password:** anyone who has it can read and change the recipes. Keep it between yourselves; it is never stored in this repository.
+- Nothing else is sent anywhere. No tracking, no analytics.
+- Deleted recipes leave a small marker for 90 days so the deletion reaches every phone; then the Sheet removes it.
+- To delete everything: delete the recipes in the app and delete the Sheet in Google Drive.
 
 ## Files
 
 ```
-index.html          page structure
-css/style.css       the look (colour tokens, light + dark)
-js/main.js          starts the app, wires modules together
-js/version.js       APP_VERSION, bumped with every change
-js/ui/shortcuts.js  all keyboard shortcuts in one table
+index.html            page structure (all screens and dialogs)
+css/style.css         the look (colour tokens, light + dark)
+js/main.js            starts the app, wires modules together, shows the right screen
+js/version.js         APP_VERSION, bumped with every change
+js/state.js           the recipes in memory; the only place that changes them
+js/storage.js         saving on the device, settings, export/import files
+js/sync.js            talks to the Google Sheet
+js/lib/recipes.js     pure helpers: title from text, tags, search, merging
+js/lib/markdown.js    turns Claude's Markdown into safe HTML
+js/ui/router.js       which screen belongs to which address (#/r/…)
+js/ui/list.js         recipe list, search, tag filter
+js/ui/recipe.js       one recipe
+js/ui/editor.js       add/edit form
+js/ui/settings.js     settings dialog: sync, backup, privacy
+js/ui/shortcuts.js    all keyboard shortcuts in one table
+js/ui/toast.js        short pop-up messages
+apps-script/Code.gs   the Google Sheet side of sync
+tests/                unit tests and browser tests (made-up recipes only)
 ```
 
-## Privacy
+## Tests
 
-Nothing is sent anywhere. When recipes are added, they will be stored on your own device.
+```
+node --test tests/*.test.mjs     # pure helpers
+python tests/app_test.py         # browser: Android phone + laptop with keyboard, fake Sheet
+```
 
 ## Roadmap
 
-- Recipe form (name, ingredients in g/ml, steps) saved on the device
-- Recipe list and search
-- Weekly meal plan
+- Weekly meal plan built from saved recipes
 - Shopping list generated from the plan
+- Servings scaling
+- "New version available" banner

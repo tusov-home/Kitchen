@@ -4,25 +4,125 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Kitchen</title>
-  <meta name="description" content="A small kitchen management app: recipes, meal plans and shopping lists.">
+  <meta name="description" content="Our household recipe book: save recipes worked out with Claude and cook them again.">
+  <meta name="theme-color" content="#c2562b">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <main class="landing">
-    <h1 class="title">Kitchen</h1>
-    <p class="tagline">Recipes, meal plans and shopping lists in one place.</p>
+  <header class="topbar">
+    <a href="#/" class="brand">Kitchen</a>
+    <span id="sync-status" class="sync-status" data-state="off" title="Sync status"></span>
+    <button id="open-settings" class="icon-button" type="button" title="Settings and sync" aria-label="Settings and sync">⚙</button>
+  </header>
 
-    <button id="add-recipe" class="primary" type="button" title="Add recipe (N)">
-      + Add recipe
-    </button>
-
-    <!-- Shown after the button is pressed, until the recipe form exists -->
-    <p id="status" class="status" role="status" aria-live="polite"></p>
+  <!-- List of recipes -->
+  <main id="view-list" class="view">
+    <div class="list-tools">
+      <input id="search" class="search" type="search" placeholder="Search recipes…" aria-label="Search recipes" title="Search (/)">
+      <button id="add-recipe" class="primary" type="button" title="Add recipe (N)">+ Add recipe</button>
+    </div>
+    <div id="tag-filter" class="tag-filter"></div>
+    <ul id="recipe-list" class="recipe-list"></ul>
+    <div id="empty-list" class="empty" hidden>
+      <p class="empty-title">No recipes yet</p>
+      <p>When a recipe in Claude is just how you want it, copy it and press <strong>+ Add recipe</strong>.</p>
+    </div>
+    <p id="no-results" class="empty" hidden>No recipes match your search.</p>
   </main>
 
-  <footer class="footer">
-    <span id="app-version"></span>
-  </footer>
+  <!-- One recipe -->
+  <main id="view-recipe" class="view" hidden>
+    <div class="actions">
+      <a href="#/" class="button" title="Back (Esc)">← Back</a>
+      <span class="spacer"></span>
+      <button id="cooked-today" class="button" type="button" title="Add today's date to the notes">✓ Cooked today</button>
+      <a id="edit-link" class="button" title="Edit (E)">Edit</a>
+    </div>
+    <article class="recipe">
+      <h1 id="recipe-title"></h1>
+      <div id="recipe-tags" class="tags"></div>
+      <section id="recipe-notes-box" class="notes" hidden>
+        <h2>Notes</h2>
+        <p id="recipe-notes"></p>
+      </section>
+      <div id="recipe-body" class="recipe-body"></div>
+    </article>
+  </main>
+
+  <!-- Add or edit a recipe -->
+  <main id="view-edit" class="view" hidden>
+    <form id="edit-form" class="edit-form">
+      <h1 id="edit-heading">Add recipe</h1>
+
+      <label for="edit-text">Recipe <span class="hint">paste it from Claude — the first line becomes the title</span></label>
+      <textarea id="edit-text" rows="14" required></textarea>
+
+      <label for="edit-title">Title</label>
+      <input id="edit-title" type="text" required>
+
+      <label for="edit-tags">Tags <span class="hint">separated by commas, e.g. quick, weekend, chicken</span></label>
+      <input id="edit-tags" type="text" autocomplete="off">
+
+      <label for="edit-notes">Notes <span class="hint">what you changed, when you cooked it, how it went</span></label>
+      <textarea id="edit-notes" rows="3"></textarea>
+
+      <div class="actions">
+        <button id="delete-recipe" class="button danger" type="button" hidden>Delete</button>
+        <span class="spacer"></span>
+        <button id="cancel-edit" class="button" type="button" title="Cancel (Esc)">Cancel</button>
+        <button class="primary" type="submit" title="Save (Ctrl+S)">Save</button>
+      </div>
+    </form>
+  </main>
+
+  <!-- Settings, sync and backup -->
+  <dialog id="settings" class="dialog">
+    <form method="dialog" class="dialog-body" id="settings-form">
+      <h2>Settings</h2>
+
+      <h3>Sync with Google Sheet</h3>
+      <p class="hint">Paste the web app link from your Apps Script (see the README for the 10-minute setup). Use the same link on every phone.</p>
+      <label for="sync-url">Web app link</label>
+      <input id="sync-url" type="url" placeholder="https://script.google.com/macros/s/…/exec" autocomplete="off">
+      <div class="actions">
+        <button id="sync-save" class="primary" type="button">Save and sync</button>
+        <button id="sync-now" class="button" type="button">Sync now</button>
+      </div>
+      <p id="settings-sync-status" class="hint" role="status"></p>
+
+      <h3>Backup</h3>
+      <div class="actions">
+        <button id="export-file" class="button" type="button">Export to file</button>
+        <label class="button file-button">
+          Import from file
+          <input id="import-file" type="file" accept="application/json,.json">
+        </label>
+      </div>
+
+      <h3>Privacy</h3>
+      <p class="hint">Recipes are saved on this device. If sync is set up, they are also stored in your own Google Sheet, reached through the web app link: anyone with that link can read and change the recipes, so only share it with each other. Nothing else is sent anywhere, and there is no tracking. To delete everything, delete the recipes here and the Sheet in Google Drive.</p>
+
+      <div class="actions">
+        <span class="spacer"></span>
+        <button class="button" value="close" title="Close (Esc)">Close</button>
+      </div>
+      <p class="hint version" id="app-version"></p>
+    </form>
+  </dialog>
+
+  <!-- Keyboard shortcut list, opened with ? -->
+  <dialog id="shortcut-help" class="dialog">
+    <form method="dialog" class="dialog-body">
+      <h2>Keyboard shortcuts</h2>
+      <table id="shortcut-table" class="shortcut-table"></table>
+      <div class="actions">
+        <span class="spacer"></span>
+        <button class="button" value="close">Close</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 
   <script type="module" src="js/main.js"></script>
 </body>
