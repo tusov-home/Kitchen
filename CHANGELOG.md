@@ -1,5 +1,8 @@
 # Changelog
 
+## 2026-10-31 d
+- Phone status bar and app title bar now match the page background instead of orange (light and dark mode).
+
 ## 2026-10-31 c
 - Installable as an app on Android and Windows (manifest, icons, "Install app" button).
 - Opens and works offline (service worker keeps a copy of the app files).
