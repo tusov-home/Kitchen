@@ -1,6 +1,7 @@
 // The recipe list: search box, tag filter and the list itself.
 import * as state from "../state.js";
 import { visibleRecipes, allTags, averageRating } from "../lib/recipes.js";
+import { isPlanning, isSelected, toggleSelected } from "./plan.js";
 
 const searchInput = document.getElementById("search");
 const tagFilter = document.getElementById("tag-filter");
@@ -46,6 +47,24 @@ export function renderList() {
     const link = document.createElement("a");
     link.href = "#/r/" + encodeURIComponent(recipe.id);
     link.className = "recipe-card";
+
+    // While planning, a tap picks the recipe instead of opening it.
+    if (isPlanning()) {
+      const picked = isSelected(recipe.id);
+      link.classList.add("pickable");
+      link.classList.toggle("picked", picked);
+      link.setAttribute("role", "checkbox");
+      link.setAttribute("aria-checked", picked ? "true" : "false");
+      const box = document.createElement("span");
+      box.className = "pick-box";
+      box.textContent = picked ? "✓" : "";
+      box.setAttribute("aria-hidden", "true");
+      link.appendChild(box);
+      link.addEventListener("click", function (event) {
+        event.preventDefault();
+        toggleSelected(recipe.id);
+      });
+    }
 
     const title = document.createElement("span");
     title.className = "recipe-card-title";

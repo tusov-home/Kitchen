@@ -12,11 +12,15 @@ import { initEditor, openEditor, saveFromEditor, cancelEditor } from "./ui/edito
 import { initSettings, setSettingsStatus } from "./ui/settings.js";
 import { initShortcuts } from "./ui/shortcuts.js";
 import { initPwa, onInstallAvailable, install } from "./pwa.js";
+import * as shoppingState from "./shoppingState.js";
+import { initPlan, isPlanning, setPlanning } from "./ui/plan.js";
+import { initShopping, renderShopping, renderCartCount } from "./ui/shopping.js";
 
 const views = {
   list: document.getElementById("view-list"),
   recipe: document.getElementById("view-recipe"),
   edit: document.getElementById("view-edit"),
+  shopping: document.getElementById("view-shopping"),
 };
 const syncStatus = document.getElementById("sync-status");
 
@@ -56,6 +60,9 @@ function route() {
       go("#/", true);
       return;
     }
+  } else if (current.screen === "shopping") {
+    setPlanning(false);
+    renderShopping();
   } else {
     document.title = "Kitchen";
     renderList();
@@ -75,6 +82,14 @@ state.onChange(function () {
   }
 });
 
+// The shopping list can change on the other phone too.
+shoppingState.onChange(function () {
+  renderCartCount();
+  if (current.screen === "shopping") {
+    renderShopping();
+  }
+});
+
 sync.onStatus(function (status) {
   syncStatus.dataset.state = status.state;
   syncStatus.title = status.message;
@@ -91,6 +106,9 @@ initRecipe();
 initName();
 initEditor();
 initSettings();
+initPlan(renderList);
+initShopping();
+renderCartCount();
 
 initShortcuts(
   {
@@ -112,7 +130,17 @@ initShortcuts(
     moreServings: () => changeServings(1),
     fewerServings: () => changeServings(-1),
     save: saveFromEditor,
-    back: () => (current.screen === "edit" ? cancelEditor() : goBack("#/")),
+    back: function () {
+      if (current.screen === "list" && isPlanning()) {
+        setPlanning(false);
+      } else if (current.screen === "edit") {
+        cancelEditor();
+      } else if (current.screen !== "list") {
+        goBack("#/");
+      }
+    },
+    openShopping: () => go("#/shopping"),
+    togglePlanning: () => setPlanning(!isPlanning()),
     showHelp: () => document.getElementById("shortcut-help").showModal(),
   },
   () => current.screen

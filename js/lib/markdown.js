@@ -7,14 +7,12 @@
 // part are multiplied and highlighted. The method is never scaled, so
 // oven temperatures and cooking times stay as they are.
 import { scaleLine } from "./scale.js";
+import { STARTS_WITH_AMOUNT, headingOf, createSectionTracker } from "./sections.js";
 
 // Invisible markers around scaled amounts, turned into <span>s after escaping.
 const MARK_START = "\u0001";
 const MARK_END = "\u0002";
 
-const INGREDIENT_WORDS = /ingredient|zutaten|koostisosa|ingredienser|you(?:'ll)? need|shopping list/i;
-const METHOD_WORDS = /method|instruction|steps?\b|direction|preparation|how to|zubereitung|anleitung|valmista|gör så här|tillagning/i;
-const STARTS_WITH_AMOUNT = /^[\d½⅓⅔¼¾⅛]/;
 
 function escapeHtml(text) {
   return text
@@ -42,19 +40,6 @@ function tableCells(line) {
     .map((cell) => cell.trim());
 }
 
-// A short line like "**Ingredients**" or "Method:" that works as a heading.
-// It must be bold, end with ":", or be at most three words, and not
-// start with an amount.
-function pseudoHeading(line) {
-  const match = line.match(/^\**\s*([^*]{2,40}?)\s*:?\s*\**\s*:?$/);
-  if (!match || STARTS_WITH_AMOUNT.test(match[1])) {
-    return null;
-  }
-  const looksLikeHeading =
-    line.startsWith("**") || line.endsWith(":") || match[1].split(/\s+/).length <= 3;
-  return looksLikeHeading ? match[1] : null;
-}
-
 export function renderMarkdown(source, options) {
   const factor = (options && options.scale) || 1;
   const lines = (source || "").replace(/\r\n/g, "\n").split("\n");
@@ -65,14 +50,7 @@ export function renderMarkdown(source, options) {
 
   // Is there a clear "Ingredients" section? If not, we only scale
   // bullet points that start with an amount.
-  const hasIngredientSection = lines.some(function (line) {
-    const t = line.trim();
-    const heading = t.match(/^#{1,6}\s+(.*)$/);
-    const text = heading ? heading[1] : pseudoHeading(t);
-    return text !== null && INGREDIENT_WORDS.test(text);
-  });
-  let inIngredients = false;
-  let ingredientsLevel = 0;
+  const tracker = createSectionTracker(lines);
 
   function mark(text) {
     return MARK_START + text + MARK_END;
@@ -81,8 +59,8 @@ export function renderMarkdown(source, options) {
     if (factor === 1) {
       return text;
     }
-    if (hasIngredientSection) {
-      if (!inIngredients) {
+    if (tracker.hasIngredientSection) {
+      if (!tracker.isInIngredients()) {
         return text;
       }
       if (kind === "paragraph" && !STARTS_WITH_AMOUNT.test(text)) {
@@ -131,15 +109,6 @@ export function renderMarkdown(source, options) {
     closeList();
     closeTable();
   }
-  // Keeps track of whether we are inside the ingredients part.
-  function sectionChange(text, level) {
-    if (INGREDIENT_WORDS.test(text)) {
-      inIngredients = true;
-      ingredientsLevel = level;
-    } else if (inIngredients && (METHOD_WORDS.test(text) || level <= ingredientsLevel)) {
-      inIngredients = false;
-    }
-  }
 
   for (const line of lines) {
     const trimmed = line.trim();
@@ -161,7 +130,7 @@ export function renderMarkdown(source, options) {
     const heading = trimmed.match(/^(#{1,6})\s+(.*)$/);
     if (heading) {
       closeAll();
-      sectionChange(heading[2], heading[1].length);
+      tracker.heading(heading[2], heading[1].length);
       // h1 is the recipe title, so headings start at h2.
       const level = Math.min(heading[1].length + 1, 4);
       html.push("<h" + level + ">" + inline(heading[2]) + "</h" + level + ">");
@@ -189,10 +158,10 @@ export function renderMarkdown(source, options) {
     }
 
     // "**Ingredients**" or "Method:" on its own line also starts a section.
-    const pseudo = pseudoHeading(trimmed);
-    if (pseudo !== null && (INGREDIENT_WORDS.test(pseudo) || METHOD_WORDS.test(pseudo))) {
+    const pseudo = headingOf(trimmed);
+    if (pseudo !== null && pseudo.level === 7) {
       closeAll();
-      sectionChange(pseudo, 7);
+      tracker.heading(pseudo.text, 7);
       paragraph.push(trimmed);
       closeParagraph();
       continue;

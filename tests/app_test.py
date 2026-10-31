@@ -42,32 +42,54 @@ Serves 2 · 25 minutes
 
 
 class FakeSheet:
-    """Acts like the Apps Script web app: merges and returns recipes."""
+    """Acts like the Apps Script web app (new Code.gs): one store per
+    collection; newest item wins, timestamped maps merge entry by entry."""
 
     def __init__(self):
-        self.recipes = {}
+        self.stores = {"recipes": {}, "shopping": {}}
         self.calls = 0
+
+    @property
+    def recipes(self):
+        return self.stores["recipes"]
+
+    @property
+    def shopping(self):
+        return self.stores["shopping"]
+
+    @staticmethod
+    def is_timestamped_map(value):
+        return (isinstance(value, dict) and value
+                and all(isinstance(v, dict) and isinstance(v.get("at"), (int, float)) for v in value.values()))
+
+    def merge(self, old, new):
+        winner = dict(new if new["updatedAt"] > old["updatedAt"] else old)
+        if winner.get("deleted"):
+            return winner
+        for field in set(old) | set(new):
+            a, b = old.get(field), new.get(field)
+            if self.is_timestamped_map(a) or self.is_timestamped_map(b):
+                merged = dict(a or {})
+                for key, entry in (b or {}).items():
+                    if key not in merged or entry["at"] > merged[key]["at"]:
+                        merged[key] = entry
+                winner[field] = merged
+        return winner
 
     def handle(self, route):
         self.calls += 1
         body = json.loads(route.request.post_data)
-        for r in body.get("recipes", []):
-            old = self.recipes.get(r["id"])
-            if not old:
-                self.recipes[r["id"]] = r
-                continue
-            winner = dict(r if r["updatedAt"] > old["updatedAt"] else old)
-            ratings = dict(old.get("ratings") or {})
-            for name, rating in (r.get("ratings") or {}).items():
-                if name not in ratings or rating["at"] > ratings[name]["at"]:
-                    ratings[name] = rating
-            winner["ratings"] = {} if winner.get("deleted") else ratings
-            self.recipes[r["id"]] = winner
+        collection = body.get("collection", "recipes")
+        store = self.stores.setdefault(collection, {})
+        for item in body.get("items", body.get("recipes", [])):
+            old = store.get(item["id"])
+            store[item["id"]] = item if not old else self.merge(old, item)
+        items = list(store.values())
         route.fulfill(
             status=200,
             content_type="application/json",
             headers={"Access-Control-Allow-Origin": "*"},
-            body=json.dumps({"ok": True, "recipes": list(self.recipes.values())}),
+            body=json.dumps({"ok": True, "items": items, collection: items}),
         )
 
 
@@ -93,7 +115,7 @@ def test_phone(p, sheet):
     expect(page.locator("#edit-title")).to_have_value("Miso Aubergine with Soba")
     page.fill("#edit-tags", "Quick, vegetarian")
     page.screenshot(path=SHOTS / "phone-2-edit.png")
-    page.click("button[type=submit]")
+    page.click("#edit-form button[type=submit]")
 
     # First save asks whose phone this is; the recipe is then Kadi's
     expect(page.locator("#name-dialog")).to_be_visible()
@@ -258,6 +280,46 @@ def test_laptop_second_device(p, sheet):
     page.screenshot(path=SHOTS / "laptop-2-help.png")
     page.keyboard.press("Escape")
 
+    # Plan shopping: pick two recipes, make a list sorted by shop section
+    page.keyboard.press("p")
+    expect(page.locator("#plan-bar")).to_be_visible()
+    page.click(".recipe-card:has-text('Miso Aubergine with Soba')")
+    page.click(".recipe-card:has-text('Beef Shakshuka')")
+    expect(page.locator("#plan-count")).to_have_text("2 recipes")
+    expect(page.locator(".recipe-card.picked")).to_have_count(2)
+    page.click("#plan-make")
+    expect(page.locator("#view-shopping")).to_be_visible()
+    expect(page.locator("#shop-recipes")).to_contain_text("Miso Aubergine with Soba (2)")
+    sections = page.locator(".shop-section h2")
+    expect(sections).to_have_text(["Produce", "Meat & fish", "Dairy & eggs", "Pantry"])
+    expect(page.locator(".shop-name")).to_contain_text(["2 aubergines", "300 g beef mince", "4 eggs", "200 g soba noodles", "2 tbsp white miso"])
+    expect(page.locator("#cart-count")).to_have_text("5")
+    page.click(".shop-item:has-text('beef mince') .shop-check")
+    expect(page.locator("#shop-progress-text")).to_have_text("1 of 5 ticked")
+    expect(page.locator("#cart-count")).to_have_text("4")
+    # Own item
+    page.fill("#shop-add-input", "toilet paper")
+    page.keyboard.press("Enter")
+    expect(page.locator(".shop-section h2").last).to_have_text("Other")
+    page.screenshot(path=SHOTS / "laptop-3-shopping.png", full_page=True)
+    page.wait_for_timeout(2500)  # sync
+    shared = [l for l in sheet.shopping.values() if not l["deleted"]]
+    assert len(shared) == 1, sheet.shopping
+    ticked = [i["name"] for i in shared[0]["items"].values() if i["checked"]]
+    assert ticked == ["beef mince"], ticked
+
+    # Making another list asks whether to add or start over
+    page.keyboard.press("Escape")
+    expect(page.locator("#view-list")).to_be_visible()
+    page.keyboard.press("p")
+    page.click(".recipe-card:has-text('Spicy Miso Aubergine')")
+    page.click("#plan-make")
+    expect(page.locator("#make-list-dialog")).to_be_visible()
+    page.click("#make-list-dialog button[value=add]")
+    expect(page.locator("#view-shopping")).to_be_visible()
+    expect(page.locator(".shop-name").filter(has_text="aubergines")).to_have_text("4 aubergines")
+    page.click(".brand")
+
     # Delete syncs as well
     page.click(".recipe-card:has-text('Beef Shakshuka')")
     expect(page.locator("#view-recipe")).to_be_visible()
@@ -298,7 +360,7 @@ def test_installable_and_offline(p):
     expect(page.locator("#add-recipe")).to_be_visible()
     page.click("#add-recipe")
     page.fill("#edit-text", "Offline omelette\n- 3 eggs")
-    page.click("button[type=submit]")
+    page.click("#edit-form button[type=submit]")
     page.fill("#name-input", "Kadi")
     page.click("#name-form button[type=submit]")
     expect(page.locator("#recipe-title")).to_have_text("Offline omelette")
@@ -306,6 +368,34 @@ def test_installable_and_offline(p):
     real_errors = [e for e in errors if "ERR_INTERNET_DISCONNECTED" not in e]
     assert not real_errors, real_errors
     print("installable + offline: ok")
+
+
+def test_shopping_shared(p, sheet):
+    """Kristiina's phone gets the shopping list Tõnis made, and her ticks go back."""
+    errors = []
+    ctx = p.chromium.launch().new_context(**p.devices["Pixel 7"])
+    ctx.route(SHEET_URL, sheet.handle)
+    ctx.add_init_script(
+        f"localStorage.setItem('kitchen.settings.v1', JSON.stringify({{syncUrl: '{SHEET_URL}', myName: 'Kadi'}}))"
+    )
+    page = ctx.new_page()
+    watch_errors(page, errors)
+    page.goto(BASE)
+    expect(page.locator("#sync-status")).to_have_attribute("data-state", "ok")
+    page.click("#open-shopping")
+    expect(page.locator(".shop-item.checked .shop-name")).to_have_text(["300 g beef mince"])
+    page.click(".shop-item:has-text('toilet paper') .shop-check")
+    expect(page.locator("#shop-progress-text")).to_contain_text("2 of")
+    page.screenshot(path=SHOTS / "phone-6-shopping.png", full_page=True)
+    for width in (340, 360):
+        page.set_viewport_size({"width": width, "height": 800})
+        assert not page.evaluate("document.documentElement.scrollWidth > window.innerWidth"), width
+    page.wait_for_timeout(2500)
+    shared = [l for l in sheet.shopping.values() if not l["deleted"]][0]
+    ticked = sorted(i["name"] for i in shared["items"].values() if i["checked"])
+    assert ticked == ["beef mince", "toilet paper"], ticked
+    assert not errors, errors
+    print("shopping shared: ok")
 
 
 def main():
@@ -320,6 +410,7 @@ def main():
         with sync_playwright() as p:
             test_phone(p, sheet)
             test_laptop_second_device(p, sheet)
+            test_shopping_shared(p, sheet)
             test_installable_and_offline(p)
         print(f"all browser tests passed ({sheet.calls} sync calls)")
     finally:

@@ -345,6 +345,244 @@ button.tag {
   text-align: left;
 }
 
+/* ---------- Plan shopping ---------- */
+
+.plan-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.plan-tools .text-button {
+  padding-left: 0;
+}
+
+.recipe-card.pickable {
+  position: relative;
+  padding-right: 3.5rem;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.recipe-card.picked {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.pick-box {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--accent-text);
+  font-weight: 700;
+}
+
+.recipe-card.picked .pick-box {
+  border-color: var(--accent);
+  background: var(--accent);
+}
+
+/* Room at the bottom so the bar never covers the last card */
+body.planning .recipe-list {
+  padding-bottom: 5rem;
+}
+
+.plan-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem max(1rem, calc((100vw - 46rem) / 2 + 1rem));
+  padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--border);
+  background: var(--bg);
+  box-shadow: 0 -4px 16px rgb(0 0 0 / 0.12);
+}
+
+.plan-count {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.primary:disabled {
+  opacity: 0.45;
+  cursor: default;
+  filter: none;
+}
+
+/* ---------- Shopping list ---------- */
+
+.cart-button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.cart-count {
+  position: absolute;
+  top: 0.1rem;
+  right: 0;
+  min-width: 1.2rem;
+  height: 1.2rem;
+  padding: 0 0.3rem;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--accent-text);
+  font-size: 0.7rem;
+  font-weight: 700;
+  line-height: 1.2rem;
+  text-align: center;
+}
+
+.page-title {
+  margin: 0.25rem 0 0.25rem;
+  font-size: 1.6rem;
+}
+
+.shop-recipes {
+  margin: 0 0 0.75rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.progress-label {
+  margin-bottom: 0.3rem;
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+
+.progress-track {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--border);
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  width: 0;
+  background: var(--ok);
+  transition: width 0.25s ease;
+}
+
+.shop-add {
+  display: flex;
+  gap: 0.5rem;
+  margin: 1rem 0 0.5rem;
+}
+
+.shop-add input {
+  flex: 1;
+  min-width: 0;
+}
+
+.shop-section h2 {
+  margin: 1.25rem 0 0.25rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.shop-items {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.shop-item {
+  display: flex;
+  align-items: center;
+  border-top: 1px solid var(--border);
+}
+
+.shop-item:first-child {
+  border-top: none;
+}
+
+.shop-check {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 3rem;
+  padding: 0.5rem 0 0.5rem 0.9rem;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.shop-check input {
+  width: 1.4rem;
+  height: 1.4rem;
+  margin: 0;
+  flex-shrink: 0;
+  accent-color: var(--ok);
+}
+
+.shop-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.shop-from {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.shop-item.checked .shop-name {
+  color: var(--muted);
+  text-decoration: line-through;
+}
+
+.shop-remove {
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-size: 1.3rem;
+  cursor: pointer;
+}
+
+.shop-remove:hover {
+  color: var(--danger);
+}
+
+.button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.stack-actions {
+  flex-direction: column;
+  align-items: stretch;
+}
+
 /* ---------- Owner ---------- */
 
 .owner-line {

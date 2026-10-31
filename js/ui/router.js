@@ -4,6 +4,7 @@
 //   #/r/<id>      one recipe
 //   #/r/<id>/edit edit recipe
 //   #/copy/<id>   new recipe, starting as a copy of another one
+//   #/shopping    the shopping list
 // Using the address means the phone's Back button works as expected.
 
 // How many app screens lie behind the current one in the history.
@@ -13,6 +14,9 @@ let replacing = false;
 
 export function parseRoute(hash) {
   const path = (hash || "").replace(/^#/, "") || "/";
+  if (path === "/shopping") {
+    return { screen: "shopping", id: null };
+  }
   if (path === "/new") {
     return { screen: "edit", id: null };
   }

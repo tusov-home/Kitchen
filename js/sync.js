@@ -1,7 +1,9 @@
-// Syncs recipes with the Google Sheet through its Apps Script web app.
+// Syncs recipes and the shopping list with the Google Sheet through its
+// Apps Script web app.
 // The app always works from the device's own copy; syncing happens in
 // the background whenever there is a connection.
 import * as state from "./state.js";
+import * as shopping from "./shoppingState.js";
 import * as storage from "./storage.js";
 import { normaliseRecipe } from "./lib/recipes.js";
 
@@ -25,14 +27,14 @@ export function isConfigured() {
   return Boolean(storage.loadSettings().syncUrl);
 }
 
-// Sends our recipes, gets back the merged list from the Sheet.
-async function talkToSheet(url, recipes) {
+// Sends a request to the Sheet and returns its answer.
+async function post(url, body) {
   // text/plain avoids the browser's extra "preflight" request,
   // which Apps Script does not answer.
   const response = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "text/plain;charset=utf-8" },
-    body: JSON.stringify({ action: "sync", recipes: recipes }),
+    body: JSON.stringify(body),
   });
   if (!response.ok) {
     throw new Error("The Sheet answered with error " + response.status);
@@ -41,7 +43,25 @@ async function talkToSheet(url, recipes) {
   if (!data.ok) {
     throw new Error(data.error || "The Sheet reported a problem");
   }
-  return data.recipes.map(normaliseRecipe).filter(Boolean);
+  return data;
+}
+
+// Sends our recipes, gets back the merged list from the Sheet.
+async function syncRecipes(url) {
+  const data = await post(url, { action: "sync", recipes: state.getAllForSync() });
+  state.mergeIn(data.recipes.map(normaliseRecipe).filter(Boolean), true);
+}
+
+// Same for the shopping list, in the Sheet's "shopping" tab.
+// Returns false if the Sheet's script is too old to know about it.
+async function syncShopping(url) {
+  const data = await post(url, { action: "sync", collection: "shopping", items: shopping.getAllForSync() });
+  // The old script ignores "collection" and answers without "items".
+  if (!Array.isArray(data.items)) {
+    return false;
+  }
+  shopping.mergeIn(data.items, true);
+  return true;
 }
 
 export async function syncNow() {
@@ -63,11 +83,16 @@ export async function syncNow() {
   running = true;
   report("syncing", "Syncing…");
   try {
-    const fromSheet = await talkToSheet(settings.syncUrl, state.getAllForSync());
-    state.mergeIn(fromSheet, true);
+    await syncRecipes(settings.syncUrl);
+    const shoppingSynced = await syncShopping(settings.syncUrl);
     const now = Date.now();
     storage.saveSettings(Object.assign(storage.loadSettings(), { lastSync: now }));
-    report("ok", "Synced " + new Date(now).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }));
+    const time = new Date(now).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+    if (shoppingSynced) {
+      report("ok", "Synced " + time);
+    } else {
+      report("error", "Recipes synced " + time + ", but the shopping list needs the new Code.gs (see README)");
+    }
   } catch (error) {
     console.warn("Sync failed", error);
     report("error", "Sync failed: " + error.message);
@@ -88,6 +113,11 @@ export function syncSoon() {
 
 export function startAutoSync() {
   state.onChange(function (change) {
+    if (!change.fromSync) {
+      syncSoon();
+    }
+  });
+  shopping.onChange(function (change) {
     if (!change.fromSync) {
       syncSoon();
     }

@@ -34,6 +34,17 @@ export function saveRecipes(recipes) {
   return writeJson(RECIPES_KEY, recipes);
 }
 
+const SHOPPING_KEY = "kitchen.shopping.v1";
+
+export function loadShopping() {
+  const list = readJson(SHOPPING_KEY, []);
+  return Array.isArray(list) ? list : [];
+}
+
+export function saveShopping(lists) {
+  return writeJson(SHOPPING_KEY, lists);
+}
+
 export function loadSettings() {
   // myName: who rates on this phone (each phone has its own).
   return Object.assign({ syncUrl: "", lastSync: 0, myName: "" }, readJson(SETTINGS_KEY, {}));

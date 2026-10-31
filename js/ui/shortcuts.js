@@ -15,7 +15,9 @@ const SHORTCUTS = [
   { keys: "=", action: "moreServings", where: ["recipe"] },
   { keys: "-", action: "fewerServings", where: ["recipe"] },
   { keys: "ctrl+s", label: "Ctrl+S", action: "save", where: ["edit"], whileTyping: true, text: "Save recipe" },
-  { keys: "escape", label: "Esc", action: "back", where: ["recipe", "edit"], whileTyping: true, text: "Back / cancel" },
+  { keys: "escape", label: "Esc", action: "back", where: ["list", "recipe", "edit", "shopping"], whileTyping: true, text: "Back / cancel" },
+  { keys: "l", label: "L", action: "openShopping", where: ["list", "recipe"], text: "Open shopping list" },
+  { keys: "p", label: "P", action: "togglePlanning", where: ["list"], text: "Plan shopping: pick recipes" },
   { keys: "?", label: "?", action: "showHelp", where: ["any"], text: "Show this list" },
 ];
 

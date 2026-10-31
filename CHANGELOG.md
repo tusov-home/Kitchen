@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-11-01 a
+- Shopping list: on the recipe list tap **🛒 Plan shopping**, pick recipes, then **Make shopping list**. Ingredients are sorted by shop section (Produce, Meat & fish, Dairy & eggs, Bakery, Pantry, Other, Check you have) and the same ingredient from several recipes is added up.
+- Tick items off while shopping; ✕ removes one; add your own items ("2 lemons", "toilet paper"); **Remove ticked** and **Start over**.
+- If a list already exists, choose **Add to current list** or **Start a new list**.
+- The list is shared between phones through the Sheet's new "shopping" tab, ticks merged item by item. Needs the `Code.gs` from version h (no further script change).
+- 🛒 in the top bar opens the list and shows how many items are left. Shortcuts: P (plan), L (list).
+
 ## 2026-10-31 h
 - New `Code.gs` that stores each recipe as one block of data: future app features no longer need script updates. It converts an existing Sheet automatically on its first sync (ratings, owners and everything else kept). **Paste it once and deploy a new version.**
 

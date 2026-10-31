@@ -18,6 +18,7 @@
     <a href="#/" class="brand">Kitchen</a>
     <button id="install-app" class="button small" type="button" title="Install Kitchen as an app" hidden>Install app</button>
     <span id="sync-status" class="sync-status" data-state="off" title="Sync status"></span>
+    <a id="open-shopping" class="icon-button cart-button" href="#/shopping" title="Shopping list (L)" aria-label="Shopping list">🛒<span id="cart-count" class="cart-count" hidden></span></a>
     <button id="open-settings" class="icon-button" type="button" title="Settings and sync" aria-label="Settings and sync">⚙</button>
   </header>
 
@@ -27,6 +28,10 @@
       <input id="search" class="search" type="search" placeholder="Search recipes…" aria-label="Search recipes" title="Search (/)">
       <button id="add-recipe" class="primary" type="button" title="Add recipe (N)">+ Add recipe</button>
     </div>
+    <div class="plan-tools">
+      <button id="plan-toggle" class="text-button" type="button" title="Pick recipes for a shopping list (P)">🛒 Plan shopping</button>
+      <span id="plan-hint" class="hint" hidden>Tap the recipes you want to cook</span>
+    </div>
     <div id="tag-filter" class="tag-filter"></div>
     <ul id="recipe-list" class="recipe-list"></ul>
     <div id="empty-list" class="empty" hidden>
@@ -34,6 +39,46 @@
       <p>When a recipe in Claude is just how you want it, copy it and press <strong>+ Add recipe</strong>.</p>
     </div>
     <p id="no-results" class="empty" hidden>No recipes match your search.</p>
+
+    <!-- Shown while picking recipes for the shopping list -->
+    <div id="plan-bar" class="plan-bar" hidden>
+      <span id="plan-count" class="plan-count">0 recipes</span>
+      <span class="spacer"></span>
+      <button id="plan-cancel" class="button" type="button" title="Cancel (Esc)">Cancel</button>
+      <button id="plan-make" class="primary" type="button" title="Make shopping list" disabled>Make shopping list</button>
+    </div>
+  </main>
+
+  <!-- Shopping list -->
+  <main id="view-shopping" class="view" hidden>
+    <div class="actions">
+      <a href="#/" class="button" title="Back (Esc)">← Recipes</a>
+    </div>
+    <h1 class="page-title">Shopping list</h1>
+    <p id="shop-recipes" class="shop-recipes"></p>
+
+    <div id="shop-progress" class="shop-progress">
+      <div class="progress-label"><span id="shop-progress-text"></span></div>
+      <div class="progress-track"><div id="shop-progress-fill" class="progress-fill"></div></div>
+    </div>
+
+    <form id="shop-add" class="shop-add">
+      <input id="shop-add-input" type="text" placeholder="Add something else, e.g. 2 lemons" aria-label="Add an item" autocomplete="off">
+      <button class="button" type="submit">Add</button>
+    </form>
+
+    <div id="shop-sections"></div>
+
+    <div id="shop-empty" class="empty" hidden>
+      <p class="empty-title">No shopping list yet</p>
+      <p>On the recipe list, tap <strong>🛒 Plan shopping</strong>, pick the recipes you'll cook, then <strong>Make shopping list</strong>.</p>
+    </div>
+
+    <div id="shop-footer" class="actions">
+      <button id="shop-remove-ticked" class="button" type="button">Remove ticked</button>
+      <span class="spacer"></span>
+      <button id="shop-delete" class="button danger" type="button">Start over</button>
+    </div>
   </main>
 
   <!-- One recipe -->
@@ -151,6 +196,19 @@
       <div class="actions">
         <span class="spacer"></span>
         <button class="button" value="close">Close</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- When a shopping list already exists -->
+  <dialog id="make-list-dialog" class="dialog">
+    <form method="dialog" class="dialog-body">
+      <h2>You already have a shopping list</h2>
+      <p class="hint" id="make-list-text"></p>
+      <div class="actions stack-actions">
+        <button class="primary" value="add">Add to current list</button>
+        <button class="button" value="new">Start a new list</button>
+        <button class="button" value="cancel">Cancel</button>
       </div>
     </form>
   </dialog>

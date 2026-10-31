@@ -32,7 +32,7 @@ export function detectServings(text) {
 }
 
 // One amount: "2", "1.5", "1,5", "½", "1½", "1 1/2", "1/2".
-const AMOUNT =
+export const AMOUNT =
   "(?:\\d+\\s+\\d+\\/\\d+|\\d+\\/\\d+|\\d+[" + FRACTION_CHARS + "]|[" + FRACTION_CHARS + "]|\\d+(?:[.,]\\d+)?)";
 // Units that may be written straight after the number: "600g", "250ml".
 const UNIT = "(?:g|kg|mg|ml|cl|dl|l|oz|lb)\\b";
