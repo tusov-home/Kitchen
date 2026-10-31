@@ -12,6 +12,7 @@
   --ok: #2e7d4f;
   --warn: #b7791f;
   --focus: #1f6feb;
+  --star: #d99a1e;
   --radius: 12px;
 }
 
@@ -29,6 +30,7 @@
     --ok: #6cc28f;
     --warn: #e3b25a;
     --focus: #79b8ff;
+    --star: #f0b84a;
   }
 }
 
@@ -341,6 +343,134 @@ button.tag {
   padding: 0.35rem 0.75rem;
   border-bottom: 1px solid var(--border);
   text-align: left;
+}
+
+/* ---------- Ratings ---------- */
+
+.rating-box {
+  margin: 0 0 1rem;
+}
+
+.my-rating {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.75rem;
+}
+
+.rating-label {
+  font-weight: 600;
+}
+
+.stars {
+  display: flex;
+}
+
+.star {
+  /* Big enough to hit with a thumb */
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-size: 1.75rem;
+  line-height: 1;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.star.filled {
+  color: var(--star);
+}
+
+.star:hover {
+  transform: scale(1.1);
+}
+
+.all-ratings {
+  margin: 0.25rem 0 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.rater-stars,
+.card-stars {
+  color: var(--star);
+  letter-spacing: 0.05em;
+}
+
+/* ---------- Servings ---------- */
+
+.servings {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 1rem 0 0.25rem;
+  padding: 0.4rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  width: fit-content;
+}
+
+.round-button {
+  width: 2.75rem;
+  height: 2.75rem;
+  border: none;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  color: var(--text);
+  font: inherit;
+  font-size: 1.4rem;
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.round-button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.servings-label {
+  min-width: 6.5rem;
+  text-align: center;
+  font-weight: 600;
+}
+
+.text-button {
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+  border: none;
+  background: transparent;
+  color: var(--accent);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Amounts changed by the servings stepper */
+.scaled {
+  padding: 0 0.15em;
+  border-radius: 4px;
+  background: var(--accent-soft);
+  font-weight: 600;
+}
+
+.short-input {
+  width: 7rem;
+  padding: 0.65rem 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
 }
 
 .notes {

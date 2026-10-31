@@ -9,7 +9,8 @@
  */
 
 const SHEET_NAME = "Recipes";
-const HEADERS = ["id", "title", "text", "tags", "notes", "updatedAt", "deleted"];
+// New columns are only ever added at the end, so older Sheets keep working.
+const HEADERS = ["id", "title", "text", "tags", "notes", "updatedAt", "deleted", "servings", "ratings"];
 // Deleted recipes are kept as small markers so the deletion reaches
 // every phone. After this many days the markers are removed.
 const DELETED_KEEP_DAYS = 90;
@@ -45,9 +46,10 @@ function getSheet_() {
   let sheet = spreadsheet.getSheetByName(SHEET_NAME);
   if (!sheet) {
     sheet = spreadsheet.insertSheet(SHEET_NAME);
-    sheet.getRange(1, 1, 1, HEADERS.length).setValues([HEADERS]).setFontWeight("bold");
     sheet.setFrozenRows(1);
   }
+  // Always (re)write the header row, so columns added in updates appear.
+  sheet.getRange(1, 1, 1, HEADERS.length).setValues([HEADERS]).setFontWeight("bold");
   return sheet;
 }
 
@@ -68,6 +70,8 @@ function readRecipes_(sheet) {
         notes: String(row[4]),
         updatedAt: Number(row[5]) || 0,
         deleted: row[6] === true || String(row[6]).toUpperCase() === "TRUE",
+        servings: Number(row[7]) || null,
+        ratings: parseRatings_(row[8]),
       };
     });
 }
@@ -81,7 +85,10 @@ function writeRecipes_(sheet, recipes) {
     return;
   }
   const rows = recipes.map(function (r) {
-    return [r.id, r.title, r.text, (r.tags || []).join(", "), r.notes, r.updatedAt, r.deleted ? "TRUE" : "FALSE"];
+    return [
+      r.id, r.title, r.text, (r.tags || []).join(", "), r.notes, r.updatedAt,
+      r.deleted ? "TRUE" : "FALSE", r.servings || "", JSON.stringify(r.ratings || {}),
+    ];
   });
   const range = sheet.getRange(2, 1, rows.length, HEADERS.length);
   // Plain text, so a recipe line starting with "=" is never read as a formula.
@@ -89,24 +96,58 @@ function writeRecipes_(sheet, recipes) {
   range.setValues(rows);
 }
 
+function parseRatings_(value) {
+  if (value && typeof value === "object") {
+    return value;
+  }
+  try {
+    const parsed = JSON.parse(value || "{}");
+    return parsed && typeof parsed === "object" ? parsed : {};
+  } catch (error) {
+    return {};
+  }
+}
+
+// For each person, their most recent rating wins.
+function mergeRatings_(a, b) {
+  const result = {};
+  [a || {}, b || {}].forEach(function (ratings) {
+    Object.keys(ratings).forEach(function (name) {
+      const r = ratings[name];
+      if (r && (!result[name] || Number(r.at) > Number(result[name].at))) {
+        result[name] = { stars: Number(r.stars) || 0, at: Number(r.at) || 0 };
+      }
+    });
+  });
+  return result;
+}
+
+// The newest version of each recipe wins; ratings merge person by person.
 function merge_(stored, incoming) {
   const byId = {};
   stored.concat(incoming).forEach(function (r) {
     if (!r || !r.id) {
       return;
     }
+    const clean = {
+      id: String(r.id),
+      title: String(r.title || ""),
+      text: String(r.text || ""),
+      tags: Array.isArray(r.tags) ? r.tags : [],
+      notes: String(r.notes || ""),
+      updatedAt: Number(r.updatedAt) || 0,
+      deleted: r.deleted === true,
+      servings: Number(r.servings) || null,
+      ratings: parseRatings_(r.ratings),
+    };
     const existing = byId[r.id];
-    if (!existing || Number(r.updatedAt) > Number(existing.updatedAt)) {
-      byId[r.id] = {
-        id: String(r.id),
-        title: String(r.title || ""),
-        text: String(r.text || ""),
-        tags: Array.isArray(r.tags) ? r.tags : [],
-        notes: String(r.notes || ""),
-        updatedAt: Number(r.updatedAt) || 0,
-        deleted: r.deleted === true,
-      };
+    if (!existing) {
+      byId[r.id] = clean;
+      return;
     }
+    const winner = clean.updatedAt > existing.updatedAt ? clean : existing;
+    winner.ratings = winner.deleted ? {} : mergeRatings_(existing.ratings, clean.ratings);
+    byId[r.id] = winner;
   });
   return Object.keys(byId).map(function (id) { return byId[id]; });
 }

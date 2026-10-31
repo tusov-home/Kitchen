@@ -5,6 +5,14 @@ const SHORTCUTS = [
   { keys: "n", label: "N", action: "addRecipe", where: ["list", "recipe"], text: "Add recipe" },
   { keys: "/", label: "/", action: "focusSearch", where: ["list"], text: "Search" },
   { keys: "e", label: "E", action: "editRecipe", where: ["recipe"], text: "Edit recipe" },
+  { keys: "1", label: "1 … 5", action: "rate1", where: ["recipe"], text: "Rate 1–5 stars (same again clears)" },
+  { keys: "2", action: "rate2", where: ["recipe"] },
+  { keys: "3", action: "rate3", where: ["recipe"] },
+  { keys: "4", action: "rate4", where: ["recipe"] },
+  { keys: "5", action: "rate5", where: ["recipe"] },
+  { keys: "+", label: "+ / −", action: "moreServings", where: ["recipe"], text: "More / fewer servings" },
+  { keys: "=", action: "moreServings", where: ["recipe"] },
+  { keys: "-", action: "fewerServings", where: ["recipe"] },
   { keys: "ctrl+s", label: "Ctrl+S", action: "save", where: ["edit"], whileTyping: true, text: "Save recipe" },
   { keys: "escape", label: "Esc", action: "back", where: ["recipe", "edit"], whileTyping: true, text: "Back / cancel" },
   { keys: "?", label: "?", action: "showHelp", where: ["any"], text: "Show this list" },
@@ -32,6 +40,10 @@ function fillHelpTable() {
   const table = document.getElementById("shortcut-table");
   table.replaceChildren();
   for (const shortcut of SHORTCUTS) {
+    // Extra keys for the same action (e.g. 2–5) have no label of their own.
+    if (!shortcut.label) {
+      continue;
+    }
     const row = table.insertRow();
     const keyCell = row.insertCell();
     const kbd = document.createElement("kbd");

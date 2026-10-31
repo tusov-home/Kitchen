@@ -1,6 +1,7 @@
 // The form for adding or editing a recipe.
 import * as state from "../state.js";
 import { titleFromText, parseTags } from "../lib/recipes.js";
+import { detectServings } from "../lib/scale.js";
 import { showToast } from "./toast.js";
 import { go, goBack } from "./router.js";
 
@@ -8,14 +9,16 @@ const form = document.getElementById("edit-form");
 const heading = document.getElementById("edit-heading");
 const textInput = document.getElementById("edit-text");
 const titleInput = document.getElementById("edit-title");
+const servingsInput = document.getElementById("edit-servings");
 const tagsInput = document.getElementById("edit-tags");
 const notesInput = document.getElementById("edit-notes");
 const deleteButton = document.getElementById("delete-recipe");
 const cancelButton = document.getElementById("cancel-edit");
 
 let editingId = null;
-// True until the user types in the title box themselves.
+// True until the user types in the title / servings box themselves.
 let titleIsAutomatic = true;
+let servingsIsAutomatic = true;
 
 // id = null for a new recipe. Returns false if the recipe doesn't exist.
 export function openEditor(id) {
@@ -28,6 +31,8 @@ export function openEditor(id) {
   document.title = heading.textContent + " · Kitchen";
   textInput.value = recipe ? recipe.text : "";
   titleInput.value = recipe ? recipe.title : "";
+  servingsInput.value = recipe && recipe.servings ? recipe.servings : "";
+  servingsIsAutomatic = !servingsInput.value;
   tagsInput.value = recipe ? recipe.tags.join(", ") : "";
   notesInput.value = recipe ? recipe.notes : "";
   deleteButton.hidden = !recipe;
@@ -46,6 +51,7 @@ export function saveFromEditor() {
     text: textInput.value,
     tags: parseTags(tagsInput.value),
     notes: notesInput.value,
+    servings: Number(servingsInput.value) || null,
   });
   showToast("Recipe saved");
   if (editingId) {
@@ -67,9 +73,15 @@ export function initEditor() {
     if (titleIsAutomatic) {
       titleInput.value = titleFromText(textInput.value);
     }
+    if (servingsIsAutomatic) {
+      servingsInput.value = detectServings(textInput.value) || "";
+    }
   });
   titleInput.addEventListener("input", function () {
     titleIsAutomatic = titleInput.value === "";
+  });
+  servingsInput.addEventListener("input", function () {
+    servingsIsAutomatic = servingsInput.value === "";
   });
 
   form.addEventListener("submit", function (event) {

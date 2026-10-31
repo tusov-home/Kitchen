@@ -1,6 +1,6 @@
 // The recipe list: search box, tag filter and the list itself.
 import * as state from "../state.js";
-import { visibleRecipes, allTags } from "../lib/recipes.js";
+import { visibleRecipes, allTags, averageRating } from "../lib/recipes.js";
 
 const searchInput = document.getElementById("search");
 const tagFilter = document.getElementById("tag-filter");
@@ -52,11 +52,22 @@ export function renderList() {
     title.textContent = recipe.title;
     link.appendChild(title);
 
-    if (recipe.tags.length) {
-      const tagLine = document.createElement("span");
-      tagLine.className = "recipe-card-tags";
-      tagLine.textContent = recipe.tags.join(" · ");
-      link.appendChild(tagLine);
+    const average = averageRating(recipe);
+    if (recipe.tags.length || average !== null) {
+      const infoLine = document.createElement("span");
+      infoLine.className = "recipe-card-tags";
+      if (average !== null) {
+        const stars = document.createElement("span");
+        stars.className = "card-stars";
+        stars.textContent = "★ " + (Math.round(average * 10) / 10);
+        stars.setAttribute("aria-label", "Rated " + average.toFixed(1) + " of 5");
+        infoLine.appendChild(stars);
+        if (recipe.tags.length) {
+          infoLine.append("  ·  ");
+        }
+      }
+      infoLine.append(recipe.tags.join(" · "));
+      link.appendChild(infoLine);
     }
 
     item.appendChild(link);

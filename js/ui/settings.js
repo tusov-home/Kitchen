@@ -3,6 +3,7 @@ import * as state from "../state.js";
 import * as storage from "../storage.js";
 import * as sync from "../sync.js";
 import { showToast } from "./toast.js";
+import { getMyName, setMyName } from "./rating.js";
 
 const dialog = document.getElementById("settings");
 const openButton = document.getElementById("open-settings");
@@ -12,9 +13,11 @@ const syncNowButton = document.getElementById("sync-now");
 const statusText = document.getElementById("settings-sync-status");
 const exportButton = document.getElementById("export-file");
 const importInput = document.getElementById("import-file");
+const nameInput = document.getElementById("my-name");
 
 export function openSettings() {
   urlInput.value = storage.loadSettings().syncUrl;
+  nameInput.value = getMyName();
   dialog.showModal();
 }
 
@@ -24,6 +27,12 @@ export function setSettingsStatus(message) {
 
 export function initSettings() {
   openButton.addEventListener("click", openSettings);
+
+  // Saved as soon as you leave the box; refresh shows the new name.
+  nameInput.addEventListener("change", function () {
+    setMyName(nameInput.value);
+    window.dispatchEvent(new Event("hashchange"));
+  });
 
   saveButton.addEventListener("click", function () {
     const url = urlInput.value.trim();

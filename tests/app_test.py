@@ -32,7 +32,7 @@ Serves 2 · 25 minutes
 
 | Item | Amount |
 |---|---|
-| Sesame | 1 tbsp |
+| Sesame | 1 tbsp sesame |
 
 ## Method
 1. Halve the aubergines and score them.
@@ -53,8 +53,16 @@ class FakeSheet:
         body = json.loads(route.request.post_data)
         for r in body.get("recipes", []):
             old = self.recipes.get(r["id"])
-            if not old or r["updatedAt"] > old["updatedAt"]:
+            if not old:
                 self.recipes[r["id"]] = r
+                continue
+            winner = dict(r if r["updatedAt"] > old["updatedAt"] else old)
+            ratings = dict(old.get("ratings") or {})
+            for name, rating in (r.get("ratings") or {}).items():
+                if name not in ratings or rating["at"] > ratings[name]["at"]:
+                    ratings[name] = rating
+            winner["ratings"] = {} if winner.get("deleted") else ratings
+            self.recipes[r["id"]] = winner
         route.fulfill(
             status=200,
             content_type="application/json",
@@ -93,7 +101,30 @@ def test_phone(p, sheet):
     expect(page.locator("#recipe-body table")).to_be_visible()
     page.click("#cooked-today")
     expect(page.locator("#recipe-notes")).to_contain_text("Cooked")
+
+    # First rating asks whose phone this is
+    page.locator("#my-stars .star").nth(3).click()
+    expect(page.locator("#name-dialog")).to_be_visible()
+    page.fill("#name-input", "Kadi")
+    page.click("#name-form button[type=submit]")
+    expect(page.locator("#my-stars .star.filled")).to_have_count(4)
+    expect(page.locator("#my-rating-label")).to_have_text("Kadi's rating")
+    expect(page.locator("#all-ratings")).to_contain_text("Kadi")
+
+    # Servings: found "Serves 2", step up to 4 → ingredients double, method doesn't
+    expect(page.locator("#servings-label")).to_have_text("2 servings")
+    page.click("#servings-up")
+    page.click("#servings-up")
+    expect(page.locator("#servings-label")).to_have_text("4 servings")
+    body = page.locator("#recipe-body")
+    expect(body).to_contain_text("4 aubergines")
+    expect(body).to_contain_text("400 g soba noodles")
+    expect(body).to_contain_text("2 tbsp sesame")
+    expect(body).to_contain_text("Roast at 220 °C for 20 minutes")
     page.screenshot(path=SHOTS / "phone-3-recipe.png", full_page=True)
+    page.click("#servings-reset")
+    expect(page.locator("#servings-label")).to_have_text("2 servings")
+    expect(body).to_contain_text("2 aubergines")
 
     # Phone Back button goes to the list, not back to the form
     page.go_back()
@@ -130,7 +161,7 @@ def test_laptop_second_device(p, sheet):
     ctx = p.chromium.launch().new_context(viewport={"width": 1366, "height": 768})
     ctx.route(SHEET_URL, sheet.handle)
     ctx.add_init_script(
-        f"localStorage.setItem('kitchen.settings.v1', JSON.stringify({{syncUrl: '{SHEET_URL}'}}))"
+        f"localStorage.setItem('kitchen.settings.v1', JSON.stringify({{syncUrl: '{SHEET_URL}', myName: 'Tõnis'}}))"
     )
     page = ctx.new_page()
     watch_errors(page, errors)
@@ -139,6 +170,23 @@ def test_laptop_second_device(p, sheet):
     # The recipe from the phone arrives through the Sheet
     expect(page.locator(".recipe-card")).to_have_count(1)
     expect(page.locator("#sync-status")).to_have_attribute("data-state", "ok")
+
+    # Tõnis rates the same recipe with the keyboard; both ratings are kept
+    page.click(".recipe-card")
+    expect(page.locator("#view-recipe")).to_be_visible()
+    expect(page.locator("#all-ratings")).to_contain_text("Kadi")
+    page.keyboard.press("5")
+    expect(page.locator("#all-ratings")).to_contain_text("Tõnis")
+    expect(page.locator("#all-ratings")).to_contain_text("Kadi")
+    page.keyboard.press("+")
+    expect(page.locator("#servings-label")).to_have_text("3 servings")
+    page.keyboard.press("-")
+    expect(page.locator("#servings-label")).to_have_text("2 servings")
+    page.keyboard.press("Escape")
+    expect(page.locator(".card-stars")).to_have_text("★ 4.5")
+    page.wait_for_timeout(2500)  # sync runs shortly after a change
+    synced = list(sheet.recipes.values())[0]["ratings"]
+    assert set(synced) == {"Kadi", "Tõnis"}, synced
 
     # Keyboard: / search, N new, Ctrl+S save, Esc back, E edit, ? help
     page.keyboard.press("/")

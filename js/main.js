@@ -4,7 +4,8 @@ import * as state from "./state.js";
 import * as sync from "./sync.js";
 import { parseRoute, trackHistory, go, goBack } from "./ui/router.js";
 import { initList, renderList, focusSearch } from "./ui/list.js";
-import { initRecipe, renderRecipe } from "./ui/recipe.js";
+import { initRecipe, renderRecipe, changeServings } from "./ui/recipe.js";
+import { initRating, rate } from "./ui/rating.js";
 import { initEditor, openEditor, saveFromEditor, cancelEditor } from "./ui/editor.js";
 import { initSettings, setSettingsStatus } from "./ui/settings.js";
 import { initShortcuts } from "./ui/shortcuts.js";
@@ -78,6 +79,7 @@ document.getElementById("add-recipe").addEventListener("click", function () {
 
 initList();
 initRecipe();
+initRating();
 initEditor();
 initSettings();
 
@@ -86,6 +88,13 @@ initShortcuts(
     addRecipe: () => go("#/new"),
     focusSearch: focusSearch,
     editRecipe: () => go("#/r/" + encodeURIComponent(current.id) + "/edit"),
+    rate1: () => rate(1),
+    rate2: () => rate(2),
+    rate3: () => rate(3),
+    rate4: () => rate(4),
+    rate5: () => rate(5),
+    moreServings: () => changeServings(1),
+    fewerServings: () => changeServings(-1),
     save: saveFromEditor,
     back: () => (current.screen === "edit" ? cancelEditor() : goBack("#/")),
     showHelp: () => document.getElementById("shortcut-help").showModal(),

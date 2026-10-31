@@ -1,7 +1,9 @@
 // Pure helpers for recipes: no DOM, no storage. Easy to test.
 //
 // A recipe looks like:
-// { id, title, text, tags: ["quick"], notes, updatedAt: 1730000000000, deleted: false }
+// { id, title, text, tags: ["quick"], notes, servings: 2,
+//   ratings: { "Tõnis": { stars: 4, at: 1730000000000 } },
+//   updatedAt: 1730000000000, deleted: false }
 
 export function newId() {
   if (globalThis.crypto && crypto.randomUUID) {
@@ -100,18 +102,54 @@ export function visibleRecipes(recipes, query, tag) {
   return result.map((item) => item.recipe);
 }
 
+// Combines two people's-ratings objects: for each person, their most
+// recent rating wins. So two phones rating at the same time both count.
+export function mergeRatings(a, b) {
+  const result = Object.assign({}, a || {});
+  for (const [name, rating] of Object.entries(b || {})) {
+    if (!result[name] || rating.at > result[name].at) {
+      result[name] = rating;
+    }
+  }
+  return result;
+}
+
 // Combines two lists of recipes. For the same id, the most recently
-// changed version wins ("last write wins"). Deleted recipes are kept as
-// small markers so the deletion reaches the other phone too.
+// changed version wins ("last write wins"); ratings are combined person
+// by person. Deleted recipes are kept as small markers so the deletion
+// reaches the other phone too.
 export function mergeRecipes(listA, listB) {
   const byId = new Map();
   for (const recipe of [...listA, ...listB]) {
     const existing = byId.get(recipe.id);
-    if (!existing || recipe.updatedAt > existing.updatedAt) {
+    if (!existing) {
       byId.set(recipe.id, recipe);
+      continue;
     }
+    const winner = recipe.updatedAt > existing.updatedAt ? recipe : existing;
+    const ratings = winner.deleted ? {} : mergeRatings(existing.ratings, recipe.ratings);
+    byId.set(recipe.id, Object.assign({}, winner, { ratings: ratings }));
   }
   return [...byId.values()];
+}
+
+// Average stars of everyone who rated, or null if nobody has.
+export function averageRating(recipe) {
+  const stars = Object.values(recipe.ratings || {})
+    .map((r) => r.stars)
+    .filter((s) => s >= 1 && s <= 5);
+  if (!stars.length) {
+    return null;
+  }
+  return stars.reduce((sum, s) => sum + s, 0) / stars.length;
+}
+
+// Ratings sorted by name, without cleared ones (stars 0).
+export function ratingList(recipe) {
+  return Object.entries(recipe.ratings || {})
+    .filter(([, r]) => r.stars >= 1)
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([name, r]) => ({ name: name, stars: r.stars }));
 }
 
 // "Cooked 12 Nov 2026" for the notes.
@@ -133,12 +171,30 @@ export function normaliseRecipe(raw) {
   if (typeof tags === "string") {
     tags = parseTags(tags);
   }
+  let ratings = raw.ratings;
+  if (typeof ratings === "string") {
+    try {
+      ratings = JSON.parse(ratings || "{}");
+    } catch (error) {
+      ratings = {};
+    }
+  }
+  const cleanRatings = {};
+  for (const [name, r] of Object.entries(ratings && typeof ratings === "object" ? ratings : {})) {
+    const stars = Number(r && r.stars);
+    if (name && stars >= 0 && stars <= 5) {
+      cleanRatings[name] = { stars: Math.round(stars), at: Number(r.at) || 0 };
+    }
+  }
+  const servings = Number(raw.servings);
   return {
     id: raw.id,
     title: String(raw.title || ""),
     text: String(raw.text || ""),
     tags: Array.isArray(tags) ? tags.map(String) : [],
     notes: String(raw.notes || ""),
+    servings: servings >= 1 && servings <= 50 ? Math.round(servings) : null,
+    ratings: cleanRatings,
     updatedAt: Number(raw.updatedAt) || 0,
     deleted: raw.deleted === true || raw.deleted === "TRUE" || raw.deleted === "true",
   };

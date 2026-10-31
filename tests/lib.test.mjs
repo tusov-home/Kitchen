@@ -76,3 +76,97 @@ test("markdown renders tables", () => {
   assert.match(html, /<td>200 g<\/td>/);
   assert.doesNotMatch(html, /---/);
 });
+
+// ---------- Ratings ----------
+import { mergeRatings, averageRating, ratingList } from "../js/lib/recipes.js";
+
+test("ratings merge person by person, newest wins", () => {
+  const merged = mergeRatings(
+    { Tõnis: { stars: 4, at: 5 }, Kadi: { stars: 2, at: 1 } },
+    { Kadi: { stars: 5, at: 6 }, Tõnis: { stars: 1, at: 2 } }
+  );
+  assert.deepEqual(merged, { Tõnis: { stars: 4, at: 5 }, Kadi: { stars: 5, at: 6 } });
+});
+
+test("recipe merge keeps ratings from both versions", () => {
+  const merged = mergeRecipes(
+    [{ id: "a", title: "new", updatedAt: 2, ratings: { T: { stars: 4, at: 1 } } }],
+    [{ id: "a", title: "old", updatedAt: 1, ratings: { K: { stars: 5, at: 3 } } }]
+  );
+  assert.equal(merged[0].title, "new");
+  assert.deepEqual(Object.keys(merged[0].ratings).sort(), ["K", "T"]);
+});
+
+test("average ignores cleared ratings", () => {
+  const recipe = { ratings: { A: { stars: 4, at: 1 }, B: { stars: 5, at: 1 }, C: { stars: 0, at: 1 } } };
+  assert.equal(averageRating(recipe), 4.5);
+  assert.equal(averageRating({ ratings: {} }), null);
+  assert.deepEqual(ratingList(recipe).map((r) => r.name), ["A", "B"]);
+});
+
+test("normalise reads ratings stored as JSON text in the Sheet", () => {
+  const r = normaliseRecipe({ id: "x", servings: "4", ratings: '{"Kadi":{"stars":5,"at":9}}' });
+  assert.equal(r.servings, 4);
+  assert.deepEqual(r.ratings, { Kadi: { stars: 5, at: 9 } });
+});
+
+// ---------- Servings ----------
+import { detectServings, scaleLine, formatAmount, stepServings } from "../js/lib/scale.js";
+
+test("servings found in common phrasings", () => {
+  assert.equal(detectServings("Serves 2 · 25 minutes"), 2);
+  assert.equal(detectServings("## Ingredients (4 servings)"), 4);
+  assert.equal(detectServings("Portions: 6"), 6);
+  assert.equal(detectServings("Roast for 20 minutes"), null);
+});
+
+test("amounts scale, temperatures and tin sizes don't", () => {
+  assert.equal(scaleLine("200 g soba", 2), "400 g soba");
+  assert.equal(scaleLine("600g chicken", 0.5), "300g chicken");
+  assert.equal(scaleLine("1½ tbsp miso", 2), "3 tbsp miso");
+  assert.equal(scaleLine("1/2 tsp salt", 0.5), "¼ tsp salt");
+  assert.equal(scaleLine("2–3 garlic cloves", 2), "4–6 garlic cloves");
+  assert.equal(scaleLine("1 tin tomatoes (400 g)", 2), "2 tin tomatoes (400 g)");
+  assert.equal(scaleLine("Bake at 220 °C", 2), "Bake at 220 °C");
+  assert.equal(scaleLine("Chinese 5-spice, 1 tsp", 2), "Chinese 5-spice, 2 tsp");
+  assert.equal(scaleLine("Salt to taste", 2), "Salt to taste");
+});
+
+test("amounts are shown kitchen-friendly", () => {
+  assert.equal(formatAmount(1203), "1205");
+  assert.equal(formatAmount(37.4), "37");
+  assert.equal(formatAmount(1.5), "1½");
+  assert.equal(formatAmount(0.33), "⅓");
+  assert.equal(formatAmount(2.98), "3");
+  assert.equal(formatAmount(1.33), "1⅓");
+  assert.equal(formatAmount(1.2), "1.2");
+});
+
+test("stepper limits", () => {
+  assert.equal(stepServings(1, -1, true), 1);
+  assert.equal(stepServings(2, 1, true), 3);
+  assert.equal(stepServings(0.5, -1, false), 0.5);
+  assert.equal(stepServings(1, 1, false), 1.5);
+});
+
+test("markdown scales only the ingredients section", () => {
+  const md = "Serves 2\n\n## Ingredients\n- 200 g rice\n### For the sauce\n- 2 tbsp soy\n\n## Method\n1. Cook 200 g rice for 10 minutes.";
+  const html = renderMarkdown(md, { scale: 2 });
+  assert.match(html, /<span class="scaled">400<\/span> g rice/);
+  assert.match(html, /<span class="scaled">4<\/span> tbsp soy/);
+  assert.match(html, /Cook 200 g rice for 10 minutes/);
+  assert.match(html, /<p>Serves 2<\/p>/);
+});
+
+test("markdown with bold pseudo-headings", () => {
+  const md = "**Ingredients**\n- 3 eggs\n\n**Method**\n1. Whisk 3 eggs";
+  const html = renderMarkdown(md, { scale: 2 });
+  assert.match(html, /<span class="scaled">6<\/span> eggs/);
+  assert.match(html, /Whisk 3 eggs/);
+});
+
+test("without an ingredients heading, only bullet amounts scale", () => {
+  const html = renderMarkdown("- 2 onions\n\n1. Fry 2 onions 5 minutes", { scale: 2 });
+  assert.match(html, /<span class="scaled">4<\/span> onions/);
+  assert.match(html, /Fry 2 onions 5 minutes/);
+});

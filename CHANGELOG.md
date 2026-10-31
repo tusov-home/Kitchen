@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-31 e
+- Star ratings (1–5) per person: each phone asks once whose phone it is. Tap the same star again to clear. The list shows the average.
+- Servings: found automatically from "Serves 2" (editable in the form). The − / + stepper on a recipe scales the ingredient amounts and highlights them; the method (temperatures, times) is never changed.
+- Shortcuts: 1–5 to rate, + / − for servings.
+- Sheet sync stores servings and ratings; ratings from two phones are merged person by person. **Update `Code.gs` in Apps Script and deploy a new version.**
+
 ## 2026-10-31 d
 - Phone status bar and app title bar now match the page background instead of orange (light and dark mode).
 

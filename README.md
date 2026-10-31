@@ -15,6 +15,8 @@ Kitchen lives in the `tusov-home` organization so it has its own web address. Pa
 - **Add a recipe:** copy the recipe from Claude, press **+ Add recipe** and paste. The first line becomes the title (you can change it). Add tags like `quick, weekend, chicken`.
 - **Find it again:** search by name, tag or ingredient, or tap a tag to filter.
 - **Cook it:** open the recipe. **✓ Cooked today** adds the date to the notes; **Edit** lets you change anything and add notes ("less chilli next time").
+- **Servings:** use **− / +** on a recipe to cook for more or fewer people. Ingredient amounts change (highlighted); the method stays as written. The base number comes from "Serves 2" in the text, or set it in **Edit → Servings**. Without it, the stepper multiplies (×½, ×1½, ×2 …).
+- **Rate it:** tap 1–5 stars after eating. Each of you rates on your own phone (the app asks your name once; change it in ⚙). Tap the same star again to clear. The list shows the average.
 ## Install as an app
 
 Kitchen can be installed like an app: own icon, full screen, opens without internet.
@@ -32,6 +34,8 @@ Updates arrive automatically: when online, the app always loads the newest versi
 | `N` | Add recipe | list, recipe |
 | `/` | Search | list |
 | `E` | Edit recipe | recipe |
+| `1` … `5` | Rate (same again clears) | recipe |
+| `+` / `−` | More / fewer servings | recipe |
 | `Ctrl+S` | Save | edit form |
 | `Esc` | Back / cancel | recipe, edit form |
 | `?` | Show all shortcuts | everywhere |
@@ -50,7 +54,7 @@ Recipes are always saved on the device first, so the app works offline. With syn
 6. In the Kitchen app: **⚙ → Web app link**, paste it, press **Save and sync**. A green dot in the top bar means synced.
 7. Send the same link to the other phone (e.g. in a private message) and paste it there too.
 
-**If you change `Code.gs` later:** Deploy → Manage deployments → ✏ Edit → Version: *New version* → Deploy. The link stays the same.
+**When `Code.gs` changes in an update** (the CHANGELOG says so), paste the new code over the old one, save, then: Deploy → Manage deployments → ✏ Edit → Version: *New version* → Deploy. The link stays the same.
 
 Sync status dot: green = synced, amber = offline (will sync later), red = sync problem (tap ⚙ to see the message).
 
@@ -77,10 +81,12 @@ js/state.js           the recipes in memory; the only place that changes them
 js/storage.js         saving on the device, settings, export/import files
 js/sync.js            talks to the Google Sheet
 js/lib/recipes.js     pure helpers: title from text, tags, search, merging
-js/lib/markdown.js    turns Claude's Markdown into safe HTML
+js/lib/markdown.js    turns Claude's Markdown into safe HTML, scales the ingredients part
+js/lib/scale.js       pure helpers: find servings, scale and format amounts
 js/ui/router.js       which screen belongs to which address (#/r/…)
 js/ui/list.js         recipe list, search, tag filter
-js/ui/recipe.js       one recipe
+js/ui/recipe.js       one recipe, servings stepper
+js/ui/rating.js       star ratings, whose phone this is
 js/ui/editor.js       add/edit form
 js/ui/settings.js     settings dialog: sync, backup, privacy
 js/ui/shortcuts.js    all keyboard shortcuts in one table

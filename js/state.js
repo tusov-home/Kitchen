@@ -35,12 +35,16 @@ export function getAllForSync() {
 // Adds a new recipe (no id) or updates an existing one. Returns the id.
 export function saveRecipe(input) {
   const id = input.id || newId();
+  const existing = getRecipe(id);
   const recipe = {
     id: id,
     title: input.title.trim(),
     text: input.text.trim(),
     tags: input.tags || [],
     notes: (input.notes || "").trim(),
+    servings: input.servings || null,
+    // Ratings are changed only through setRating, so keep them on edits.
+    ratings: input.ratings || (existing ? existing.ratings : {}),
     updatedAt: Date.now(),
     deleted: false,
   };
@@ -63,10 +67,27 @@ export function addNote(id, line) {
   saveRecipe(Object.assign({}, recipe, { notes: notes }));
 }
 
+// Sets one person's stars (1–5), or clears them (0). Each rating keeps
+// its own time, so ratings from two phones merge without overwriting
+// each other, and rating doesn't count as editing the recipe.
+export function setRating(id, name, stars) {
+  const recipe = getRecipe(id);
+  if (!recipe || !name) {
+    return;
+  }
+  const ratings = Object.assign({}, recipe.ratings);
+  ratings[name] = { stars: stars, at: Date.now() };
+  recipes = recipes.map((r) => (r.id === id ? Object.assign({}, r, { ratings: ratings }) : r));
+  changed();
+}
+
 // Keeps a small "deleted" marker so the deletion syncs to other devices.
 export function deleteRecipe(id) {
   recipes = recipes.filter((r) => r.id !== id);
-  recipes.push({ id: id, title: "", text: "", tags: [], notes: "", updatedAt: Date.now(), deleted: true });
+  recipes.push({
+    id: id, title: "", text: "", tags: [], notes: "", servings: null, ratings: {},
+    updatedAt: Date.now(), deleted: true,
+  });
   changed();
 }
 

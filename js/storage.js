@@ -35,7 +35,8 @@ export function saveRecipes(recipes) {
 }
 
 export function loadSettings() {
-  return Object.assign({ syncUrl: "", lastSync: 0 }, readJson(SETTINGS_KEY, {}));
+  // myName: who rates on this phone (each phone has its own).
+  return Object.assign({ syncUrl: "", lastSync: 0, myName: "" }, readJson(SETTINGS_KEY, {}));
 }
 
 export function saveSettings(settings) {
