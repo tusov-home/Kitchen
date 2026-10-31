@@ -2,7 +2,13 @@
 
 Our household recipe book. When a recipe worked out with Claude is just how we want it, we paste it here, so we can find it again and cook it exactly the same way.
 
+**Open it:** https://tusov-home.github.io/Kitchen/
+
 Plain HTML, CSS and JavaScript modules. No build step: GitHub Pages serves the files as they are.
+
+## Hosting rule
+
+Kitchen lives in the `tusov-home` organization so it has its own web address. Part Coach sits at the root of `ttusov-art.github.io`, and an app at a site's root claims every address below it: apps placed under it can't be installed separately, and Part Coach clears their offline helpers when it starts. So: **never put an app in a `*.github.io` root repository** next to other apps.
 
 ## Use it
 
@@ -13,7 +19,7 @@ Plain HTML, CSS and JavaScript modules. No build step: GitHub Pages serves the f
 
 Kitchen can be installed like an app: own icon, full screen, opens without internet.
 
-- **Android (Chrome):** open the site, tap **Install app** in the top bar (or ⋮ → *Install app*).
+- **Android (Chrome):** open https://tusov-home.github.io/Kitchen/, tap **Install app** in the top bar (or ⋮ → *Install app*).
 - **Windows (Chrome or Edge):** click **Install app** in the top bar, or the install icon at the right end of the address bar.
 - **iPhone (Safari):** Share → *Add to Home Screen*. This also stops Safari from deleting the app's data after 7 days without use.
 
