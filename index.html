@@ -6,11 +6,15 @@
   <title>Kitchen</title>
   <meta name="description" content="Our household recipe book: save recipes worked out with Claude and cook them again.">
   <meta name="theme-color" content="#c2562b">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
   <header class="topbar">
     <a href="#/" class="brand">Kitchen</a>
+    <button id="install-app" class="button small" type="button" title="Install Kitchen as an app" hidden>Install app</button>
     <span id="sync-status" class="sync-status" data-state="off" title="Sync status"></span>
     <button id="open-settings" class="icon-button" type="button" title="Settings and sync" aria-label="Settings and sync">⚙</button>
   </header>

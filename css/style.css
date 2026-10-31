@@ -175,6 +175,12 @@ body {
   border-color: var(--accent);
 }
 
+.button.small {
+  min-height: 2.25rem;
+  padding: 0.3rem 0.9rem;
+  font-size: 0.875rem;
+}
+
 .button.danger {
   color: var(--danger);
 }

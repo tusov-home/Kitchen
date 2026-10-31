@@ -192,6 +192,37 @@ def test_laptop_second_device(p, sheet):
     print("laptop: ok")
 
 
+def test_installable_and_offline(p):
+    """Manifest and icons load, service worker works, app opens offline."""
+    errors = []
+    ctx = p.chromium.launch().new_context(**p.devices["Pixel 7"])
+    page = ctx.new_page()
+    watch_errors(page, errors)
+    page.goto(BASE)
+
+    manifest = page.evaluate("fetch('manifest.webmanifest').then(r => r.json())")
+    assert manifest["display"] == "standalone"
+    for icon in manifest["icons"]:
+        status = page.evaluate(f"fetch('{icon['src']}').then(r => r.status)")
+        assert status == 200, f"missing icon {icon['src']}"
+
+    page.evaluate("navigator.serviceWorker.ready")
+    page.reload()  # now controlled by the service worker
+    page.wait_for_function("navigator.serviceWorker.controller !== null")
+
+    ctx.set_offline(True)
+    page.reload()
+    expect(page.locator("#add-recipe")).to_be_visible()
+    page.click("#add-recipe")
+    page.fill("#edit-text", "Offline omelette\n- 3 eggs")
+    page.click("button[type=submit]")
+    expect(page.locator("#recipe-title")).to_have_text("Offline omelette")
+
+    real_errors = [e for e in errors if "ERR_INTERNET_DISCONNECTED" not in e]
+    assert not real_errors, real_errors
+    print("installable + offline: ok")
+
+
 def main():
     server = subprocess.Popen(
         [sys.executable, "-m", "http.server", str(PORT)],
@@ -204,6 +235,7 @@ def main():
         with sync_playwright() as p:
             test_phone(p, sheet)
             test_laptop_second_device(p, sheet)
+            test_installable_and_offline(p)
         print(f"all browser tests passed ({sheet.calls} sync calls)")
     finally:
         server.terminate()

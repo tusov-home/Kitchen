@@ -8,6 +8,7 @@ import { initRecipe, renderRecipe } from "./ui/recipe.js";
 import { initEditor, openEditor, saveFromEditor, cancelEditor } from "./ui/editor.js";
 import { initSettings, setSettingsStatus } from "./ui/settings.js";
 import { initShortcuts } from "./ui/shortcuts.js";
+import { initPwa, onInstallAvailable, install } from "./pwa.js";
 
 const views = {
   list: document.getElementById("view-list"),
@@ -93,6 +94,14 @@ initShortcuts(
 );
 
 document.getElementById("app-version").textContent = "Version " + APP_VERSION;
+
+// "Install app" button appears only when the browser allows installing.
+const installButton = document.getElementById("install-app");
+onInstallAvailable(function (available) {
+  installButton.hidden = !available;
+});
+installButton.addEventListener("click", install);
+initPwa();
 
 window.addEventListener("hashchange", route);
 route();

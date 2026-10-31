@@ -9,7 +9,15 @@ Plain HTML, CSS and JavaScript modules. No build step: GitHub Pages serves the f
 - **Add a recipe:** copy the recipe from Claude, press **+ Add recipe** and paste. The first line becomes the title (you can change it). Add tags like `quick, weekend, chicken`.
 - **Find it again:** search by name, tag or ingredient, or tap a tag to filter.
 - **Cook it:** open the recipe. **✓ Cooked today** adds the date to the notes; **Edit** lets you change anything and add notes ("less chilli next time").
-- **Android:** in Chrome, use ⋮ → *Add to Home screen* so it opens like an app.
+## Install as an app
+
+Kitchen can be installed like an app: own icon, full screen, opens without internet.
+
+- **Android (Chrome):** open the site, tap **Install app** in the top bar (or ⋮ → *Install app*).
+- **Windows (Chrome or Edge):** click **Install app** in the top bar, or the install icon at the right end of the address bar.
+- **iPhone (Safari):** Share → *Add to Home Screen*. This also stops Safari from deleting the app's data after 7 days without use.
+
+Updates arrive automatically: when online, the app always loads the newest version.
 
 ## Keyboard shortcuts
 
@@ -52,6 +60,10 @@ Sync status dot: green = synced, amber = offline (will sync later), red = sync p
 
 ```
 index.html            page structure (all screens and dialogs)
+manifest.webmanifest  app name, icons and colours for installing
+sw.js                 service worker: keeps a copy of the app for offline use
+icons/                app icons (Android, Windows, iPhone, browser tab)
+js/pwa.js             registers the service worker, shows the Install button
 css/style.css         the look (colour tokens, light + dark)
 js/main.js            starts the app, wires modules together, shows the right screen
 js/version.js         APP_VERSION, bumped with every change

@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-10-31 c
+- Installable as an app on Android and Windows (manifest, icons, "Install app" button).
+- Opens and works offline (service worker keeps a copy of the app files).
+
 ## 2026-10-31 b
 - Recipe book: paste a recipe from Claude, title taken from the first line, tags and notes.
 - Recipe list with search (name, tag, ingredient) and tag filter.
