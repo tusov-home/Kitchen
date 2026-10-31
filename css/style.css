@@ -1,0 +1,104 @@
+/* Colour tokens: change the look here, in one place */
+:root {
+  --bg: #faf7f2;
+  --text: #2b2622;
+  --muted: #6f655c;
+  --accent: #c2562b;
+  --accent-text: #ffffff;
+  --focus: #1f6feb;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1c1a18;
+    --text: #f1ece6;
+    --muted: #a99f95;
+    --accent: #e0703f;
+    --accent-text: #1c1a18;
+    --focus: #79b8ff;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  line-height: 1.5;
+}
+
+.landing {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 1rem;
+  text-align: center;
+}
+
+.title {
+  margin: 0;
+  font-size: clamp(2.5rem, 10vw, 4rem);
+  letter-spacing: -0.02em;
+}
+
+.tagline {
+  margin: 0 0 1rem;
+  color: var(--muted);
+  max-width: 28rem;
+}
+
+.primary {
+  min-height: 3rem;
+  padding: 0.75rem 1.75rem;
+  border: none;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--accent-text);
+  font: inherit;
+  font-size: 1.125rem;
+  font-weight: 600;
+  cursor: pointer;
+  /* Avoid text selection / callout on long-press (Android, iPhone) */
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.primary:hover {
+  filter: brightness(1.08);
+}
+
+.primary:active {
+  transform: translateY(1px);
+}
+
+.primary:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+}
+
+.status {
+  min-height: 1.5em;
+  margin: 0;
+  color: var(--muted);
+}
+
+.footer {
+  padding: 1rem;
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--muted);
+}

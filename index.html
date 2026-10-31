@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kitchen</title>
+  <meta name="description" content="A small kitchen management app: recipes, meal plans and shopping lists.">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <main class="landing">
+    <h1 class="title">Kitchen</h1>
+    <p class="tagline">Recipes, meal plans and shopping lists in one place.</p>
+
+    <button id="add-recipe" class="primary" type="button" title="Add recipe (N)">
+      + Add recipe
+    </button>
+
+    <!-- Shown after the button is pressed, until the recipe form exists -->
+    <p id="status" class="status" role="status" aria-live="polite"></p>
+  </main>
+
+  <footer class="footer">
+    <span id="app-version"></span>
+  </footer>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
