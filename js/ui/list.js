@@ -1,6 +1,7 @@
 // The recipe list: search box, tag filter and the list itself.
 import * as state from "../state.js";
-import { visibleRecipes, allTags, averageRating } from "../lib/recipes.js";
+import * as storage from "../storage.js";
+import { visibleRecipes, allTags, allOwners, averageRating } from "../lib/recipes.js";
 import { isPlanning, isSelected, toggleSelected } from "./plan.js";
 
 const searchInput = document.getElementById("search");
@@ -9,7 +10,35 @@ const list = document.getElementById("recipe-list");
 const emptyList = document.getElementById("empty-list");
 const noResults = document.getElementById("no-results");
 
+const ownerFilter = document.getElementById("owner-filter");
+const sortSelect = document.getElementById("sort-select");
+
 let activeTag = "";
+// Owner filter and sort are remembered on this phone.
+let activeOwner = storage.loadSettings().listOwner || "";
+let sortOrder = storage.loadSettings().listSort || "newest";
+
+function rememberView() {
+  storage.saveSettings(Object.assign(storage.loadSettings(), { listOwner: activeOwner, listSort: sortOrder }));
+}
+
+// "Everyone · Kristiina · Tõnis", shown once there are two owners.
+function renderOwnerFilter(owners) {
+  ownerFilter.replaceChildren();
+  ownerFilter.hidden = owners.length < 2;
+  if (ownerFilter.hidden) {
+    return;
+  }
+  for (const owner of ["", ...owners]) {
+    ownerFilter.appendChild(
+      tagChip(owner || "Everyone", owner === activeOwner, function () {
+        activeOwner = owner;
+        rememberView();
+        renderList();
+      })
+    );
+  }
+}
 
 function tagChip(tag, selected, onClick) {
   const chip = document.createElement("button");
@@ -27,6 +56,12 @@ export function renderList() {
   if (!tags.includes(activeTag)) {
     activeTag = "";
   }
+  const owners = allOwners(all);
+  if (owners.length < 2 || !owners.includes(activeOwner)) {
+    activeOwner = "";
+  }
+  renderOwnerFilter(owners);
+  sortSelect.value = sortOrder;
 
   // Tag filter chips
   tagFilter.replaceChildren();
@@ -40,7 +75,7 @@ export function renderList() {
   }
 
   // The list
-  const shown = visibleRecipes(all, searchInput.value, activeTag);
+  const shown = visibleRecipes(all, searchInput.value, activeTag, { owner: activeOwner, sort: sortOrder });
   list.replaceChildren();
   for (const recipe of shown) {
     const item = document.createElement("li");
@@ -117,4 +152,9 @@ export function focusSearch() {
 
 export function initList() {
   searchInput.addEventListener("input", renderList);
+  sortSelect.addEventListener("change", function () {
+    sortOrder = sortSelect.value;
+    rememberView();
+    renderList();
+  });
 }

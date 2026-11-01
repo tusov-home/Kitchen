@@ -73,7 +73,15 @@ export function allTags(recipes) {
 
 // Recipes to show in the list: filtered by search text and tag,
 // title matches first, then most recently changed.
-export function visibleRecipes(recipes, query, tag) {
+// Recipes to show in the list.
+// options: { owner: "Kadi" or "" for everyone,
+//            sort: "newest" | "az" | "rating" }
+// "newest": while searching, title matches come first, then newest.
+// "az": alphabetical by title. "rating": best average first; unrated
+// recipes at the end; equal ratings A–Z.
+export function visibleRecipes(recipes, query, tag, options) {
+  const owner = (options && options.owner) || "";
+  const sort = (options && options.sort) || "newest";
   const q = (query || "").trim().toLowerCase();
   const result = [];
 
@@ -84,16 +92,31 @@ export function visibleRecipes(recipes, query, tag) {
     if (tag && !(recipe.tags || []).includes(tag)) {
       continue;
     }
+    if (owner && recipe.owner !== owner) {
+      continue;
+    }
     const inTitle = recipe.title.toLowerCase().includes(q);
     const inTags = (recipe.tags || []).some((t) => t.includes(q));
     const inText = recipe.text.toLowerCase().includes(q);
     if (q && !inTitle && !inTags && !inText) {
       continue;
     }
-    result.push({ recipe: recipe, score: inTitle ? 2 : inTags ? 1 : 0 });
+    result.push({ recipe: recipe, score: inTitle ? 2 : inTags ? 1 : 0, rating: averageRating(recipe) });
   }
 
+  const byTitle = (a, b) => a.recipe.title.localeCompare(b.recipe.title, undefined, { sensitivity: "base" });
   result.sort(function (a, b) {
+    if (sort === "az") {
+      return byTitle(a, b);
+    }
+    if (sort === "rating") {
+      if (a.rating !== b.rating) {
+        if (a.rating === null) return 1;
+        if (b.rating === null) return -1;
+        return b.rating - a.rating;
+      }
+      return byTitle(a, b);
+    }
     if (a.score !== b.score) {
       return b.score - a.score;
     }
@@ -101,6 +124,17 @@ export function visibleRecipes(recipes, query, tag) {
   });
 
   return result.map((item) => item.recipe);
+}
+
+// Everyone who owns at least one recipe, A–Z.
+export function allOwners(recipes) {
+  const set = new Set();
+  for (const recipe of recipes) {
+    if (!recipe.deleted && recipe.owner) {
+      set.add(recipe.owner);
+    }
+  }
+  return [...set].sort((a, b) => a.localeCompare(b));
 }
 
 // Combines two people's-ratings objects: for each person, their most

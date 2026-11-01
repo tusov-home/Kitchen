@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-11-01 d
+- Show recipes by owner (Everyone / each name), once two people own recipes.
+- Sort the list by Newest, A–Z or Best rated (average of everyone's stars; unrated at the end).
+- Both choices are remembered on each phone.
+
 ## 2026-11-01 c
 - Import accepts simpler files (e.g. made by Claude from old chats): missing id, owner or date are filled in, and importing the same file twice doesn't create doubles. See "Bring recipes over from Claude chats" in the README.
 

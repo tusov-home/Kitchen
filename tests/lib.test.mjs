@@ -191,3 +191,30 @@ test("a copy keeps the recipe but not notes, ratings or owner", () => {
   copy.tags.push("spicy");
   assert.deepEqual(original.tags, ["weekend"], "original tags untouched");
 });
+
+// ---------- Owner filter and sorting ----------
+import { allOwners } from "../js/lib/recipes.js";
+
+const shelf = [
+  { id: "1", title: "banana bread", text: "", tags: [], owner: "Tõnis", updatedAt: 3, ratings: { K: { stars: 3, at: 1 } } },
+  { id: "2", title: "Apple pie", text: "", tags: [], owner: "Kristiina", updatedAt: 1, ratings: { K: { stars: 5, at: 1 }, T: { stars: 4, at: 1 } } },
+  { id: "3", title: "Carrot soup", text: "", tags: [], owner: "Tõnis", updatedAt: 2, ratings: {} },
+  { id: "4", title: "Dal", text: "", tags: [], owner: "Kristiina", updatedAt: 4, ratings: { T: { stars: 3, at: 1 } } },
+];
+
+test("sort A–Z ignores upper/lower case", () => {
+  assert.deepEqual(visibleRecipes(shelf, "", "", { sort: "az" }).map((r) => r.id), ["2", "1", "3", "4"]);
+});
+
+test("sort by rating: best first, ties A–Z, unrated last", () => {
+  assert.deepEqual(visibleRecipes(shelf, "", "", { sort: "rating" }).map((r) => r.id), ["2", "1", "4", "3"]);
+});
+
+test("newest stays the default", () => {
+  assert.deepEqual(visibleRecipes(shelf, "", "").map((r) => r.id), ["4", "1", "3", "2"]);
+});
+
+test("filter by owner, and list of owners", () => {
+  assert.deepEqual(visibleRecipes(shelf, "", "", { owner: "Tõnis", sort: "az" }).map((r) => r.id), ["1", "3"]);
+  assert.deepEqual(allOwners(shelf), ["Kristiina", "Tõnis"]);
+});

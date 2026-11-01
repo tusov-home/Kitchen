@@ -186,7 +186,7 @@ def test_laptop_second_device(p, sheet):
     ctx = p.chromium.launch().new_context(viewport={"width": 1366, "height": 768})
     ctx.route(SHEET_URL, sheet.handle)
     ctx.add_init_script(
-        f"localStorage.setItem('kitchen.settings.v1', JSON.stringify({{syncUrl: '{SHEET_URL}', myName: 'Tõnis'}}))"
+        f"if (!localStorage.getItem('kitchen.settings.v1')) localStorage.setItem('kitchen.settings.v1', JSON.stringify({{syncUrl: '{SHEET_URL}', myName: 'Tõnis'}}))"
     )
     page = ctx.new_page()
     watch_errors(page, errors)
@@ -279,6 +279,20 @@ def test_laptop_second_device(p, sheet):
     expect(page.locator("#shortcut-help")).to_be_visible()
     page.screenshot(path=SHOTS / "laptop-2-help.png")
     page.keyboard.press("Escape")
+
+    # Owner filter and sorting (Kadi and Tõnis both own recipes now)
+    expect(page.locator("#owner-filter button")).to_have_text(["Everyone", "Kadi", "Tõnis"])
+    page.click("#owner-filter button:has-text('Kadi')")
+    expect(page.locator(".recipe-card-title")).to_have_text(["Miso Aubergine with Soba"])
+    page.click("#owner-filter button:has-text('Everyone')")
+    page.select_option("#sort-select", "az")
+    expect(page.locator(".recipe-card-title")).to_have_text(["Beef Shakshuka", "Miso Aubergine with Soba", "Spicy Miso Aubergine"])
+    page.select_option("#sort-select", "rating")
+    expect(page.locator(".recipe-card-title").first).to_have_text("Miso Aubergine with Soba")
+    page.reload()  # choice is remembered on this device
+    expect(page.locator("#sort-select")).to_have_value("rating")
+    page.screenshot(path=SHOTS / "laptop-4-sorted.png")
+    page.select_option("#sort-select", "newest")
 
     # Plan shopping: pick two recipes, make a list sorted by shop section
     page.keyboard.press("p")

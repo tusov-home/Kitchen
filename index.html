@@ -32,6 +32,16 @@
       <button id="plan-toggle" class="text-button" type="button" title="Pick recipes for a shopping list (P)">🛒 Plan shopping</button>
       <span id="plan-hint" class="hint" hidden>Tap the recipes you want to cook</span>
     </div>
+    <div class="view-tools">
+      <div id="owner-filter" class="owner-filter" role="group" aria-label="Show recipes by"></div>
+      <label class="sort-label">Sort
+        <select id="sort-select" title="Sort recipes">
+          <option value="newest">Newest</option>
+          <option value="az">A–Z</option>
+          <option value="rating">Best rated</option>
+        </select>
+      </label>
+    </div>
     <div id="tag-filter" class="tag-filter"></div>
     <ul id="recipe-list" class="recipe-list"></ul>
     <div id="empty-list" class="empty" hidden>
