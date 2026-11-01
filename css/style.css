@@ -82,6 +82,18 @@ body {
   text-decoration: none;
 }
 
+.brand-version {
+  margin-left: 0.15em;
+  color: var(--muted);
+  font-size: 0.6em;
+  font-weight: 600;
+}
+
+/* The settings heading takes focus on open; no outline needed there. */
+.dialog-title:focus {
+  outline: none;
+}
+
 .sync-status {
   display: inline-flex;
   align-items: center;

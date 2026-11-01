@@ -15,7 +15,7 @@
 </head>
 <body>
   <header class="topbar">
-    <a href="#/" class="brand">Kitchen</a>
+    <a href="#/" class="brand">Kitchen<sup id="brand-version" class="brand-version"></sup></a>
     <button id="install-app" class="button small" type="button" title="Install Kitchen as an app" hidden>Install app</button>
     <span id="sync-status" class="sync-status" data-state="off" title="Sync status"></span>
     <a id="open-shopping" class="icon-button cart-button" href="#/shopping" title="Shopping list (L)" aria-label="Shopping list">🛒<span id="cart-count" class="cart-count" hidden></span></a>
@@ -152,7 +152,8 @@
   <!-- Settings, sync and backup -->
   <dialog id="settings" class="dialog">
     <form method="dialog" class="dialog-body" id="settings-form">
-      <h2>Settings</h2>
+      <!-- Focus lands here, not in a text box, so the phone keyboard stays closed -->
+      <h2 tabindex="-1" autofocus class="dialog-title">Settings</h2>
 
       <h3>This phone</h3>
       <label for="my-name">Your name <span class="hint">marks your recipes and ratings — keep it the same, or you'll lose editing rights to your recipes</span></label>

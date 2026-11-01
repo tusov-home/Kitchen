@@ -147,6 +147,8 @@ initShortcuts(
 );
 
 document.getElementById("app-version").textContent = "Version " + APP_VERSION;
+// Just the letter next to the title, e.g. "Kitchen b".
+document.getElementById("brand-version").textContent = APP_VERSION.split(" ").pop();
 
 // "Install app" button appears only when the browser allows installing.
 const installButton = document.getElementById("install-app");

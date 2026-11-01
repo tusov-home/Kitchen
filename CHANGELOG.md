@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-01 b
+- The version letter is shown small next to the title.
+- Opening Settings no longer puts the cursor in a text box, so the phone keyboard stays closed until you tap one.
+
 ## 2026-11-01 a
 - Shopping list: on the recipe list tap **🛒 Plan shopping**, pick recipes, then **Make shopping list**. Ingredients are sorted by shop section (Produce, Meat & fish, Dairy & eggs, Bakery, Pantry, Other, Check you have) and the same ingredient from several recipes is added up.
 - Tick items off while shopping; ✕ removes one; add your own items ("2 lemons", "toilet paper"); **Remove ticked** and **Start over**.

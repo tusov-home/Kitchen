@@ -1,2 +1,2 @@
 // Bump with every delivered change. Format: date + increasing letter.
-export const APP_VERSION = "2026-11-01 a";
+export const APP_VERSION = "2026-11-01 b";
