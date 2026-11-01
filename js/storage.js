@@ -82,5 +82,35 @@ export async function importFromFile(file) {
   if (!Array.isArray(list)) {
     throw new Error("This file has no recipes in it.");
   }
-  return list.map(normaliseRecipe).filter(Boolean);
+  const myName = loadSettings().myName;
+  return list.map((raw) => normaliseRecipe(fillImportGaps(raw, myName))).filter(Boolean);
+}
+
+// A file written by hand or by Claude may leave out technical fields.
+// Fill them in so the recipe still imports: an id made from the title
+// (so importing the same file twice doesn't create doubles), today's
+// time, this phone's name as owner, and the title as the first line.
+export function fillImportGaps(raw, myName) {
+  if (!raw || typeof raw !== "object" || (!raw.title && !raw.text)) {
+    return raw;
+  }
+  const recipe = Object.assign({}, raw);
+  const title = String(recipe.title || "").trim();
+  if (!recipe.id) {
+    const slug = title.toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+    recipe.id = "import-" + (slug || Date.now().toString(36));
+  }
+  if (!recipe.updatedAt) {
+    recipe.updatedAt = Date.now();
+  }
+  if (!recipe.owner && myName) {
+    recipe.owner = myName;
+  }
+  if (title && recipe.text && !String(recipe.text).trim().startsWith("#")) {
+    recipe.text = "# " + title + "\n\n" + recipe.text;
+  }
+  if (!recipe.title && recipe.text) {
+    recipe.title = String(recipe.text).split("\n")[0].replace(/^#+\s*/, "").trim();
+  }
+  return recipe;
 }

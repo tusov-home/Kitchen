@@ -29,6 +29,32 @@ Kitchen can be installed like an app: own icon, full screen, opens without inter
 
 Updates arrive automatically: when online, the app always loads the newest version.
 
+## Bring recipes over from Claude chats
+
+In Claude, make sure **Settings → "Search and reference chats"** is on, start a new chat and paste:
+
+```
+Search all my past chats for recipes I worked out or adjusted. Search several times with different words (recipe, ingredients, dinner, bake, soup, salad, dessert …) until you find no new ones.
+
+For each recipe, use the FINAL version from that chat (with all my changes), not the first draft. If a dish appears in several chats, take the newest version only.
+
+Then make one downloadable file called kitchen-recipes.json with exactly this shape:
+
+{"recipes": [
+  {
+    "title": "Dish name",
+    "text": "Serves 2\n\n## Ingredients\n- 200 g ...\n- 1 onion\n\n## Method\n1. ...\n2. ...",
+    "tags": ["veggie", "quick"],
+    "servings": 2,
+    "notes": "Adjusted with Claude, chat from <month year>"
+  }
+]}
+
+Rules: amounts in grams/ml, tbsp/tsp for small amounts; one ingredient per "- " line, starting with the amount; method as numbered steps; tags in lowercase. Before making the file, show me the list of dish names you found so I can remove any I don't want.
+```
+
+Then in Kitchen: **⚙ → Import from file** and pick `kitchen-recipes.json`. The recipes are owned by whoever's phone imports them. Importing the same file again won't create doubles.
+
 ## Keyboard shortcuts
 
 | Key | Action | Where |
