@@ -15,12 +15,19 @@ import { initPwa, onInstallAvailable, install } from "./pwa.js";
 import * as shoppingState from "./shoppingState.js";
 import { initPlan, isPlanning, setPlanning } from "./ui/plan.js";
 import { initShopping, renderShopping, renderCartCount } from "./ui/shopping.js";
+import { initTabs, renderTabs, goToTab, stepTab } from "./ui/tabs.js";
+import { pantry } from "./pantryState.js";
+import { chores } from "./choresState.js";
+import { initPantry, renderPantry, renderPantryBadge, focusPantryAdd } from "./ui/pantry.js";
+import { initChores, renderChores, renderChoresBadge, openChore } from "./ui/chores.js";
 
 const views = {
   list: document.getElementById("view-list"),
   recipe: document.getElementById("view-recipe"),
   edit: document.getElementById("view-edit"),
   shopping: document.getElementById("view-shopping"),
+  pantry: document.getElementById("view-pantry"),
+  chores: document.getElementById("view-chores"),
 };
 const syncStatus = document.getElementById("sync-status");
 
@@ -63,10 +70,17 @@ function route() {
   } else if (current.screen === "shopping") {
     setPlanning(false);
     renderShopping();
+  } else if (current.screen === "pantry") {
+    setPlanning(false);
+    renderPantry();
+  } else if (current.screen === "chores") {
+    setPlanning(false);
+    renderChores();
   } else {
     document.title = "Kitchen";
     renderList();
   }
+  renderTabs(current.screen, views[current.screen]);
   window.scrollTo(0, 0);
 }
 
@@ -90,6 +104,32 @@ shoppingState.onChange(function () {
   }
 });
 
+// Pantry and chores can change on the other phone too.
+pantry.onChange(function () {
+  renderPantryBadge();
+  if (current.screen === "pantry") {
+    renderPantry();
+  } else if (current.screen === "shopping") {
+    renderShopping();
+  }
+});
+chores.onChange(function () {
+  renderChoresBadge();
+  if (current.screen === "chores") {
+    renderChores();
+  }
+});
+// Back on the app after a while (maybe a new day): chores' due dates
+// and the badge depend on today's date.
+document.addEventListener("visibilitychange", function () {
+  if (document.visibilityState === "visible") {
+    renderChoresBadge();
+    if (current.screen === "chores") {
+      renderChores();
+    }
+  }
+});
+
 sync.onStatus(function (status) {
   syncStatus.dataset.state = status.state;
   syncStatus.title = status.message;
@@ -108,7 +148,12 @@ initEditor();
 initSettings();
 initPlan(renderList);
 initShopping();
+initPantry();
+initChores();
+initTabs(() => current.screen);
 renderCartCount();
+renderPantryBadge();
+renderChoresBadge();
 
 initShortcuts(
   {
@@ -139,7 +184,11 @@ initShortcuts(
         goBack("#/");
       }
     },
-    openShopping: () => go("#/shopping"),
+    openShopping: () => goToTab("shopping"),
+    previousTab: () => stepTab(-1),
+    nextTab: () => stepTab(1),
+    focusPantryAdd: focusPantryAdd,
+    addChore: () => openChore(null),
     togglePlanning: () => setPlanning(!isPlanning()),
     showHelp: () => document.getElementById("shortcut-help").showModal(),
   },

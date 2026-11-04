@@ -3,7 +3,9 @@
 // the Sheet's "shopping" tab.
 import * as storage from "./storage.js";
 import { newId } from "./lib/recipes.js";
-import { addRecipeItems, manualItem, mergeLists, currentList, normaliseList } from "./lib/shopping.js";
+import { addRecipeItems, manualItem, mergeLists, currentList, normaliseList, nameKey } from "./lib/shopping.js";
+import { findInPantry } from "./lib/pantry.js";
+import { pantry, setStatus } from "./pantryState.js";
 
 // All lists, including deleted ones (needed for sync).
 let lists = storage.loadShopping().map(normaliseList).filter(Boolean);
@@ -55,6 +57,15 @@ export function addRecipes(recipes, mode) {
     items = addRecipeItems(items, recipe, 1, now);
     listRecipes[recipe.id] = { title: recipe.title, servings: recipe.servings || null, at: now };
   }
+  // What the pantry says you have goes to "Check you have" instead of
+  // being bought again. (Not removed: the pantry doesn't know amounts.)
+  const stock = pantry.getAll();
+  items = Object.assign({}, items);
+  for (const [key, item] of Object.entries(items)) {
+    if (item.at === now && !item.removed && !item.checked && findInPantry(stock, item.name)) {
+      items[key] = Object.assign({}, item, { section: "Check you have", inPantry: true });
+    }
+  }
   return update(list, { items: items, recipes: listRecipes });
 }
 
@@ -67,6 +78,19 @@ export function toggleItem(key) {
   const items = Object.assign({}, list.items);
   items[key] = Object.assign({}, item, { checked: !item.checked, at: Date.now() });
   update(list, { items: items });
+  // Bought it: if the pantry had it as Low or Out, it's back to Have.
+  if (!item.checked) {
+    restockPantry(item);
+  }
+}
+
+function restockPantry(item) {
+  for (const stock of pantry.getAll()) {
+    const same = stock.id === item.pantryId || nameKey(stock.title) === nameKey(item.name);
+    if (same && stock.status !== "have") {
+      setStatus(stock.id, "have");
+    }
+  }
 }
 
 // Removed items stay as small markers, so the removal syncs too.
@@ -99,9 +123,11 @@ export function removeTicked() {
 }
 
 // Adds something you typed, e.g. "toilet paper" or "2 lemons".
-export function addOwnItem(text) {
+// extra: more fields for the item, e.g. { pantryId } from the pantry.
+// Returns true if it was added (false if it's already on the list).
+export function addOwnItem(text, extra) {
   if (!text.trim()) {
-    return;
+    return false;
   }
   const now = Date.now();
   let list = getCurrent();
@@ -113,10 +139,11 @@ export function addOwnItem(text) {
   const items = Object.assign({}, list.items);
   // Same thing already on the list (and not ticked): keep one line.
   if (items[own.key] && !items[own.key].removed && !items[own.key].checked) {
-    return;
+    return false;
   }
-  items[own.key] = own.item;
+  items[own.key] = Object.assign(own.item, extra || {});
   update(list, { items: items });
+  return true;
 }
 
 export function deleteCurrent() {

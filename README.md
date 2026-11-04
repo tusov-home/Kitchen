@@ -1,6 +1,6 @@
 # Kitchen
 
-Our household recipe book. When a recipe worked out with Claude is just how we want it, we paste it here, so we can find it again and cook it exactly the same way.
+Our household kitchen app: recipe book, shopping list, pantry and chores. When a recipe worked out with Claude is just how we want it, we paste it here, so we can find it again and cook it exactly the same way.
 
 **Open it:** https://tusov-home.github.io/Kitchen/
 
@@ -17,6 +17,9 @@ Kitchen lives in the `tusov-home` organization so it has its own web address. Pa
 - **Cook it:** open the recipe. **✓ Cooked today** adds the date to the notes; **Edit** lets you change anything and add notes ("less chilli next time").
 - **Servings:** use **− / +** on a recipe to cook for more or fewer people. Ingredient amounts change (highlighted); the method stays as written. The base number comes from "Serves 2" in the text, or set it in **Edit → Servings**. Without it, the stepper multiplies (×½, ×1½, ×2 …).
 - **Owners:** whoever adds a recipe owns it, and only they can edit or delete it. The other person can view and rate it, or tap **Make my copy** to adjust it as their own recipe; the copy links back to the original. This is a household convenience, not real security: it trusts the name each phone is set to, so keep your name the same.
+- **Pages:** the tab bar at the bottom switches between **Recipes**, **Shopping**, **Pantry** and **Chores**. Swipe left or right to move between them (start the swipe a little away from the screen edge, which Android uses for Back). The small numbers show what needs attention.
+- **Pantry:** what you have at home. Tap **Have** to mark something **Low**, again for **Out**. **Add to shopping list** puts everything low or out on the list, and ticking it off while shopping marks it as **Have** again. Shopping lists made from recipes put things you have under **Check you have** (the pantry doesn't know amounts, so they're not removed). Tap a name to rename it, move it to another section or delete it.
+- **Chores:** **+ Add chore**, choose who (or Anyone), how often it repeats, and when it's next due. Tick it off when done: a repeating chore comes back on its next date (done a day late, it stays on its usual day), with **Undo** if you tapped by mistake. One-off chores go to **Done**; **Clear done** tidies up. Tap a chore to edit it or see who did it last.
 - **Owner and sorting:** above the tags, tap a name to see only that person's recipes (Everyone shows all). **Sort** orders the list by Newest, A–Z or Best rated. Each phone remembers its choice.
 - **Shopping list:** on the recipe list tap **🛒 Plan shopping**, tap the recipes you'll cook, then **Make shopping list**. Items are sorted by shop section and the same ingredient is added up (two recipes with 200 g feta → 400 g feta; "7+ tbsp olive oil" means some recipes didn't say how much). Things you probably have (salt, oil, spices) go under **Check you have**. Tick items off as you shop, ✕ to remove one, or add your own. With sync, you both see the same list and ticks. 🛒 in the top bar opens it.
 - **Rate it:** tap 1–5 stars after eating. Each of you rates on your own phone (the app asks your name once; change it in ⚙). Tap the same star again to clear. The list shows the average.
@@ -69,6 +72,8 @@ Then in Kitchen: **⚙ → Import from file** and pick `kitchen-recipes.json`. T
 | `Ctrl+S` | Save | edit form |
 | `Esc` | Back / cancel | recipe, edit form |
 | `P` | Plan shopping (pick recipes) | list |
+| `←` / `→` | Previous / next page | Recipes, Shopping, Pantry, Chores |
+| `N` | Add an item / a chore | Pantry / Chores |
 | `L` | Open shopping list | list, recipe |
 | `?` | Show all shortcuts | everywhere |
 
@@ -110,6 +115,9 @@ css/style.css         the look (colour tokens, light + dark)
 js/main.js            starts the app, wires modules together, shows the right screen
 js/version.js         APP_VERSION, bumped with every change
 js/state.js           the recipes in memory; the only place that changes them
+js/collection.js      a small reusable store (used by pantry and chores)
+js/pantryState.js     the pantry
+js/choresState.js     the chores
 js/shoppingState.js   the shopping list; the only place that changes it
 js/storage.js         saving on the device, settings, export/import files
 js/sync.js            talks to the Google Sheet
@@ -118,6 +126,8 @@ js/lib/markdown.js    turns Claude's Markdown into safe HTML, scales the ingredi
 js/lib/scale.js       pure helpers: find servings, scale and format amounts
 js/lib/sections.js    finds the ingredients part of a recipe (shared rules)
 js/lib/shopping.js    pure helpers: read ingredients, shop sections, add up, merge lists
+js/lib/pantry.js      pure helpers: pantry sections, statuses, matching ingredients
+js/lib/chores.js      pure helpers: due dates, repeating, grouping
 js/ui/router.js       which screen belongs to which address (#/r/…)
 js/ui/list.js         recipe list, search, tag filter
 js/ui/recipe.js       one recipe, servings stepper
@@ -125,6 +135,9 @@ js/ui/rating.js       star ratings
 js/ui/name.js         whose phone this is (asked once)
 js/ui/plan.js         Plan shopping mode on the recipe list
 js/ui/shopping.js     the shopping list screen
+js/ui/tabs.js         bottom tab bar and swiping between pages
+js/ui/pantry.js       the pantry screen
+js/ui/chores.js       the chores screen
 js/ui/editor.js       add/edit form
 js/ui/settings.js     settings dialog: sync, backup, privacy
 js/ui/shortcuts.js    all keyboard shortcuts in one table

@@ -41,10 +41,11 @@ function itemRow(key, item) {
   name.className = "shop-name";
   name.textContent = itemLabel(item);
   text.appendChild(name);
-  if (item.sources.length) {
+  const notes = (item.inPantry ? ["In your pantry"] : []).concat(item.sources);
+  if (notes.length) {
     const from = document.createElement("span");
     from.className = "shop-from";
-    from.textContent = item.sources.join(" · ");
+    from.textContent = notes.join(" · ");
     text.appendChild(from);
   }
   label.append(box, text);

@@ -396,7 +396,7 @@ def test_shopping_shared(p, sheet):
     watch_errors(page, errors)
     page.goto(BASE)
     expect(page.locator("#sync-status")).to_have_attribute("data-state", "ok")
-    page.click("#open-shopping")
+    page.click(".tab[data-tab=shopping]")
     expect(page.locator(".shop-item.checked .shop-name")).to_have_text(["300 g beef mince"])
     page.click(".shop-item:has-text('toilet paper') .shop-check")
     expect(page.locator("#shop-progress-text")).to_contain_text("2 of")
@@ -412,6 +412,191 @@ def test_shopping_shared(p, sheet):
     print("shopping shared: ok")
 
 
+def swipe(page, from_x, to_x, y=400):
+    """A quick sideways finger swipe (touch events, like on a phone)."""
+    page.evaluate(
+        """([fromX, toX, y]) => {
+            const target = document.elementFromPoint(fromX, y) || document.body;
+            const touch = (x) => new Touch({ identifier: 1, target: target, clientX: x, clientY: y });
+            target.dispatchEvent(new TouchEvent("touchstart", { touches: [touch(fromX)], changedTouches: [touch(fromX)], bubbles: true }));
+            target.dispatchEvent(new TouchEvent("touchend", { touches: [], changedTouches: [touch(toX)], bubbles: true }));
+        }""",
+        [from_x, to_x, y],
+    )
+
+
+def test_pantry_chores_tabs(p, sheet):
+    """Kadi's phone: tabs and swiping, pantry linked to shopping, chores."""
+    errors = []
+    ctx = p.chromium.launch().new_context(**p.devices["Pixel 7"])
+    ctx.route(SHEET_URL, sheet.handle)
+    ctx.add_init_script(
+        f"if (!localStorage.getItem('kitchen.settings.v1')) localStorage.setItem('kitchen.settings.v1', JSON.stringify({{syncUrl: '{SHEET_URL}', myName: 'Kadi'}}))"
+    )
+    page = ctx.new_page()
+    watch_errors(page, errors)
+    page.goto(BASE)
+    expect(page.locator("#sync-status")).to_have_attribute("data-state", "ok")
+    expect(page.locator(".tab.active")).to_have_attribute("data-tab", "list")
+
+    # Swipe left twice: Recipes → Shopping → Pantry; right goes back
+    swipe(page, 330, 120)
+    expect(page.locator("#view-shopping")).to_be_visible()
+    swipe(page, 330, 120)
+    expect(page.locator("#view-pantry")).to_be_visible()
+    expect(page.locator(".tab.active")).to_have_attribute("data-tab", "pantry")
+    swipe(page, 120, 330)
+    expect(page.locator("#view-shopping")).to_be_visible()
+    # From the screen edge (Android's Back gesture area): nothing happens
+    swipe(page, 8, 300)
+    expect(page.locator("#view-shopping")).to_be_visible()
+    # A mostly vertical move is a scroll, not a swipe
+    page.evaluate("""() => {
+        const t = (x, y) => new Touch({ identifier: 1, target: document.body, clientX: x, clientY: y });
+        document.body.dispatchEvent(new TouchEvent("touchstart", { touches: [t(300, 600)], changedTouches: [t(300, 600)], bubbles: true }));
+        document.body.dispatchEvent(new TouchEvent("touchend", { touches: [], changedTouches: [t(200, 300)], bubbles: true }));
+    }""")
+    expect(page.locator("#view-shopping")).to_be_visible()
+    # Phone Back from a tab returns to Recipes
+    page.go_back()
+    expect(page.locator("#view-list")).to_be_visible()
+
+    # ---------- Pantry ----------
+    page.click(".tab[data-tab=pantry]")
+    expect(page.locator("#pantry-empty")).to_be_visible()
+    page.click("#pantry-staples")
+    expect(page.locator(".pantry-item")).to_have_count(29)
+    rice = page.locator(".pantry-item", has_text="Rice")
+    rice.locator(".status-pill").click()
+    expect(rice.locator(".status-pill")).to_have_text("Low")
+    rice.locator(".status-pill").click()
+    expect(rice.locator(".status-pill")).to_have_text("Out")
+    expect(page.locator("#pantry-count")).to_have_text("1")
+    page.click("#pantry-filter button[data-filter=low]")
+    expect(page.locator(".pantry-name")).to_have_text(["Rice"])
+    page.click("#pantry-filter button[data-filter=all]")
+    # Own item: section guessed
+    page.fill("#pantry-add-input", "Oat milk")
+    page.keyboard.press("Enter")
+    expect(page.locator(".shop-section", has_text="Fridge").locator(".pantry-name", has_text="Oat milk")).to_be_visible()
+    # Rename / move / delete through the dialog (keyboard stays closed)
+    page.click(".pantry-name:has-text('Oat milk')")
+    expect(page.locator("#pantry-dialog")).to_be_visible()
+    assert page.evaluate("document.activeElement.tagName") == "H2"
+    page.once("dialog", lambda d: d.accept())
+    page.click("#pantry-delete")
+    expect(page.locator(".pantry-name:has-text('Oat milk')")).to_have_count(0)
+    page.screenshot(path=SHOTS / "phone-7-pantry.png", full_page=True)
+
+    # Low/out → shopping list; buying it restocks the pantry
+    expect(page.locator("#pantry-restock")).to_contain_text("1 item is low or out")
+    page.click("#pantry-to-shopping")
+    expect(page.locator("#pantry-restock")).to_be_hidden()
+    page.click(".tab[data-tab=shopping]")
+    page.click(".shop-item:has-text('Rice') .shop-check")
+    page.click(".tab[data-tab=pantry]")
+    expect(page.locator(".pantry-item", has_text="Rice").locator(".status-pill")).to_have_text("Have")
+    expect(page.locator("#pantry-count")).to_be_hidden()
+
+    # A recipe shopping list moves what you have to "Check you have"
+    page.fill("#pantry-add-input", "White miso")
+    page.keyboard.press("Enter")
+    page.click(".tab[data-tab=list]")
+    page.click("#plan-toggle")
+    page.click(".recipe-card:has-text('Miso Aubergine with Soba')")
+    page.click("#plan-make")
+    page.click("#make-list-dialog button[value=new]")
+    miso = page.locator(".shop-item", has_text="white miso")
+    expect(miso).to_contain_text("In your pantry")
+    expect(page.locator(".shop-section", has_text="Check you have")).to_contain_text("white miso")
+    expect(page.locator(".shop-section", has_text="Produce")).to_contain_text("aubergines")
+
+    # ---------- Chores ----------
+    page.click(".tab[data-tab=chores]")
+    expect(page.locator("#chores-empty")).to_be_visible()
+    page.click("#chore-add")
+    expect(page.locator("#chore-dialog")).to_be_visible()
+    assert page.evaluate("document.activeElement.tagName") == "H2", "keyboard must stay closed"
+    page.fill("#chore-title", "Vacuum")
+    expect(page.locator("#chore-repeat")).to_have_value("1-week")
+    page.click("#chore-form button[value=save]")
+    expect(page.locator(".chore-group.group-today")).to_contain_text("Vacuum")
+    expect(page.locator("#chores-count")).to_have_text("1")
+
+    # One-off with no date, for Kadi
+    page.click("#chore-add")
+    page.fill("#chore-title", "Fix shelf")
+    page.select_option("#chore-repeat", "once")
+    page.fill("#chore-due", "")
+    page.select_option("#chore-who", "Kadi")
+    page.click("#chore-form button[value=save]")
+    expect(page.locator(".chore-group.group-any-time")).to_contain_text("Fix shelf")
+
+    # Custom repeat
+    page.click("#chore-add")
+    page.fill("#chore-title", "Water plants")
+    page.select_option("#chore-repeat", "custom")
+    expect(page.locator("#chore-custom")).to_be_visible()
+    page.fill("#chore-every", "3")
+    page.select_option("#chore-unit", "day")
+    page.click("#chore-form button[value=save]")
+    expect(page.locator(".chore", has_text="Water plants")).to_contain_text("every 3 days")
+
+    # Tick a repeating chore: it moves on a week; Undo brings it back
+    page.click(".chore:has-text('Vacuum') .chore-check")
+    expect(page.locator("#toast")).to_contain_text("Done! Next:")
+    expect(page.locator(".chore-group.group-later")).to_contain_text("Vacuum")
+    page.click(".toast-action")
+    expect(page.locator(".chore-group.group-today")).to_contain_text("Vacuum")
+    page.click(".chore:has-text('Vacuum') .chore-check")
+    expect(page.locator(".chore-group.group-later")).to_contain_text("Vacuum")
+
+    # Tick the one-off: Done; Clear done removes it
+    page.click(".chore:has-text('Fix shelf') .chore-check")
+    expect(page.locator(".chore-group.group-done")).to_contain_text("Fix shelf")
+    page.screenshot(path=SHOTS / "phone-8-chores.png", full_page=True)
+    page.click("#chores-clear-done")
+    expect(page.locator(".chore", has_text="Fix shelf")).to_have_count(0)
+
+    # Edit shows when it was last done
+    page.click(".chore:has-text('Vacuum') .chore-text")
+    expect(page.locator("#chore-last")).to_have_text("Last done today by Kadi")
+    page.click("#chore-form button[value=cancel]")
+
+    # Narrow phones: nothing sticks out sideways
+    for width in (340, 360):
+        page.set_viewport_size({"width": width, "height": 800})
+        for tab in ("list", "shopping", "pantry", "chores"):
+            page.click(f".tab[data-tab={tab}]")
+            assert not page.evaluate("document.documentElement.scrollWidth > window.innerWidth"), (tab, width)
+
+    page.wait_for_timeout(2500)  # sync
+    chores_in_sheet = sorted(c["title"] for c in sheet.stores["chores"].values() if not c.get("deleted"))
+    assert chores_in_sheet == ["Vacuum", "Water plants"], chores_in_sheet
+    assert len([i for i in sheet.stores["pantry"].values() if not i.get("deleted")]) == 30
+
+    # The laptop sees the same chores and pantry
+    laptop = p.chromium.launch().new_context(viewport={"width": 1366, "height": 768})
+    laptop.route(SHEET_URL, sheet.handle)
+    laptop.add_init_script(
+        f"if (!localStorage.getItem('kitchen.settings.v1')) localStorage.setItem('kitchen.settings.v1', JSON.stringify({{syncUrl: '{SHEET_URL}', myName: 'Tõnis'}}))"
+    )
+    other = laptop.new_page()
+    watch_errors(other, errors)
+    other.goto(BASE + "#/chores")
+    expect(other.locator(".chore")).to_have_count(2)
+    # Keyboard: → to Pantry... ← back to Shopping
+    other.keyboard.press("ArrowLeft")
+    expect(other.locator("#view-pantry")).to_be_visible()
+    expect(other.locator(".pantry-item")).to_have_count(30)
+    other.keyboard.press("n")
+    assert other.evaluate("document.activeElement.id") == "pantry-add-input"
+    other.screenshot(path=SHOTS / "laptop-5-pantry.png")
+
+    assert not errors, errors
+    print("pantry, chores, tabs: ok")
+
+
 def main():
     server = subprocess.Popen(
         [sys.executable, "-m", "http.server", str(PORT)],
@@ -425,6 +610,7 @@ def main():
             test_phone(p, sheet)
             test_laptop_second_device(p, sheet)
             test_shopping_shared(p, sheet)
+            test_pantry_chores_tabs(p, sheet)
             test_installable_and_offline(p)
         print(f"all browser tests passed ({sheet.calls} sync calls)")
     finally:

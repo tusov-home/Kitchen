@@ -18,7 +18,6 @@
     <a href="#/" class="brand">Kitchen<sup id="brand-version" class="brand-version"></sup></a>
     <button id="install-app" class="button small" type="button" title="Install Kitchen as an app" hidden>Install app</button>
     <span id="sync-status" class="sync-status" data-state="off" title="Sync status"></span>
-    <a id="open-shopping" class="icon-button cart-button" href="#/shopping" title="Shopping list (L)" aria-label="Shopping list">🛒<span id="cart-count" class="cart-count" hidden></span></a>
     <button id="open-settings" class="icon-button" type="button" title="Settings and sync" aria-label="Settings and sync">⚙</button>
   </header>
 
@@ -61,9 +60,6 @@
 
   <!-- Shopping list -->
   <main id="view-shopping" class="view" hidden>
-    <div class="actions">
-      <a href="#/" class="button" title="Back (Esc)">← Recipes</a>
-    </div>
     <h1 class="page-title">Shopping list</h1>
     <p id="shop-recipes" class="shop-recipes"></p>
 
@@ -88,6 +84,54 @@
       <button id="shop-remove-ticked" class="button" type="button">Remove ticked</button>
       <span class="spacer"></span>
       <button id="shop-delete" class="button danger" type="button">Start over</button>
+    </div>
+  </main>
+
+  <!-- Pantry: what we have at home -->
+  <main id="view-pantry" class="view" hidden>
+    <h1 class="page-title">Pantry</h1>
+    <p class="hint page-hint">What you have at home. Tap <strong>Have</strong> to mark something Low or Out.</p>
+
+    <div id="pantry-restock" class="restock" hidden>
+      <span id="pantry-restock-text"></span>
+      <button id="pantry-to-shopping" class="primary" type="button">Add to shopping list</button>
+    </div>
+
+    <form id="pantry-add" class="shop-add">
+      <input id="pantry-add-input" type="text" placeholder="Add something, e.g. rice" aria-label="Add to pantry" autocomplete="off">
+      <button class="button" type="submit">Add</button>
+    </form>
+
+    <div id="pantry-filter" class="owner-filter" role="group" aria-label="Show">
+      <button type="button" class="tag selected" data-filter="all" aria-pressed="true">Everything</button>
+      <button type="button" class="tag" data-filter="low" aria-pressed="false">Low &amp; out</button>
+    </div>
+
+    <div id="pantry-sections"></div>
+
+    <div id="pantry-empty" class="empty" hidden>
+      <p class="empty-title">Pantry is empty</p>
+      <p>Add what you keep at home, or start with a list of common staples and remove what you don't have.</p>
+      <button id="pantry-staples" class="primary" type="button">Start with common staples</button>
+    </div>
+    <p id="pantry-none-low" class="empty" hidden>Nothing is low or out.</p>
+  </main>
+
+  <!-- Household chores -->
+  <main id="view-chores" class="view" hidden>
+    <div class="page-head">
+      <h1 class="page-title">Chores</h1>
+      <button id="chore-add" class="primary" type="button" title="Add chore (N)">+ Add chore</button>
+    </div>
+    <div id="chores-filter" class="owner-filter" role="group" aria-label="Show chores for"></div>
+    <div id="chores-groups"></div>
+    <div id="chores-empty" class="empty" hidden>
+      <p class="empty-title">No chores yet</p>
+      <p>Add repeating chores like <em>Vacuum, every week</em> or <em>Bins, every 2 weeks</em>. When you tick one off, it comes back on its next date.</p>
+    </div>
+    <div id="chores-footer" class="actions" hidden>
+      <span class="spacer"></span>
+      <button id="chores-clear-done" class="button" type="button">Clear done</button>
     </div>
   </main>
 
@@ -235,6 +279,70 @@
         <span class="spacer"></span>
         <button class="button" type="button" id="name-cancel">Cancel</button>
         <button class="primary" type="submit">Save</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Bottom tab bar. Swipe left/right to move between pages. -->
+  <nav id="tabbar" class="tabbar" aria-label="Pages">
+    <a href="#/" class="tab" data-tab="list" title="Recipes (←/→ to switch pages)"><span class="tab-icon" aria-hidden="true">🍲</span><span class="tab-label">Recipes</span></a>
+    <a href="#/shopping" class="tab" data-tab="shopping" title="Shopping list (L)"><span class="tab-icon" aria-hidden="true">🛒</span><span class="tab-label">Shopping</span><span id="cart-count" class="tab-badge" hidden></span></a>
+    <a href="#/pantry" class="tab" data-tab="pantry" title="Pantry"><span class="tab-icon" aria-hidden="true">🫙</span><span class="tab-label">Pantry</span><span id="pantry-count" class="tab-badge" hidden></span></a>
+    <a href="#/chores" class="tab" data-tab="chores" title="Chores"><span class="tab-icon" aria-hidden="true">🧹</span><span class="tab-label">Chores</span><span id="chores-count" class="tab-badge" hidden></span></a>
+  </nav>
+
+  <!-- Edit one pantry item -->
+  <dialog id="pantry-dialog" class="dialog">
+    <form method="dialog" class="dialog-body" id="pantry-form">
+      <h2 tabindex="-1" autofocus class="dialog-title">Pantry item</h2>
+      <label for="pantry-title">Name</label>
+      <input id="pantry-title" type="text" required autocomplete="off">
+      <label for="pantry-section">Kept in</label>
+      <select id="pantry-section"></select>
+      <div class="actions">
+        <button id="pantry-delete" class="button danger" type="button">Delete</button>
+        <span class="spacer"></span>
+        <button class="button" value="cancel" formnovalidate>Cancel</button>
+        <button class="primary" value="save">Save</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Add or edit a chore -->
+  <dialog id="chore-dialog" class="dialog">
+    <form method="dialog" class="dialog-body" id="chore-form">
+      <h2 id="chore-dialog-title" tabindex="-1" autofocus class="dialog-title">Add chore</h2>
+      <label for="chore-title">What</label>
+      <input id="chore-title" type="text" required autocomplete="off" placeholder="e.g. Vacuum the flat">
+      <label for="chore-who">Who</label>
+      <select id="chore-who"></select>
+      <label for="chore-repeat">Repeat</label>
+      <select id="chore-repeat">
+        <option value="once">Once</option>
+        <option value="1-day">Every day</option>
+        <option value="1-week">Every week</option>
+        <option value="2-week">Every 2 weeks</option>
+        <option value="1-month">Every month</option>
+        <option value="3-month">Every 3 months</option>
+        <option value="custom">Other…</option>
+      </select>
+      <div id="chore-custom" class="custom-repeat" hidden>
+        <span>Every</span>
+        <input id="chore-every" class="short-input" type="number" min="1" max="365" value="10" inputmode="numeric" aria-label="Every how many">
+        <select id="chore-unit" aria-label="Unit">
+          <option value="day">days</option>
+          <option value="week">weeks</option>
+          <option value="month">months</option>
+        </select>
+      </div>
+      <label for="chore-due">Due <span id="chore-due-hint" class="hint"></span></label>
+      <input id="chore-due" type="date">
+      <p id="chore-last" class="hint" hidden></p>
+      <div class="actions">
+        <button id="chore-delete" class="button danger" type="button" hidden>Delete</button>
+        <span class="spacer"></span>
+        <button class="button" value="cancel" formnovalidate>Cancel</button>
+        <button class="primary" value="save">Save</button>
       </div>
     </form>
   </dialog>

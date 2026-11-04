@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-11-04 a
+- **Tab bar** at the bottom: Recipes · Shopping · Pantry · Chores. Swipe left/right to move between them (not from the very edge of the screen, which Android keeps for Back), or press ← / → on the laptop. Badges show items to buy, pantry items low or out, and chores due today or late.
+- **Pantry**: what you have at home, by Fridge, Freezer, Fruit & veg, Cupboard, Spices & oils, Other. Tap the status to switch Have → Low → Out. "Add to shopping list" puts everything low or out on the list; ticking it off while shopping sets it back to Have. Recipe shopping lists move things you have to "Check you have". "Start with common staples" fills an empty pantry.
+- **Chores**: repeating (every day / week / 2 weeks / month / 3 months / custom) and one-off chores, for one of you or anyone. Grouped as Late, Today, This week, Later, Any time, Done. Ticking a repeating chore moves it to its next date (keeping its rhythm if done a little late), with Undo.
+- Pantry and chores sync through two new Sheet tabs. No `Code.gs` change needed if you have the version from 2026-10-31 h.
+- The 🛒 moved from the top bar into the tab bar.
+
 ## 2026-11-01 d
 - Show recipes by owner (Everyone / each name), once two people own recipes.
 - Sort the list by Newest, A–Z or Best rated (average of everyone's stars; unrated at the end).

@@ -4,6 +4,8 @@
 // the background whenever there is a connection.
 import * as state from "./state.js";
 import * as shopping from "./shoppingState.js";
+import { pantry } from "./pantryState.js";
+import { chores } from "./choresState.js";
 import * as storage from "./storage.js";
 import { normaliseRecipe } from "./lib/recipes.js";
 
@@ -52,15 +54,22 @@ async function syncRecipes(url) {
   state.mergeIn(data.recipes.map(normaliseRecipe).filter(Boolean), true);
 }
 
-// Same for the shopping list, in the Sheet's "shopping" tab.
-// Returns false if the Sheet's script is too old to know about it.
-async function syncShopping(url) {
-  const data = await post(url, { action: "sync", collection: "shopping", items: shopping.getAllForSync() });
+// Everything else has its own tab in the Sheet. Each needs
+// getAllForSync(), mergeIn(items, fromSync) and onChange(listener).
+const COLLECTIONS = [
+  { name: "shopping", store: shopping },
+  { name: "pantry", store: pantry },
+  { name: "chores", store: chores },
+];
+
+// Returns false if the Sheet's script is too old to know about collections.
+async function syncCollection(url, collection) {
+  const data = await post(url, { action: "sync", collection: collection.name, items: collection.store.getAllForSync() });
   // The old script ignores "collection" and answers without "items".
   if (!Array.isArray(data.items)) {
     return false;
   }
-  shopping.mergeIn(data.items, true);
+  collection.store.mergeIn(data.items, true);
   return true;
 }
 
@@ -84,14 +93,20 @@ export async function syncNow() {
   report("syncing", "Syncing…");
   try {
     await syncRecipes(settings.syncUrl);
-    const shoppingSynced = await syncShopping(settings.syncUrl);
+    let allSynced = true;
+    for (const collection of COLLECTIONS) {
+      allSynced = (await syncCollection(settings.syncUrl, collection)) && allSynced;
+      if (!allSynced) {
+        break; // the old script won't know the others either
+      }
+    }
     const now = Date.now();
     storage.saveSettings(Object.assign(storage.loadSettings(), { lastSync: now }));
     const time = new Date(now).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
-    if (shoppingSynced) {
+    if (allSynced) {
       report("ok", "Synced " + time);
     } else {
-      report("error", "Recipes synced " + time + ", but the shopping list needs the new Code.gs (see README)");
+      report("error", "Recipes synced " + time + ", but shopping, pantry and chores need the new Code.gs (see README)");
     }
   } catch (error) {
     console.warn("Sync failed", error);
@@ -117,11 +132,13 @@ export function startAutoSync() {
       syncSoon();
     }
   });
-  shopping.onChange(function (change) {
-    if (!change.fromSync) {
-      syncSoon();
-    }
-  });
+  for (const collection of COLLECTIONS) {
+    collection.store.onChange(function (change) {
+      if (!change.fromSync) {
+        syncSoon();
+      }
+    });
+  }
   window.addEventListener("online", syncNow);
   document.addEventListener("visibilitychange", function () {
     if (document.visibilityState === "visible") {
