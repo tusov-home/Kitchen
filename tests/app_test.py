@@ -412,16 +412,25 @@ def test_shopping_shared(p, sheet):
     print("shopping shared: ok")
 
 
-def swipe(page, from_x, to_x, y=400):
-    """A quick sideways finger swipe (touch events, like on a phone)."""
+def swipe(page, from_x, to_x, y=400, steps=6, step_ms=16, lift=True):
+    """A finger swipe: touchstart, a few touchmoves, then touchend
+    (like on a phone). lift=False keeps the finger down."""
     page.evaluate(
-        """([fromX, toX, y]) => {
+        """async ([fromX, toX, y, steps, stepMs, lift]) => {
             const target = document.elementFromPoint(fromX, y) || document.body;
             const touch = (x) => new Touch({ identifier: 1, target: target, clientX: x, clientY: y });
+            const wait = (ms) => new Promise((r) => setTimeout(r, ms));
             target.dispatchEvent(new TouchEvent("touchstart", { touches: [touch(fromX)], changedTouches: [touch(fromX)], bubbles: true }));
-            target.dispatchEvent(new TouchEvent("touchend", { touches: [], changedTouches: [touch(toX)], bubbles: true }));
+            for (let i = 1; i <= steps; i++) {
+                await wait(stepMs);
+                const x = fromX + ((toX - fromX) * i) / steps;
+                target.dispatchEvent(new TouchEvent("touchmove", { touches: [touch(x)], changedTouches: [touch(x)], bubbles: true }));
+            }
+            if (lift) {
+                target.dispatchEvent(new TouchEvent("touchend", { touches: [], changedTouches: [touch(toX)], bubbles: true }));
+            }
         }""",
-        [from_x, to_x, y],
+        [from_x, to_x, y, steps, step_ms, lift],
     )
 
 
@@ -445,20 +454,51 @@ def test_pantry_chores_tabs(p, sheet):
     swipe(page, 330, 120)
     expect(page.locator("#view-pantry")).to_be_visible()
     expect(page.locator(".tab.active")).to_have_attribute("data-tab", "pantry")
+    # More sensitive: a 60 px swipe is enough
+    swipe(page, 150, 210)
+    expect(page.locator("#view-shopping")).to_be_visible()
+
+    # The page follows the finger while it's down
+    swipe(page, 300, 200, lift=False)
+    moved = page.evaluate("document.getElementById('view-shopping').style.transform")
+    assert moved == "translateX(-100px)", moved
+    page.evaluate("""() => {
+        const t = new Touch({ identifier: 1, target: document.body, clientX: 200, clientY: 400 });
+        document.body.dispatchEvent(new TouchEvent("touchend", { touches: [], changedTouches: [t], bubbles: true }));
+    }""")
+    expect(page.locator("#view-pantry")).to_be_visible()
     swipe(page, 120, 330)
     expect(page.locator("#view-shopping")).to_be_visible()
+
+    # A short, slow drag springs back and stays on the page
+    swipe(page, 200, 235, steps=6, step_ms=60)
+    page.wait_for_timeout(400)
+    expect(page.locator("#view-shopping")).to_be_visible()
+    assert page.evaluate("document.getElementById('view-shopping').style.transform") == ""
+
     # From the screen edge (Android's Back gesture area): nothing happens
     swipe(page, 8, 300)
     expect(page.locator("#view-shopping")).to_be_visible()
     # A mostly vertical move is a scroll, not a swipe
     page.evaluate("""() => {
         const t = (x, y) => new Touch({ identifier: 1, target: document.body, clientX: x, clientY: y });
-        document.body.dispatchEvent(new TouchEvent("touchstart", { touches: [t(300, 600)], changedTouches: [t(300, 600)], bubbles: true }));
-        document.body.dispatchEvent(new TouchEvent("touchend", { touches: [], changedTouches: [t(200, 300)], bubbles: true }));
+        const fire = (type, x, y) => document.body.dispatchEvent(new TouchEvent(type, { touches: type === "touchend" ? [] : [t(x, y)], changedTouches: [t(x, y)], bubbles: true }));
+        fire("touchstart", 300, 600); fire("touchmove", 280, 500); fire("touchmove", 240, 300); fire("touchend", 240, 300);
     }""")
     expect(page.locator("#view-shopping")).to_be_visible()
+
     # Phone Back from a tab returns to Recipes
     page.go_back()
+    expect(page.locator("#view-list")).to_be_visible()
+    # First page: swiping right only stretches a little, then springs back
+    swipe(page, 100, 300, lift=False)
+    stretched = page.evaluate("document.getElementById('view-list').style.transform")
+    assert stretched == "translateX(50px)", stretched
+    page.evaluate("""() => {
+        const t = new Touch({ identifier: 1, target: document.body, clientX: 300, clientY: 400 });
+        document.body.dispatchEvent(new TouchEvent("touchend", { touches: [], changedTouches: [t], bubbles: true }));
+    }""")
+    page.wait_for_timeout(400)
     expect(page.locator("#view-list")).to_be_visible()
 
     # ---------- Pantry ----------

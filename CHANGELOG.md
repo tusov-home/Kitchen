@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-04 b
+- Swiping between pages is more sensitive: about 55 px is enough, or a short quick flick.
+- The page now follows your finger while you swipe. Let go far enough and it slides away while the next page glides in; let go early and it springs back. On the first and last page it only stretches a little. (Turned off if the phone is set to reduce motion.)
+
 ## 2026-11-04 a
 - **Tab bar** at the bottom: Recipes · Shopping · Pantry · Chores. Swipe left/right to move between them (not from the very edge of the screen, which Android keeps for Back), or press ← / → on the laptop. Badges show items to buy, pantry items low or out, and chores due today or late.
 - **Pantry**: what you have at home, by Fridge, Freezer, Fruit & veg, Cupboard, Spices & oils, Other. Tap the status to switch Have → Low → Out. "Add to shopping list" puts everything low or out on the list; ticking it off while shopping sets it back to Have. Recipe shopping lists move things you have to "Check you have". "Start with common staples" fills an empty pantry.

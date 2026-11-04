@@ -987,17 +987,37 @@ body.has-tabbar.planning {
   text-align: center;
 }
 
-/* Page slides in from the side it came from */
+/* The tab pages handle sideways finger moves themselves (to follow the
+   finger); up/down scrolling and zooming stay with the browser. */
+#view-list,
+#view-shopping,
+#view-pantry,
+#view-chores {
+  touch-action: pan-y pinch-zoom;
+}
+
+/* Page slides in from the side it came from, settling with a tiny bounce */
 @keyframes slide-from-right {
-  from { transform: translateX(2.5rem); opacity: 0.4; }
+  from { transform: translateX(40%); opacity: 0; }
   to { transform: none; opacity: 1; }
 }
 @keyframes slide-from-left {
-  from { transform: translateX(-2.5rem); opacity: 0.4; }
+  from { transform: translateX(-40%); opacity: 0; }
   to { transform: none; opacity: 1; }
 }
-.view.slide-from-right { animation: slide-from-right 0.2s ease-out; }
-.view.slide-from-left { animation: slide-from-left 0.2s ease-out; }
+.view.slide-from-right,
+.view.slide-from-left {
+  animation-duration: 0.3s;
+  animation-timing-function: cubic-bezier(0.2, 0.9, 0.3, 1.08);
+}
+.view.slide-from-right { animation-name: slide-from-right; }
+.view.slide-from-left { animation-name: slide-from-left; }
+
+/* No sideways overflow while a page is moving */
+html,
+body {
+  overflow-x: clip;
+}
 
 @media (prefers-reduced-motion: reduce) {
   .view.slide-from-right,
