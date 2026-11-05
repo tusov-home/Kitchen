@@ -73,8 +73,9 @@ explains the app itself (features, files, shortcuts, sync setup).
 - The brushed ensō (`icons/enso-mark.png`, used as a CSS mask) is the one
   signature element. Keep everything else quiet: no all-caps labels,
   generous spacing, soft rectangles rather than pills.
-- Recipes page order: today's suggestion → search → quiet list header;
-  filters fold behind "Filter".
+- Recipes page order: today's suggestion → search → framed "All recipes"
+  row, filling the phone's height while folded. List, Filter, Plan
+  shopping and + fold behind that row.
 - Dialogs must not pop up the phone keyboard on open: give the heading
   `tabindex="-1" autofocus`.
 - Every frequent action gets a keyboard shortcut in `js/ui/shortcuts.js`

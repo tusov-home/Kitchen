@@ -280,7 +280,7 @@ h3,
 .suggestion {
   position: relative;
   overflow: hidden;
-  margin: 0.5rem 0 1.25rem;
+  margin: 0 0 0.75rem;
   padding: 1.5rem 1.4rem 1.25rem;
   border-radius: var(--radius-lg);
   background: var(--surface);
@@ -299,6 +299,47 @@ h3,
   pointer-events: none;
   -webkit-mask: url("../icons/enso-mark.png") center / contain no-repeat;
   mask: url("../icons/enso-mark.png") center / contain no-repeat;
+}
+
+/* While "All recipes" is folded, the page fills the phone from the top bar
+   to the tab bar: the suggestion takes all the height the other two leave.
+   Everything here depends on the folded panel, so it needs no JavaScript. */
+body:has(#view-list:not([hidden]) #all-panel[hidden]) {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+}
+
+#view-list:has(#all-panel[hidden]) {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  width: 100%;
+  padding-bottom: 0;
+}
+
+#view-list:has(#all-panel[hidden]) .suggestion {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+}
+
+#view-list:has(#all-panel[hidden]) .suggestion::after {
+  right: -3.5rem;
+  bottom: -3.5rem;
+  width: 18rem;
+  height: 18rem;
+}
+
+/* Title in the middle of the free space, buttons at the bottom */
+#view-list:has(#all-panel[hidden]) .suggestion-title {
+  margin-top: auto;
+  font-size: 2.3rem;
+}
+
+#view-list:has(#all-panel[hidden]) .suggestion-actions {
+  margin-top: auto;
+  padding-top: 1.25rem;
 }
 
 .suggestion-label {
@@ -386,7 +427,7 @@ h3,
 }
 
 .list-title {
-  margin: 1.25rem 0 0;
+  margin: 0.75rem 0 0;
   font-size: 1.2rem;
 }
 
@@ -401,7 +442,7 @@ h3,
   padding: 0 1rem;
   border: none;
   border-radius: var(--radius);
-  background: transparent;
+  background: var(--surface);
   color: var(--text);
   font: inherit;
   text-align: left;

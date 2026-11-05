@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-05 g
+- **All recipes** now has the same panel look as the search box.
+- While it's folded, the page fills the whole phone: the suggestion grows down to the search and All recipes rows, which sit just above the tab bar.
+
 ## 2026-11-05 f
 - Fixed updates: right after a new version was published, a phone could load the new page with old code and styling, so buttons looked wrong or did nothing. The app now always checks every file for changes when it's online.
 

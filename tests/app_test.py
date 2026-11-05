@@ -344,6 +344,10 @@ def test_laptop_second_device(p, sheet):
     page.click("#all-toggle")
     expect(panel).to_be_hidden()
     page.screenshot(path=SHOTS / "laptop-6-folded.png")
+    # Folded, the three panels fill the height down to the tab bar
+    gap = page.evaluate("document.getElementById('tabbar').getBoundingClientRect().top - document.getElementById('all-toggle').getBoundingClientRect().bottom")
+    assert 0 < gap < 32, gap
+    assert page.evaluate("document.documentElement.scrollHeight <= window.innerHeight")
     # F from the folded page opens the list with its filters
     page.keyboard.press("f")
     expect(panel).to_be_visible()
