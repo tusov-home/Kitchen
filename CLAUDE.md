@@ -38,8 +38,14 @@ explains the app itself (features, files, shortcuts, sync setup).
      360, 412 px) and look at them. No sideways scrolling allowed.
 5. **Update the README** (features, shortcuts, files list) when behaviour
    or files change.
-6. Commit with the attribution lines from the session; push to `main`,
-   then **check the "pages build and deployment" run turned green**.
+6. Tõnis has given standing permission: commit and push to `main` without
+   asking, using the attribution lines from the session. Then **wait for
+   the "pages build and deployment" run to finish and tell him the result**
+   (green, or red with the failed step). Find the run for the commit with:
+   `gh run list -R tusov-home/kitchen --commit "$(git rev-parse HEAD)" --json status,conclusion,databaseId`
+   `gh run list` and `gh run view` work from a session; `gh api .../pages`
+   and fetching the live site from the shell are blocked, so judge by the
+   run. It can take a minute before the run appears.
 
 ## Data and sync (don't break these)
 
