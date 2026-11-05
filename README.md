@@ -110,6 +110,7 @@ Sync status dot: green = synced, amber = offline (will sync later), red = sync p
 ## Files
 
 ```
+CLAUDE.md             working rules for Claude sessions on this repository
 index.html            page structure (all screens and dialogs)
 manifest.webmanifest  app name, icons and colours for installing
 sw.js                 service worker: keeps a copy of the app for offline use
