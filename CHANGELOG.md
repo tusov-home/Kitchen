@@ -1,5 +1,8 @@
 # Changelog
 
+## 2026-11-05 i
+- **Add to shopping list** on the recipe page (shortcut A) adds its ingredients to the current list, for the servings shown. If the recipe is already on the list, it asks first, because the amounts would add up.
+
 ## 2026-11-05 h
 - Two initial buttons in the corner of the suggestion, **T** and **K**, choose whose recipes it picks from. Both on means all recipes, and one always stays on. Each phone starts with its own person and remembers your choice.
 - The dish on screen stays if it still counts; otherwise the next one appears straight away.

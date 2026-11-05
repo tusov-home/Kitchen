@@ -10,6 +10,7 @@ const SHORTCUTS = [
   { keys: "k", action: "suggestK", where: ["list"] },
   { keys: "e", label: "E", action: "editRecipe", where: ["recipe"], text: "Edit recipe (your own)" },
   { keys: "c", label: "C", action: "copyRecipe", where: ["recipe"], text: "Make my copy" },
+  { keys: "a", label: "A", action: "addToList", where: ["recipe"], text: "Add ingredients to the shopping list" },
   { keys: "1", label: "1 … 5", action: "rate1", where: ["recipe"], text: "Rate 1–5 stars (same again clears)" },
   { keys: "2", action: "rate2", where: ["recipe"] },
   { keys: "3", action: "rate3", where: ["recipe"] },

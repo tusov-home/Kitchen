@@ -23,6 +23,7 @@ Kitchen lives in the `tusov-home` organization so it has its own web address. Pa
 - **Projects:** on the Home tab, switch to **Projects** for home improvements with no deadline. **+ Add project**, then add **steps** (tick them off as you go) and **things to buy** (**Add to shopping list** puts them on the shared list; ticking them off there marks them bought). Set the status with 💡 Idea / 🔨 Doing / ✅ Done, and keep measurements or links in **Notes**, which save by themselves. You can both work on the same project at once.
 - **Today's suggestion:** the recipes page opens with one dish to cook today and why it was picked. Below it are the search and a folded **All recipes** row; tap it or press A for the list. It changes daily, favours well-rated dishes you haven't cooked lately (it reads the "Cooked …" dates in the notes) and weekend dishes on weekends. **Another idea** shows the next one. The initials in its corner (**T**, **K**) choose whose recipes it picks from: both on means all recipes, and one always stays on. Each phone starts with its own person and remembers your choice, so the two phones can show different dishes.
 - **Owner, tags and sorting:** unfold **All recipes** and tap **Filter** (or press F). Tap a name to see only that person's recipes, a tag to narrow down, and **Sort** for Newest, A–Z or Best rated. Each phone remembers its sort order.
+- **One recipe to the list:** on a recipe, set the servings and tap **Add to shopping list** (or press A). It joins the current list, and **Open list** takes you there.
 - **Shopping list:** unfold **All recipes**, tap **🛒 Plan shopping**, tap the recipes you'll cook, then **Make shopping list**. Items are sorted by shop section and the same ingredient is added up (two recipes with 200 g feta → 400 g feta; "7+ tbsp olive oil" means some recipes didn't say how much). Things you probably have (salt, oil, spices) go under **Check you have**. Tick items off as you shop, ✕ to remove one, or add your own. With sync, you both see the same list and ticks. 🛒 in the top bar opens it.
 - **Rate it:** tap 1–5 stars after eating. Each of you rates on your own phone (the app asks your name once; change it in ⚙). Tap the same star again to clear. The list shows the average.
 ## Install as an app
@@ -70,6 +71,7 @@ Then in Kitchen: **⚙ → Import from file** and pick `kitchen-recipes.json`. T
 | `A` | Show / hide all recipes | list |
 | `F` | Show / hide filters | list |
 | `T` / `K` | Suggestions: whose recipes | list |
+| `A` | Add ingredients to the shopping list | recipe |
 | `E` | Edit recipe (your own) | recipe |
 | `C` | Make my copy | recipe |
 | `1` … `5` | Rate (same again clears) | recipe |

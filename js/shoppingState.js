@@ -41,7 +41,8 @@ function update(list, changes) {
 
 // recipes: [{ id, title, text, servings }]. mode "new" starts a fresh
 // list (the old one is deleted); "add" adds to the current list.
-export function addRecipes(recipes, mode) {
+// factor scales the amounts (2 = double); it's 1 if left out.
+export function addRecipes(recipes, mode, factor) {
   const now = Date.now();
   let list = mode === "add" ? getCurrent() : null;
   if (!list) {
@@ -55,7 +56,7 @@ export function addRecipes(recipes, mode) {
   let items = list.items;
   const listRecipes = Object.assign({}, list.recipes);
   for (const recipe of recipes) {
-    items = addRecipeItems(items, recipe, 1, now);
+    items = addRecipeItems(items, recipe, factor || 1, now);
     listRecipes[recipe.id] = { title: recipe.title, servings: recipe.servings || null, at: now };
   }
   // What the pantry says you have goes to "Check you have" instead of
@@ -68,6 +69,12 @@ export function addRecipes(recipes, mode) {
     }
   }
   return update(list, { items: items, recipes: listRecipes });
+}
+
+// Is this recipe already on the current list?
+export function hasRecipe(id) {
+  const list = getCurrent();
+  return Boolean(list && list.recipes[id]);
 }
 
 export function toggleItem(key) {

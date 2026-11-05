@@ -848,6 +848,42 @@ def test_projects(p, sheet):
     print("projects: ok")
 
 
+def test_add_from_recipe(p):
+    """The recipe page adds its ingredients, for the servings shown."""
+    ctx = p.chromium.launch().new_context(**p.devices["Pixel 7"])
+    ctx.add_init_script("if (!localStorage.getItem('kitchen.settings.v1')) localStorage.setItem('kitchen.settings.v1', JSON.stringify({myName: 'Kadi'}))")
+    page = ctx.new_page()
+    errors = []
+    watch_errors(page, errors)
+    page.goto(BASE)
+    page.click("#add-recipe")
+    page.fill("#edit-text", RECIPE)
+    page.click("#edit-form button[type=submit]")
+    expect(page.locator("#view-recipe")).to_be_visible()
+    expect(page.locator("#servings-label")).to_have_text("2 servings")
+    page.click("#servings-up")
+    page.click("#servings-up")
+    expect(page.locator("#servings-label")).to_have_text("4 servings")
+    page.screenshot(path=SHOTS / "phone-recipe-add.png")
+    page.click("#add-to-list")
+    expect(page.locator("#toast")).to_contain_text("Added to the shopping list")
+    expect(page.locator("#cart-count")).to_have_text("3")
+    page.click("#toast .toast-action")
+    expect(page.locator("#view-shopping")).to_be_visible()
+    expect(page.locator(".shop-name").filter(has_text="aubergines")).to_have_text("4 aubergines")
+    # A second time asks first, so a double tap doesn't double the list
+    page.go_back()
+    expect(page.locator("#view-recipe")).to_be_visible()
+    page.click("#add-to-list")
+    expect(page.locator("#toast")).to_contain_text("Already on the shopping list")
+    page.click("#toast .toast-action")
+    expect(page.locator("#toast")).to_contain_text("Added to the shopping list")
+    page.click("#toast .toast-action")
+    expect(page.locator(".shop-name").filter(has_text="aubergines")).to_have_text("8 aubergines")
+    assert not errors, errors
+    print("add from recipe: ok")
+
+
 # A small web server for test_site_missing: serves the app until a file
 # named OFF appears next to it, then answers 404 for everything, like
 # GitHub Pages does while a site is unpublished.
@@ -971,6 +1007,7 @@ def main():
             test_pantry_chores_tabs(p, sheet)
             test_projects(p, sheet)
             test_installable_and_offline(p)
+            test_add_from_recipe(p)
             test_site_missing(p)
             test_update_after_publish(p)
         print(f"all browser tests passed ({sheet.calls} sync calls)")

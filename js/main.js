@@ -5,7 +5,7 @@ import * as sync from "./sync.js";
 import { parseRoute, trackHistory, go, goBack } from "./ui/router.js";
 import { toggleSuggestionOwner } from "./ui/suggestion.js";
 import { initList, renderList, focusSearch, toggleAllRecipes, toggleFilters } from "./ui/list.js";
-import { initRecipe, renderRecipe, changeServings, canEditCurrent } from "./ui/recipe.js";
+import { initRecipe, renderRecipe, changeServings, canEditCurrent, addCurrentToList } from "./ui/recipe.js";
 import { showToast } from "./ui/toast.js";
 import { rate } from "./ui/rating.js";
 import { initName } from "./ui/name.js";
@@ -208,6 +208,7 @@ initShortcuts(
     rate3: () => rate(3),
     rate4: () => rate(4),
     rate5: () => rate(5),
+    addToList: addCurrentToList,
     moreServings: () => changeServings(1),
     fewerServings: () => changeServings(-1),
     save: saveFromEditor,

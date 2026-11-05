@@ -1,10 +1,13 @@
 // Shows one recipe, ready to cook from: ratings, notes, a servings
 // stepper and the recipe text with amounts scaled to the servings.
 import * as state from "../state.js";
+import * as shopping from "../shoppingState.js";
+import { ingredientLines } from "../lib/sections.js";
 import { bodyWithoutTitle, cookedNote, canEdit } from "../lib/recipes.js";
 import { renderMarkdown } from "../lib/markdown.js";
 import { formatAmount, stepServings } from "../lib/scale.js";
 import { renderRating } from "./rating.js";
+import { go } from "./router.js";
 import { getMyName } from "./name.js";
 import { showToast } from "./toast.js";
 
@@ -21,15 +24,21 @@ const servingsDown = document.getElementById("servings-down");
 const servingsUp = document.getElementById("servings-up");
 const servingsLabel = document.getElementById("servings-label");
 const servingsReset = document.getElementById("servings-reset");
+const addToListButton = document.getElementById("add-to-list");
 
 let currentId = null;
 // The servings shown. Without a known base it's a multiplier (1 = as written).
 let shownServings = 1;
 let shownBase = null;
 
+// How much the shown servings differ from the recipe as written.
+function shownFactor(recipe) {
+  return recipe.servings ? shownServings / recipe.servings : shownServings;
+}
+
 function renderServingsAndBody(recipe) {
   const base = recipe.servings;
-  const factor = base ? shownServings / base : shownServings;
+  const factor = shownFactor(recipe);
 
   if (base) {
     servingsLabel.textContent = shownServings + (shownServings === 1 ? " serving" : " servings");
@@ -120,6 +129,27 @@ export function changeServings(direction) {
   renderServingsAndBody(recipe);
 }
 
+function addIngredients(recipe) {
+  shopping.addRecipes([recipe], "add", shownFactor(recipe));
+  showToast("Added to the shopping list", { label: "Open list", run: () => go("#/shopping") });
+}
+
+// Adds the ingredients, for the servings shown, to the current list.
+// A second time would add the amounts up, so that has to be meant.
+export function addCurrentToList() {
+  const recipe = state.getRecipe(currentId);
+  if (!recipe) {
+    return;
+  }
+  if (ingredientLines(recipe.text).length === 0) {
+    showToast("No ingredient list found in this recipe");
+  } else if (shopping.hasRecipe(recipe.id)) {
+    showToast("Already on the shopping list", { label: "Add again", run: () => addIngredients(recipe) });
+  } else {
+    addIngredients(recipe);
+  }
+}
+
 export function initRecipe() {
   cookedButton.addEventListener("click", function () {
     if (!currentId) {
@@ -131,6 +161,7 @@ export function initRecipe() {
     showToast("Added to notes: " + note);
   });
 
+  addToListButton.addEventListener("click", addCurrentToList);
   servingsUp.addEventListener("click", () => changeServings(1));
   servingsDown.addEventListener("click", () => changeServings(-1));
   servingsReset.addEventListener("click", function () {
