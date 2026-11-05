@@ -1,5 +1,8 @@
 # Changelog
 
+## 2026-11-05 f
+- Fixed updates: right after a new version was published, a phone could load the new page with old code and styling, so buttons looked wrong or did nothing. The app now always checks every file for changes when it's online.
+
 ## 2026-11-05 e
 - The recipes page now opens with only today's suggestion, the search and one **All recipes** row. Tap the row (or press A) to unfold the list together with **Filter**, **Plan shopping** and **+**.
 - Searching, filtering with F and planning shopping unfold it by themselves. Each app start begins folded again.

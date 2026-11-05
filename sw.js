@@ -4,8 +4,12 @@
 // from GitHub Pages (so updates arrive right away) and keep a copy.
 // When offline, use the copy. Recipes themselves live in localStorage,
 // not here; requests to the Google Sheet are never touched.
+//
+// GitHub Pages lets browsers keep each file for 10 minutes. "No-cache"
+// below means: always ask the site whether a file changed. Without it, a
+// phone can get a new page together with old code and styling.
 
-const CACHE = "kitchen-app-v9";
+const CACHE = "kitchen-app-v10";
 
 const APP_FILES = [
   "./",
@@ -62,7 +66,9 @@ const APP_FILES = [
 
 self.addEventListener("install", function (event) {
   event.waitUntil(
-    caches.open(CACHE).then((cache) => cache.addAll(APP_FILES))
+    caches.open(CACHE).then((cache) =>
+      cache.addAll(APP_FILES.map((file) => new Request(file, { cache: "reload" })))
+    )
   );
   self.skipWaiting();
 });
@@ -92,7 +98,7 @@ self.addEventListener("fetch", function (event) {
     return;
   }
   event.respondWith(
-    fetch(request)
+    fetch(request, { cache: "no-cache" })
       .then(function (response) {
         if (response.ok) {
           const copy = response.clone();

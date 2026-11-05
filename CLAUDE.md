@@ -89,6 +89,10 @@ explains the app itself (features, files, shortcuts, sync setup).
 - If a Pages deploy fails with "in progress deployment … please cancel":
   delete the `github-pages` environment (Settings → Environments), then
   push again. Do **not** set Pages to "None" — that takes the site down.
+- GitHub Pages lets browsers keep files for 10 minutes. The service worker
+  must fetch with `cache: "no-cache"`, or a phone mixes a new `index.html`
+  with old JS and CSS right after a publish. `test_update_after_publish`
+  guards this.
 - The service worker serves its saved copy if the site answers with an
   error, so the installed app survives short outages.
 

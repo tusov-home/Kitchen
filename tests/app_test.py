@@ -8,6 +8,7 @@ and a Windows laptop size with the keyboard, and fakes the Google Sheet
 so sync can be tested without the internet. Made-up recipes only.
 """
 import json
+import os
 import subprocess
 import sys
 import time
@@ -876,6 +877,54 @@ def test_site_missing(p):
         server.terminate()
 
 
+# Like GitHub Pages: browsers may keep every file for 10 minutes.
+CACHING_SERVER = """
+import functools, http.server, sys
+root, port = sys.argv[1], int(sys.argv[2])
+class Handler(http.server.SimpleHTTPRequestHandler):
+    def end_headers(self):
+        self.send_header("Cache-Control", "max-age=600")
+        super().end_headers()
+    def log_message(self, *args):
+        pass
+http.server.ThreadingHTTPServer(("", port), functools.partial(Handler, directory=root)).serve_forever()
+"""
+
+
+def test_update_after_publish(p):
+    """A new version is published while the browser may still keep the old
+    files: the next start must load the new page AND the new code together."""
+    import shutil
+    import tempfile
+    site = Path(tempfile.mkdtemp()) / "site"
+    shutil.copytree(Path.cwd(), site, ignore=shutil.ignore_patterns(".git", "test-screenshots"))
+    port = PORT + 2
+    server = subprocess.Popen([sys.executable, "-c", CACHING_SERVER, str(site), str(port)])
+    time.sleep(1)
+    try:
+        url = f"http://localhost:{port}/"
+        ctx = p.chromium.launch().new_context(**p.devices["Pixel 7"])
+        page = ctx.new_page()
+        page.goto(url)
+        page.evaluate("navigator.serviceWorker.ready")
+        page.reload()
+        page.wait_for_function("navigator.serviceWorker.controller !== null")
+        expect(page.locator("#brand-version")).not_to_have_text("zz")
+        # Publish: a changed version file with a newer date
+        version = site / "js" / "version.js"
+        version.write_text('export const APP_VERSION = "2099-01-01 zz";\n')
+        future = time.time() + 60
+        os.utime(version, (future, future))
+        # Close and reopen the app, as on a phone
+        page.close()
+        page = ctx.new_page()
+        page.goto(url)
+        expect(page.locator("#brand-version")).to_have_text("zz")
+        print("update after publish: ok")
+    finally:
+        server.terminate()
+
+
 def main():
     server = subprocess.Popen(
         [sys.executable, "-m", "http.server", str(PORT)],
@@ -893,6 +942,7 @@ def main():
             test_projects(p, sheet)
             test_installable_and_offline(p)
             test_site_missing(p)
+            test_update_after_publish(p)
         print(f"all browser tests passed ({sheet.calls} sync calls)")
     finally:
         server.terminate()
