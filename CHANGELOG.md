@@ -1,5 +1,8 @@
 # Changelog
 
+## 2026-11-05 c
+- The installed app keeps working from its saved copy when the website answers with an error (for example while GitHub Pages is being republished), instead of showing GitHub's "404" page.
+
 ## 2026-11-05 b
 - New look, in a calm Japandi style: stone paper, sumi ink, moss and hinoki wood colours, with dark mode as charred wood and rice paper.
 - Titles in Zen Old Mincho, everything else in Zen Kaku Gothic New (self-hosted, no Google requests).

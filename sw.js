@@ -5,7 +5,7 @@
 // When offline, use the copy. Recipes themselves live in localStorage,
 // not here; requests to the Google Sheet are never touched.
 
-const CACHE = "kitchen-app-v7";
+const CACHE = "kitchen-app-v8";
 
 const APP_FILES = [
   "./",
@@ -75,6 +75,13 @@ self.addEventListener("activate", function (event) {
   self.clients.claim();
 });
 
+// The saved copy of a file; any page address falls back to the app itself.
+function fromCache(request) {
+  return caches.match(request, { ignoreSearch: true }).then(function (cached) {
+    return cached || (request.mode === "navigate" ? caches.match("./") : undefined);
+  });
+}
+
 self.addEventListener("fetch", function (event) {
   const request = event.request;
   const url = new URL(request.url);
@@ -88,14 +95,15 @@ self.addEventListener("fetch", function (event) {
         if (response.ok) {
           const copy = response.clone();
           caches.open(CACHE).then((cache) => cache.put(request, copy));
+          return response;
         }
-        return response;
+        // The site answered with an error (e.g. 404 while GitHub Pages
+        // is being republished): keep using the saved copy if we have one.
+        return fromCache(request).then((cached) => cached || response);
       })
       .catch(function () {
-        return caches.match(request, { ignoreSearch: true }).then(function (cached) {
-          // Any page address falls back to the app itself.
-          return cached || caches.match("./");
-        });
+        // No connection at all: use the saved copy.
+        return fromCache(request);
       })
   );
 });

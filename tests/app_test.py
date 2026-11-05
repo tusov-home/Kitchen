@@ -759,6 +759,65 @@ def test_projects(p, sheet):
     print("projects: ok")
 
 
+# A small web server for test_site_missing: serves the app until a file
+# named OFF appears next to it, then answers 404 for everything, like
+# GitHub Pages does while a site is unpublished.
+SITE_SERVER = """
+import functools, http.server, os, sys
+root, port = sys.argv[1], int(sys.argv[2])
+class Handler(http.server.SimpleHTTPRequestHandler):
+    def do_GET(self):
+        if os.path.exists(os.path.join(root, "OFF")):
+            self.send_error(404, "Site not found")
+        else:
+            super().do_GET()
+    def end_headers(self):
+        # No browser caching, so the test sees what a phone sees once
+        # GitHub's 10-minute cache has run out.
+        self.send_header("Cache-Control", "no-store")
+        super().end_headers()
+    def log_message(self, *args):
+        pass
+http.server.ThreadingHTTPServer(("", port), functools.partial(Handler, directory=root)).serve_forever()
+"""
+
+
+def test_site_missing(p):
+    """The website answers 404 (e.g. while GitHub Pages republishes):
+    the installed app keeps working from its saved copy."""
+    import tempfile
+    root = Path.cwd()
+    off = Path(tempfile.mkdtemp()) / "OFF"
+    port = PORT + 1
+    # Serve the repository folder; the OFF switch lives in a temp folder,
+    # passed in by pointing the server's check at it via a symlinked root.
+    site = off.parent / "site"
+    site.symlink_to(root, target_is_directory=True)
+    server = subprocess.Popen([sys.executable, "-c", SITE_SERVER.replace('os.path.join(root, "OFF")', repr(str(off))), str(site), str(port)])
+    time.sleep(1)
+    try:
+        url = f"http://localhost:{port}/"
+        ctx = p.chromium.launch().new_context(**p.devices["Pixel 7"])
+        ctx.add_init_script("if (!localStorage.getItem('kitchen.settings.v1')) localStorage.setItem('kitchen.settings.v1', JSON.stringify({myName: 'Kadi'}))")
+        page = ctx.new_page()
+        page.goto(url)
+        page.evaluate("navigator.serviceWorker.ready")
+        page.reload()
+        page.wait_for_function("navigator.serviceWorker.controller !== null")
+        page.click("#add-recipe")
+        page.fill("#edit-text", "Lentil soup\n- 200 g lentils")
+        page.click("#edit-form button[type=submit]")
+        expect(page.locator("#recipe-title")).to_have_text("Lentil soup")
+        # Switch the site off: every file now answers 404
+        off.write_text("off")
+        page.goto(url)
+        expect(page.locator("#add-recipe")).to_be_visible()
+        expect(page.locator("#recipe-list")).to_contain_text("Lentil soup")
+        print("site missing: ok")
+    finally:
+        server.terminate()
+
+
 def main():
     server = subprocess.Popen(
         [sys.executable, "-m", "http.server", str(PORT)],
@@ -775,6 +834,7 @@ def main():
             test_pantry_chores_tabs(p, sheet)
             test_projects(p, sheet)
             test_installable_and_offline(p)
+            test_site_missing(p)
         print(f"all browser tests passed ({sheet.calls} sync calls)")
     finally:
         server.terminate()
