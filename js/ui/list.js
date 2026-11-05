@@ -1,8 +1,10 @@
-// The recipe list: search box, tag filter and the list itself.
+// The recipes page: today's suggestion, search, and the list with its
+// filters (folded away behind "Filter" until needed).
 import * as state from "../state.js";
 import * as storage from "../storage.js";
 import { visibleRecipes, allTags, allOwners, averageRating } from "../lib/recipes.js";
 import { isPlanning, isSelected, toggleSelected } from "./plan.js";
+import { renderSuggestion, initSuggestion } from "./suggestion.js";
 
 const searchInput = document.getElementById("search");
 const tagFilter = document.getElementById("tag-filter");
@@ -12,6 +14,11 @@ const noResults = document.getElementById("no-results");
 
 const ownerFilter = document.getElementById("owner-filter");
 const sortSelect = document.getElementById("sort-select");
+const filterToggle = document.getElementById("filter-toggle");
+const filterPanel = document.getElementById("filter-panel");
+const recipeCount = document.getElementById("recipe-count");
+
+let filterOpen = false;
 
 let activeTag = "";
 // Owner filter and sort are remembered on this phone.
@@ -143,6 +150,31 @@ export function renderList() {
 
   emptyList.hidden = all.length > 0;
   noResults.hidden = all.length === 0 || shown.length > 0;
+
+  // How many recipes are shown, e.g. "21" or "4 of 21".
+  recipeCount.textContent = all.length === 0 ? "" : shown.length === all.length ? String(all.length) : shown.length + " of " + all.length;
+
+  // Filter panel: open on request; it also stays open while a filter is
+  // active, so a hidden filter never makes recipes seem to disappear.
+  const activeFilters = (activeOwner ? 1 : 0) + (activeTag ? 1 : 0);
+  filterPanel.hidden = !(filterOpen || activeFilters > 0) || all.length === 0;
+  filterToggle.hidden = all.length === 0;
+  filterToggle.textContent = activeFilters ? "Filter (" + activeFilters + ")" : "Filter";
+  filterToggle.setAttribute("aria-expanded", filterPanel.hidden ? "false" : "true");
+
+  // The suggestion steps aside while you search or plan.
+  renderSuggestion(all, !searchInput.value.trim() && !isPlanning());
+}
+
+export function toggleFilters() {
+  filterOpen = filterPanel.hidden;
+  if (!filterOpen) {
+    // Closing also clears the filters, so nothing stays hidden.
+    activeOwner = "";
+    activeTag = "";
+    rememberView();
+  }
+  renderList();
 }
 
 export function focusSearch() {
@@ -151,7 +183,9 @@ export function focusSearch() {
 }
 
 export function initList() {
+  initSuggestion();
   searchInput.addEventListener("input", renderList);
+  filterToggle.addEventListener("click", toggleFilters);
   sortSelect.addEventListener("change", function () {
     sortOrder = sortSelect.value;
     rememberView();

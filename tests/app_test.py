@@ -250,7 +250,7 @@ def test_laptop_second_device(p, sheet):
     page.keyboard.type("zzz")
     expect(page.locator("#no-results")).to_be_visible()
     page.fill("#search", "")
-    page.locator("body").click()
+    page.evaluate("document.activeElement.blur()")  # leave the text box
 
     page.keyboard.press("n")
     expect(page.locator("#view-edit")).to_be_visible()
@@ -269,8 +269,37 @@ def test_laptop_second_device(p, sheet):
     expect(page.locator("#view-list")).to_be_visible()
     expect(page.locator(".recipe-card")).to_have_count(3)
 
+    # Today's suggestion is the first thing on the page
+    suggestion = page.locator("#suggestion")
+    expect(suggestion).to_be_visible()
+    expect(page.locator("#suggestion-label")).to_contain_text("Suggestion for")
+    first = page.locator("#suggestion-link").inner_text()
+    page.click("#suggestion-next")
+    expect(page.locator("#suggestion-link")).not_to_have_text(first)
+    # Search: the suggestion steps aside while typing
+    page.keyboard.press("/")
+    page.keyboard.type("shak")
+    expect(suggestion).to_be_hidden()
+    expect(page.locator("#recipe-count")).to_have_text("1 of 3")
+    page.fill("#search", "")
+    expect(suggestion).to_be_visible()
+    page.evaluate("document.activeElement.blur()")  # leave the text box
+    # Open the suggested recipe
+    picked = page.locator("#suggestion-link").inner_text()
+    page.click("#suggestion-open")
+    expect(page.locator("#view-recipe")).to_be_visible()  # wait for the page itself
+    expect(page.locator("#recipe-title")).to_have_text(picked)
+    page.keyboard.press("Escape")
+    expect(page.locator("#view-list")).to_be_visible()
+
+    # Filters are folded away until asked for (F or the Filter button)
+    expect(page.locator("#filter-panel")).to_be_hidden()
+    page.keyboard.press("f")
+    expect(page.locator("#filter-panel")).to_be_visible()
+
     # Tag filter
     page.click("button.tag:has-text('weekday')")
+    expect(page.locator("#filter-toggle")).to_have_text("Filter (1)")
     expect(page.locator(".recipe-card")).to_have_count(1)
     page.screenshot(path=SHOTS / "laptop-1-list.png")
     page.click("button.tag:has-text('weekday')")
@@ -291,12 +320,15 @@ def test_laptop_second_device(p, sheet):
     expect(page.locator(".recipe-card-title").first).to_have_text("Miso Aubergine with Soba")
     page.reload()  # choice is remembered on this device
     expect(page.locator("#sort-select")).to_have_value("rating")
+    expect(page.locator("#filter-panel")).to_be_hidden()  # folded again after reload
+    page.click("#filter-toggle")
     page.screenshot(path=SHOTS / "laptop-4-sorted.png")
     page.select_option("#sort-select", "newest")
 
     # Plan shopping: pick two recipes, make a list sorted by shop section
     page.keyboard.press("p")
     expect(page.locator("#plan-bar")).to_be_visible()
+    expect(page.locator("#suggestion")).to_be_hidden()  # the list has the stage
     page.click(".recipe-card:has-text('Miso Aubergine with Soba')")
     page.click(".recipe-card:has-text('Beef Shakshuka')")
     expect(page.locator("#plan-count")).to_have_text("2 recipes")

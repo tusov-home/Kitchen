@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-11-05 d
+- Calmer recipes page. First: **today's suggestion**, one recipe with a short reason ("A favourite, rated 5 ★ · Not cooked in a while"). It's the same on both phones each day, prefers well-rated dishes you haven't cooked lately, and weekend dishes on weekends. **Another idea** shows the next one.
+- Second: a full-width search. While you search or plan shopping, the suggestion steps aside.
+- Filters, tags and sorting are folded behind **Filter** (shortcut F); adding a recipe is the **+** next to "All recipes".
+
 ## 2026-11-05 c
 - The installed app keeps working from its saved copy when the website answers with an error (for example while GitHub Pages is being republished), instead of showing GitHub's "404" page.
 

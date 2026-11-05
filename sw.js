@@ -5,7 +5,7 @@
 // When offline, use the copy. Recipes themselves live in localStorage,
 // not here; requests to the Google Sheet are never touched.
 
-const CACHE = "kitchen-app-v8";
+const CACHE = "kitchen-app-v9";
 
 const APP_FILES = [
   "./",
@@ -37,8 +37,10 @@ const APP_FILES = [
   "js/lib/pantry.js",
   "js/lib/chores.js",
   "js/lib/projects.js",
+  "js/lib/suggest.js",
   "js/ui/router.js",
   "js/ui/list.js",
+  "js/ui/suggestion.js",
   "js/ui/recipe.js",
   "js/ui/rating.js",
   "js/ui/name.js",

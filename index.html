@@ -24,29 +24,50 @@
 
   <!-- List of recipes -->
   <main id="view-list" class="view">
-    <div class="list-tools">
-      <input id="search" class="search" type="search" placeholder="Search recipes…" aria-label="Search recipes" title="Search (/)">
-      <button id="add-recipe" class="primary" type="button" title="Add recipe (N)">+ Add recipe</button>
-    </div>
-    <div class="plan-tools">
+    <!-- First thing on the page: one calm suggestion for today -->
+    <section id="suggestion" class="suggestion" aria-labelledby="suggestion-label" hidden>
+      <h2 id="suggestion-label" class="suggestion-label"></h2>
+      <a id="suggestion-link" class="suggestion-title"></a>
+      <p id="suggestion-reason" class="suggestion-reason"></p>
+      <div class="suggestion-actions">
+        <a id="suggestion-open" class="primary">Open recipe</a>
+        <button id="suggestion-next" class="text-button" type="button" title="Show another suggestion">Another idea</button>
+      </div>
+    </section>
+
+    <!-- Second: search -->
+    <label class="search-box">
+      <svg class="line-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg>
+      <input id="search" class="search" type="search" placeholder="Search recipes or ingredients" aria-label="Search recipes" title="Search (/)">
+    </label>
+
+    <!-- Everything else stays quiet until asked for -->
+    <div class="list-head">
+      <h2 class="list-title">All recipes <span id="recipe-count" class="hint"></span></h2>
+      <span class="spacer"></span>
+      <button id="filter-toggle" class="text-button" type="button" aria-expanded="false" aria-controls="filter-panel" title="Filter and sort (F)">Filter</button>
       <button id="plan-toggle" class="text-button" type="button" title="Pick recipes for a shopping list (P)">Plan shopping</button>
-      <span id="plan-hint" class="hint" hidden>Tap the recipes you want to cook</span>
+      <button id="add-recipe" class="icon-button add-button" type="button" title="Add recipe (N)" aria-label="Add recipe"><svg class="line-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 5v14M5 12h14"/></svg></button>
     </div>
-    <div class="view-tools">
-      <div id="owner-filter" class="owner-filter" role="group" aria-label="Show recipes by"></div>
-      <label class="sort-label">Sort
-        <select id="sort-select" title="Sort recipes">
-          <option value="newest">Newest</option>
-          <option value="az">A–Z</option>
-          <option value="rating">Best rated</option>
-        </select>
-      </label>
+    <p id="plan-hint" class="hint plan-hint" hidden>Tap the recipes you want to cook</p>
+
+    <div id="filter-panel" class="filter-panel" hidden>
+      <div class="view-tools">
+        <div id="owner-filter" class="owner-filter" role="group" aria-label="Show recipes by"></div>
+        <label class="sort-label">Sort
+          <select id="sort-select" title="Sort recipes">
+            <option value="newest">Newest</option>
+            <option value="az">A–Z</option>
+            <option value="rating">Best rated</option>
+          </select>
+        </label>
+      </div>
+      <div id="tag-filter" class="tag-filter"></div>
     </div>
-    <div id="tag-filter" class="tag-filter"></div>
     <ul id="recipe-list" class="recipe-list"></ul>
     <div id="empty-list" class="empty" hidden>
       <p class="empty-title">No recipes yet</p>
-      <p>When a recipe in Claude is just how you want it, copy it and press <strong>+ Add recipe</strong>.</p>
+      <p>When a recipe in Claude is just how you want it, copy it and tap <strong>+</strong> next to All recipes.</p>
     </div>
     <p id="no-results" class="empty" hidden>No recipes match your search.</p>
 
