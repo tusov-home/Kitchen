@@ -26,7 +26,10 @@
   <main id="view-list" class="view">
     <!-- First thing on the page: one calm suggestion for today -->
     <section id="suggestion" class="suggestion" aria-labelledby="suggestion-label" hidden>
-      <h2 id="suggestion-label" class="suggestion-label"></h2>
+      <div class="suggestion-head">
+        <h2 id="suggestion-label" class="suggestion-label"></h2>
+        <div id="suggestion-owners" class="suggestion-owners" role="group" aria-label="Suggest recipes from"></div>
+      </div>
       <a id="suggestion-link" class="suggestion-title"></a>
       <p id="suggestion-reason" class="suggestion-reason"></p>
       <div class="suggestion-actions">

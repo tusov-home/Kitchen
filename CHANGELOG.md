@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-05 h
+- Two initial buttons in the corner of the suggestion, **T** and **K**, choose whose recipes it picks from. Both on means all recipes, and one always stays on. Each phone starts with its own person and remembers your choice.
+- The dish on screen stays if it still counts; otherwise the next one appears straight away.
+
 ## 2026-11-05 g
 - **All recipes** now has the same panel look as the search box.
 - While it's folded, the page fills the whole phone: the suggestion grows down to the search and All recipes rows, which sit just above the tab bar.

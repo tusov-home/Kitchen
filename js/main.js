@@ -3,6 +3,7 @@ import { APP_VERSION } from "./version.js";
 import * as state from "./state.js";
 import * as sync from "./sync.js";
 import { parseRoute, trackHistory, go, goBack } from "./ui/router.js";
+import { toggleSuggestionOwner } from "./ui/suggestion.js";
 import { initList, renderList, focusSearch, toggleAllRecipes, toggleFilters } from "./ui/list.js";
 import { initRecipe, renderRecipe, changeServings, canEditCurrent } from "./ui/recipe.js";
 import { showToast } from "./ui/toast.js";
@@ -192,6 +193,8 @@ initShortcuts(
     focusSearch: focusSearch,
     toggleAllRecipes: toggleAllRecipes,
     toggleFilters: toggleFilters,
+    suggestT: () => toggleSuggestionOwner("T"),
+    suggestK: () => toggleSuggestionOwner("K"),
     editRecipe: function () {
       if (canEditCurrent()) {
         go("#/r/" + encodeURIComponent(current.id) + "/edit");

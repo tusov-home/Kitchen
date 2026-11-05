@@ -6,6 +6,8 @@ const SHORTCUTS = [
   { keys: "/", label: "/", action: "focusSearch", where: ["list"], text: "Search" },
   { keys: "a", label: "A", action: "toggleAllRecipes", where: ["list"], text: "Show / hide all recipes" },
   { keys: "f", label: "F", action: "toggleFilters", where: ["list"], text: "Show / hide filters" },
+  { keys: "t", label: "T / K", action: "suggestT", where: ["list"], text: "Suggestions: whose recipes" },
+  { keys: "k", action: "suggestK", where: ["list"] },
   { keys: "e", label: "E", action: "editRecipe", where: ["recipe"], text: "Edit recipe (your own)" },
   { keys: "c", label: "C", action: "copyRecipe", where: ["recipe"], text: "Make my copy" },
   { keys: "1", label: "1 … 5", action: "rate1", where: ["recipe"], text: "Rate 1–5 stars (same again clears)" },

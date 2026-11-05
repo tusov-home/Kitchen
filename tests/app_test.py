@@ -348,6 +348,32 @@ def test_laptop_second_device(p, sheet):
     gap = page.evaluate("document.getElementById('tabbar').getBoundingClientRect().top - document.getElementById('all-toggle').getBoundingClientRect().bottom")
     assert 0 < gap < 32, gap
     assert page.evaluate("document.documentElement.scrollHeight <= window.innerHeight")
+    # Suggestion initials: starts with this phone's owner (Tõnis)
+    t_button = page.locator("#suggestion-owners button:has-text('T')")
+    k_button = page.locator("#suggestion-owners button:has-text('K')")
+    expect(page.locator("#suggestion-owners button")).to_have_text(["T", "K"])
+    expect(t_button).to_have_attribute("aria-pressed", "true")
+    expect(k_button).to_have_attribute("aria-pressed", "false")
+    assert page.locator("#suggestion-link").inner_text() in ["Beef Shakshuka", "Spicy Miso Aubergine"]
+    t_button.click()  # the last one stays on
+    expect(t_button).to_have_attribute("aria-pressed", "true")
+    # Both on: the dish on screen stays, it still counts
+    shown = page.locator("#suggestion-link").inner_text()
+    k_button.click()
+    expect(k_button).to_have_attribute("aria-pressed", "true")
+    expect(page.locator("#suggestion-link")).to_have_text(shown)
+    page.screenshot(path=SHOTS / "laptop-7-initials.png")
+    # Only K: Kadi has one recipe, so it shows at once and no "Another idea"
+    page.keyboard.press("t")
+    expect(t_button).to_have_attribute("aria-pressed", "false")
+    expect(page.locator("#suggestion-link")).to_have_text("Miso Aubergine with Soba")
+    expect(page.locator("#suggestion-next")).to_be_hidden()
+    page.reload()  # the choice is remembered on this device
+    expect(k_button).to_have_attribute("aria-pressed", "true")
+    expect(t_button).to_have_attribute("aria-pressed", "false")
+    page.keyboard.press("t")
+    page.keyboard.press("k")
+    expect(page.locator("#suggestion-next")).to_be_visible()
     # F from the folded page opens the list with its filters
     page.keyboard.press("f")
     expect(panel).to_be_visible()

@@ -86,3 +86,31 @@ export function dailySuggestions(recipes, today) {
   scored.sort((a, b) => b.score - a.score || a.recipe.title.localeCompare(b.recipe.title));
   return scored.map(({ recipe, reason }) => ({ recipe: recipe, reason: reason }));
 }
+
+// Whose recipes the suggestion picks from. Uses the saved choice, or else
+// just this phone's owner, or everyone if this phone's owner has no recipes.
+export function activeOwners(owners, saved, myName) {
+  const kept = (saved || []).filter((owner) => owners.includes(owner));
+  if (kept.length > 0) {
+    return kept;
+  }
+  return owners.includes(myName) ? [myName] : owners;
+}
+
+// Switches one owner on or off; the last one always stays on.
+export function toggleOwner(active, owner) {
+  if (!active.includes(owner)) {
+    return [...active, owner];
+  }
+  return active.length > 1 ? active.filter((name) => name !== owner) : active;
+}
+
+// Recipes of the chosen owners. Old recipes without an owner always count.
+export function recipesOfOwners(recipes, active) {
+  return recipes.filter((recipe) => !recipe.owner || active.includes(recipe.owner));
+}
+
+// "Tõnis" gives "T".
+export function initial(name) {
+  return ([...name.trim()][0] || "").toUpperCase();
+}

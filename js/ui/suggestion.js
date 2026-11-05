@@ -1,7 +1,11 @@
 // "Today's suggestion" at the top of the recipes page: one recipe to
 // cook, with a short reason. "Another idea" steps through the day's list.
-import { dailySuggestions } from "../lib/suggest.js";
+// The initials in the corner choose whose recipes it picks from.
+import * as storage from "../storage.js";
+import { dailySuggestions, activeOwners, toggleOwner, recipesOfOwners, initial } from "../lib/suggest.js";
+import { allOwners } from "../lib/recipes.js";
 import { toDateString } from "../lib/chores.js";
+import { getMyName } from "./name.js";
 
 const box = document.getElementById("suggestion");
 const label = document.getElementById("suggestion-label");
@@ -9,6 +13,7 @@ const link = document.getElementById("suggestion-link");
 const reason = document.getElementById("suggestion-reason");
 const openButton = document.getElementById("suggestion-open");
 const nextButton = document.getElementById("suggestion-next");
+const ownerButtons = document.getElementById("suggestion-owners");
 
 const KEY = "kitchen.suggestion.v1";
 
@@ -31,6 +36,76 @@ function saveOffset(today, offset) {
 }
 
 let lastRecipes = [];
+let shownId = "";
+
+function currentOwners(owners) {
+  return activeOwners(owners, storage.loadSettings().suggestOwners, getMyName());
+}
+
+// The day's list, from the chosen owners' recipes only.
+function todaysList(recipes, today) {
+  const owners = allOwners(recipes);
+  const pool = owners.length < 2 ? recipes : recipesOfOwners(recipes, currentOwners(owners));
+  return dailySuggestions(pool, today);
+}
+
+function setOwners(next) {
+  storage.saveSettings(Object.assign(storage.loadSettings(), { suggestOwners: next }));
+  // Keep the dish on screen if it still counts; the change then applies
+  // from the next suggestion on.
+  const today = toDateString(new Date());
+  const index = todaysList(lastRecipes, today).findIndex((item) => item.recipe.id === shownId);
+  saveOffset(today, Math.max(index, 0));
+  const before = shownId;
+  renderSuggestion(lastRecipes, true);
+  if (shownId !== before) {
+    showChange();
+  }
+}
+
+// One initial per person, shown once there are two owners.
+function renderOwners(recipes) {
+  const owners = allOwners(recipes);
+  const active = currentOwners(owners);
+  ownerButtons.replaceChildren();
+  ownerButtons.hidden = owners.length < 2;
+  if (ownerButtons.hidden) {
+    return;
+  }
+  // This phone's own person first, so the buttons read "me, then you".
+  const mine = getMyName();
+  const ordered = [...owners].sort((a, b) => (b === mine) - (a === mine));
+  for (const owner of ordered) {
+    const on = active.includes(owner);
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "tag owner-initial" + (on ? " selected" : "");
+    button.textContent = initial(owner);
+    button.title = owner + "'s recipes (" + initial(owner) + ")";
+    button.setAttribute("aria-label", owner + "'s recipes");
+    button.setAttribute("aria-pressed", on ? "true" : "false");
+    button.addEventListener("click", () => setOwners(toggleOwner(active, owner)));
+    ownerButtons.appendChild(button);
+  }
+}
+
+// For the keyboard: T or K.
+export function toggleSuggestionOwner(letter) {
+  if (box.hidden) {
+    return;
+  }
+  const button = [...ownerButtons.children].find((item) => item.textContent === letter);
+  if (button) {
+    button.click();
+  }
+}
+
+function showChange() {
+  // A soft fade so you can see it changed.
+  box.classList.remove("changed");
+  void box.offsetWidth;
+  box.classList.add("changed");
+}
 
 // visible: false while searching or planning, so the list has the stage.
 export function renderSuggestion(recipes, visible) {
@@ -41,8 +116,10 @@ export function renderSuggestion(recipes, visible) {
   }
   const now = new Date();
   const today = toDateString(now);
-  const list = dailySuggestions(recipes, today);
+  renderOwners(recipes);
+  const list = todaysList(recipes, today);
   const pick = list[loadOffset(today) % list.length];
+  shownId = pick.recipe.id;
   const href = "#/r/" + encodeURIComponent(pick.recipe.id);
 
   label.textContent = "Suggestion for " + now.toLocaleDateString("en-GB", { weekday: "long" });
@@ -59,9 +136,6 @@ export function initSuggestion() {
     const today = toDateString(new Date());
     saveOffset(today, loadOffset(today) + 1);
     renderSuggestion(lastRecipes, true);
-    // A soft fade so you can see it changed.
-    box.classList.remove("changed");
-    void box.offsetWidth;
-    box.classList.add("changed");
+    showChange();
   });
 }

@@ -1,7 +1,7 @@
 // Unit tests for the daily suggestion. Run with: node --test tests/*.test.mjs
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { lastCooked, seededRandom, dailySuggestions } from "../js/lib/suggest.js";
+import { lastCooked, seededRandom, dailySuggestions, activeOwners, toggleOwner, recipesOfOwners, initial } from "../js/lib/suggest.js";
 
 test("last cooked date is read from the notes", () => {
   assert.equal(lastCooked("Cooked 2 Nov 2026\nLess salt\nCooked 14 Oct 2026"), "2026-11-02");
@@ -57,4 +57,37 @@ test("same day, same order; the order changes over days", () => {
     firsts.add(dailySuggestions(recipes, "2026-11-" + String(day).padStart(2, "0"))[0].recipe.id);
   }
   assert.ok(firsts.size >= 4, "different dishes on different days: " + [...firsts]);
+});
+
+test("the suggestion starts with this phone's owner", () => {
+  assert.deepEqual(activeOwners(["Kadi", "Tõnis"], undefined, "Tõnis"), ["Tõnis"]);
+  assert.deepEqual(activeOwners(["Kadi", "Tõnis"], [], "Kadi"), ["Kadi"]);
+});
+
+test("a saved choice wins, unless nobody in it has recipes any more", () => {
+  assert.deepEqual(activeOwners(["Kadi", "Tõnis"], ["Kadi", "Tõnis"], "Tõnis"), ["Kadi", "Tõnis"]);
+  assert.deepEqual(activeOwners(["Kadi", "Tõnis"], ["Old"], "Tõnis"), ["Tõnis"]);
+});
+
+test("everyone counts if this phone's owner has no recipes", () => {
+  assert.deepEqual(activeOwners(["Kadi", "Tõnis"], undefined, "Mari"), ["Kadi", "Tõnis"]);
+  assert.deepEqual(activeOwners(["Kadi", "Tõnis"], undefined, ""), ["Kadi", "Tõnis"]);
+});
+
+test("owners switch on and off, but the last one stays on", () => {
+  assert.deepEqual(toggleOwner(["Tõnis"], "Kadi"), ["Tõnis", "Kadi"]);
+  assert.deepEqual(toggleOwner(["Tõnis", "Kadi"], "Tõnis"), ["Kadi"]);
+  assert.deepEqual(toggleOwner(["Kadi"], "Kadi"), ["Kadi"]);
+});
+
+test("only the chosen owners' recipes count, plus old ones without an owner", () => {
+  const recipes = [r("a", "A", { owner: "Kadi" }), r("b", "B", { owner: "Tõnis" }), r("c", "C", { owner: "" })];
+  assert.deepEqual(recipesOfOwners(recipes, ["Kadi"]).map((x) => x.id), ["a", "c"]);
+  assert.deepEqual(recipesOfOwners(recipes, ["Kadi", "Tõnis"]).map((x) => x.id), ["a", "b", "c"]);
+});
+
+test("an initial is the first letter, in capitals", () => {
+  assert.equal(initial("Tõnis"), "T");
+  assert.equal(initial(" kadi"), "K");
+  assert.equal(initial("Õie"), "Õ");
 });
