@@ -138,7 +138,7 @@ export function initProject() {
     }
     setStatus(currentId, button.dataset.status);
     if (button.dataset.status === "done") {
-      showToast("Well done! 🎉", { label: "Undo", run: () => setStatus(currentId, before) });
+      showToast("Well done.", { label: "Undo", run: () => setStatus(currentId, before) });
     } else {
       showToast("Moved to " + STATUS_LABELS[button.dataset.status]);
     }

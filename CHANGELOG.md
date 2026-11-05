@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-11-05 b
+- New look, in a calm Japandi style: stone paper, sumi ink, moss and hinoki wood colours, with dark mode as charred wood and rice paper.
+- Titles in Zen Old Mincho, everything else in Zen Kaku Gothic New (self-hosted, no Google requests).
+- A brushed ensō as the app icon, by the title, behind the active tab and on empty pages. Thin line icons instead of emoji.
+- Quieter layout: more space, lists as sheets of paper without outlines, section names in normal case, softer buttons.
+- Reinstall the app to get the new icon on the home screen.
+
 ## 2026-11-05 a
 - **Projects** for small home improvements without a deadline. The Chores tab is now **Home**, with a "Chores | Projects" switch at the top; Home reopens whichever you used last.
 - Each project has a status (💡 Idea, 🔨 Doing, ✅ Done), a rough size (an evening / a weekend / bigger), who, notes that save by themselves, a **steps** checklist with progress, and **things to buy**.

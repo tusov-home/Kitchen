@@ -1,0 +1,44 @@
+/* Self-hosted fonts (no requests to Google). Both are from the Zen family
+   by Yoshimichi Ohira, licensed under the SIL Open Font License 1.1 —
+   see LICENSE-*.txt in this folder. Only the Latin characters are
+   included (this covers English, German, Estonian and Swedish). */
+
+@font-face {
+  font-family: "Zen Old Mincho";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("zen-old-mincho-latin-400-normal.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Zen Old Mincho";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("zen-old-mincho-latin-700-normal.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Zen Kaku Gothic New";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("zen-kaku-gothic-new-latin-400-normal.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Zen Kaku Gothic New";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("zen-kaku-gothic-new-latin-500-normal.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Zen Kaku Gothic New";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("zen-kaku-gothic-new-latin-700-normal.woff2") format("woff2");
+}

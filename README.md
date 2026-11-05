@@ -159,6 +159,11 @@ node --test tests/*.test.mjs     # pure helpers + Code.gs against a fake Sheet
 python tests/app_test.py         # browser: Android phone + laptop with keyboard, fake Sheet
 ```
 
+## Credits
+
+- Fonts: [Zen Old Mincho](https://github.com/googlefonts/zen-oldmincho) and [Zen Kaku Gothic New](https://github.com/googlefonts/zen-kakugothic) by Yoshimichi Ohira, SIL Open Font License 1.1 (licence files in `fonts/`). Self-hosted: no requests to Google.
+- Icons and the ensō mark: drawn for this app.
+
 ## Roadmap
 
 - Weekly meal plan built from saved recipes

@@ -5,13 +5,19 @@
 // When offline, use the copy. Recipes themselves live in localStorage,
 // not here; requests to the Google Sheet are never touched.
 
-const CACHE = "kitchen-app-v6";
+const CACHE = "kitchen-app-v7";
 
 const APP_FILES = [
   "./",
   "index.html",
   "manifest.webmanifest",
   "css/style.css",
+  "fonts/fonts.css",
+  "fonts/zen-old-mincho-latin-400-normal.woff2",
+  "fonts/zen-old-mincho-latin-700-normal.woff2",
+  "fonts/zen-kaku-gothic-new-latin-400-normal.woff2",
+  "fonts/zen-kaku-gothic-new-latin-500-normal.woff2",
+  "fonts/zen-kaku-gothic-new-latin-700-normal.woff2",
   "js/main.js",
   "js/version.js",
   "js/state.js",
@@ -48,6 +54,7 @@ const APP_FILES = [
   "js/ui/shortcuts.js",
   "js/ui/toast.js",
   "icons/icon-192.png",
+  "icons/enso-mark.png",
   "icons/favicon-32.png",
 ];
 

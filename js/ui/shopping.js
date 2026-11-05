@@ -16,7 +16,7 @@ const removeTickedButton = document.getElementById("shop-remove-ticked");
 const deleteButton = document.getElementById("shop-delete");
 const cartCount = document.getElementById("cart-count");
 
-// The little number on the 🛒 button: items still to buy.
+// The little number on the Shopping tab: items still to buy.
 export function renderCartCount() {
   const list = shopping.getCurrent();
   const p = list ? progress(list.items) : { done: 0, total: 0 };

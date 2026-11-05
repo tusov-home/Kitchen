@@ -56,7 +56,7 @@ function renderBar() {
   }
   bar.hidden = !planning;
   hint.hidden = !planning;
-  toggleButton.textContent = planning ? "Done planning" : "🛒 Plan shopping";
+  toggleButton.textContent = planning ? "Done planning" : "Plan shopping";
   countText.textContent = selected.size + (selected.size === 1 ? " recipe" : " recipes");
   makeButton.disabled = selected.size === 0;
 }
