@@ -385,17 +385,56 @@ h3,
   outline: none;
 }
 
-.list-head {
+.list-title {
+  margin: 1.25rem 0 0;
+  font-size: 1.2rem;
+}
+
+/* The one row under the search box; a tap unfolds the panel below it */
+.all-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  width: 100%;
+  min-height: 3.1rem;
+  padding: 0 1rem;
+  border: none;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.all-toggle:disabled {
+  opacity: 1;
+  cursor: default;
+}
+
+.all-toggle:disabled .all-chevron {
+  display: none;
+}
+
+.all-chevron {
+  flex-shrink: 0;
+  width: 1.25rem;
+  height: 1.25rem;
+  color: var(--muted);
+  transition: transform 0.2s ease-out;
+}
+
+.all-toggle[aria-expanded="true"] .all-chevron {
+  transform: rotate(180deg);
+}
+
+.list-tools {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  justify-content: flex-end;
   gap: 0 0.25rem;
-  margin: 1.75rem 0 0;
-}
-
-.list-title {
-  margin: 0;
-  font-size: 1.2rem;
 }
 
 .list-title .hint {
@@ -403,14 +442,14 @@ h3,
   font-family: var(--font-body);
 }
 
-.list-head .text-button {
+.list-tools .text-button {
   padding: 0 0.6rem;
   color: var(--muted);
   font-weight: 500;
 }
 
-.list-head .text-button:hover,
-.list-head .text-button[aria-expanded="true"] {
+.list-tools .text-button:hover,
+.list-tools .text-button[aria-expanded="true"] {
   color: var(--text);
 }
 

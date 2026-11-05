@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-05 e
+- The recipes page now opens with only today's suggestion, the search and one **All recipes** row. Tap the row (or press A) to unfold the list together with **Filter**, **Plan shopping** and **+**.
+- Searching, filtering with F and planning shopping unfold it by themselves. Each app start begins folded again.
+
 ## 2026-11-05 d
 - Calmer recipes page. First: **today's suggestion**, one recipe with a short reason ("A favourite, rated 5 ★ · Not cooked in a while"). It's the same on both phones each day, prefers well-rated dishes you haven't cooked lately, and weekend dishes on weekends. **Another idea** shows the next one.
 - Second: a full-width search. While you search or plan shopping, the suggestion steps aside.

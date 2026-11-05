@@ -197,6 +197,7 @@ def test_laptop_second_device(p, sheet):
     expect(page.locator("#sync-status")).to_have_attribute("data-state", "ok")
 
     # Tõnis rates the same recipe with the keyboard; both ratings are kept
+    page.click("#all-toggle")
     page.click(".recipe-card")
     expect(page.locator("#view-recipe")).to_be_visible()
     expect(page.locator("#all-ratings")).to_contain_text("Kadi")
@@ -321,7 +322,31 @@ def test_laptop_second_device(p, sheet):
     page.reload()  # choice is remembered on this device
     expect(page.locator("#sort-select")).to_have_value("rating")
     expect(page.locator("#filter-panel")).to_be_hidden()  # folded again after reload
-    page.click("#filter-toggle")
+    # "All recipes" is folded on every start: only the suggestion and search
+    panel = page.locator("#all-panel")
+    expect(panel).to_be_hidden()
+    expect(page.locator("#suggestion")).to_be_visible()
+    expect(page.locator("#add-recipe")).to_be_hidden()
+    # Searching unfolds it, and clearing the search folds it again
+    page.keyboard.press("/")
+    page.keyboard.type("shak")
+    expect(page.locator(".recipe-card").first).to_be_visible()
+    expect(page.locator("#all-toggle")).to_be_disabled()
+    page.fill("#search", "")
+    expect(panel).to_be_hidden()
+    page.evaluate("document.activeElement.blur()")  # leave the text box
+    # A shows and hides it; so does a click, for the phone
+    page.keyboard.press("a")
+    expect(panel).to_be_visible()
+    expect(page.locator("#all-toggle")).to_have_attribute("aria-expanded", "true")
+    page.screenshot(path=SHOTS / "laptop-5-unfolded.png")
+    page.click("#all-toggle")
+    expect(panel).to_be_hidden()
+    page.screenshot(path=SHOTS / "laptop-6-folded.png")
+    # F from the folded page opens the list with its filters
+    page.keyboard.press("f")
+    expect(panel).to_be_visible()
+    expect(page.locator("#filter-panel")).to_be_visible()
     page.screenshot(path=SHOTS / "laptop-4-sorted.png")
     page.select_option("#sort-select", "newest")
 
@@ -574,6 +599,7 @@ def test_pantry_chores_tabs(p, sheet):
     page.fill("#pantry-add-input", "White miso")
     page.keyboard.press("Enter")
     page.click(".tab[data-tab=list]")
+    page.click("#all-toggle")
     page.click("#plan-toggle")
     page.click(".recipe-card:has-text('Miso Aubergine with Soba')")
     page.click("#plan-make")
@@ -843,7 +869,7 @@ def test_site_missing(p):
         # Switch the site off: every file now answers 404
         off.write_text("off")
         page.goto(url)
-        expect(page.locator("#add-recipe")).to_be_visible()
+        expect(page.locator("#all-toggle")).to_be_visible()
         expect(page.locator("#recipe-list")).to_contain_text("Lentil soup")
         print("site missing: ok")
     finally:

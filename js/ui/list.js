@@ -1,5 +1,5 @@
-// The recipes page: today's suggestion, search, and the list with its
-// filters (folded away behind "Filter" until needed).
+// The recipes page: today's suggestion, search, and "All recipes", a
+// folded panel holding the list, its filters and the Plan and + buttons.
 import * as state from "../state.js";
 import * as storage from "../storage.js";
 import { visibleRecipes, allTags, allOwners, averageRating } from "../lib/recipes.js";
@@ -17,7 +17,11 @@ const sortSelect = document.getElementById("sort-select");
 const filterToggle = document.getElementById("filter-toggle");
 const filterPanel = document.getElementById("filter-panel");
 const recipeCount = document.getElementById("recipe-count");
+const allToggle = document.getElementById("all-toggle");
+const allPanel = document.getElementById("all-panel");
 
+// Folded on every app start, so the page opens on today's suggestion.
+let allOpen = false;
 let filterOpen = false;
 
 let activeTag = "";
@@ -162,11 +166,31 @@ export function renderList() {
   filterToggle.textContent = activeFilters ? "Filter (" + activeFilters + ")" : "Filter";
   filterToggle.setAttribute("aria-expanded", filterPanel.hidden ? "false" : "true");
 
+  // "All recipes": folded unless opened, but it must be open to show search
+  // results, to pick recipes, and when there are none yet (for the + button).
+  const mustBeOpen = Boolean(searchInput.value.trim()) || isPlanning() || all.length === 0;
+  allPanel.hidden = !(allOpen || mustBeOpen);
+  allToggle.disabled = mustBeOpen;
+  allToggle.setAttribute("aria-expanded", allPanel.hidden ? "false" : "true");
+  allToggle.title = allPanel.hidden ? "Show all recipes (A)" : "Hide all recipes (A)";
+
   // The suggestion steps aside while you search or plan.
   renderSuggestion(all, !searchInput.value.trim() && !isPlanning());
 }
 
+export function toggleAllRecipes() {
+  allOpen = allPanel.hidden;
+  renderList();
+}
+
 export function toggleFilters() {
+  // F while folded: unfold first, so the filters can be seen.
+  if (allPanel.hidden) {
+    allOpen = true;
+    filterOpen = true;
+    renderList();
+    return;
+  }
   filterOpen = filterPanel.hidden;
   if (!filterOpen) {
     // Closing also clears the filters, so nothing stays hidden.
@@ -185,6 +209,7 @@ export function focusSearch() {
 export function initList() {
   initSuggestion();
   searchInput.addEventListener("input", renderList);
+  allToggle.addEventListener("click", toggleAllRecipes);
   filterToggle.addEventListener("click", toggleFilters);
   sortSelect.addEventListener("change", function () {
     sortOrder = sortSelect.value;

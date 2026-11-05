@@ -41,10 +41,16 @@
       <input id="search" class="search" type="search" placeholder="Search recipes or ingredients" aria-label="Search recipes" title="Search (/)">
     </label>
 
-    <!-- Everything else stays quiet until asked for -->
-    <div class="list-head">
-      <h2 class="list-title">All recipes <span id="recipe-count" class="hint"></span></h2>
-      <span class="spacer"></span>
+    <!-- Everything else stays folded until asked for -->
+    <h2 class="list-title">
+      <button id="all-toggle" class="all-toggle" type="button" aria-expanded="false" aria-controls="all-panel" title="Show all recipes (A)">
+        <span>All recipes <span id="recipe-count" class="hint"></span></span>
+        <svg class="line-icon all-chevron" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 9.5l6 6 6-6"/></svg>
+      </button>
+    </h2>
+
+    <div id="all-panel" hidden>
+    <div class="list-tools">
       <button id="filter-toggle" class="text-button" type="button" aria-expanded="false" aria-controls="filter-panel" title="Filter and sort (F)">Filter</button>
       <button id="plan-toggle" class="text-button" type="button" title="Pick recipes for a shopping list (P)">Plan shopping</button>
       <button id="add-recipe" class="icon-button add-button" type="button" title="Add recipe (N)" aria-label="Add recipe"><svg class="line-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 5v14M5 12h14"/></svg></button>
@@ -67,9 +73,10 @@
     <ul id="recipe-list" class="recipe-list"></ul>
     <div id="empty-list" class="empty" hidden>
       <p class="empty-title">No recipes yet</p>
-      <p>When a recipe in Claude is just how you want it, copy it and tap <strong>+</strong> next to All recipes.</p>
+      <p>When a recipe in Claude is just how you want it, copy it and tap <strong>+</strong> above.</p>
     </div>
     <p id="no-results" class="empty" hidden>No recipes match your search.</p>
+    </div>
 
     <!-- Shown while picking recipes for the shopping list -->
     <div id="plan-bar" class="plan-bar" hidden>

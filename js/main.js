@@ -3,7 +3,7 @@ import { APP_VERSION } from "./version.js";
 import * as state from "./state.js";
 import * as sync from "./sync.js";
 import { parseRoute, trackHistory, go, goBack } from "./ui/router.js";
-import { initList, renderList, focusSearch, toggleFilters } from "./ui/list.js";
+import { initList, renderList, focusSearch, toggleAllRecipes, toggleFilters } from "./ui/list.js";
 import { initRecipe, renderRecipe, changeServings, canEditCurrent } from "./ui/recipe.js";
 import { showToast } from "./ui/toast.js";
 import { rate } from "./ui/rating.js";
@@ -190,6 +190,7 @@ initShortcuts(
   {
     addRecipe: () => go("#/new"),
     focusSearch: focusSearch,
+    toggleAllRecipes: toggleAllRecipes,
     toggleFilters: toggleFilters,
     editRecipe: function () {
       if (canEditCurrent()) {
