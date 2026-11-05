@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-11-05 a
+- **Projects** for small home improvements without a deadline. The Chores tab is now **Home**, with a "Chores | Projects" switch at the top; Home reopens whichever you used last.
+- Each project has a status (💡 Idea, 🔨 Doing, ✅ Done), a rough size (an evening / a weekend / bigger), who, notes that save by themselves, a **steps** checklist with progress, and **things to buy**.
+- "Add to shopping list" puts the things to buy on the shared list (marked with the project's name); ticking them off while shopping marks them as bought in the project.
+- Ticking the first step moves an idea to Doing. Marking it Done has Undo.
+- Steps and things to buy merge item by item between phones, so you can both work on the same project. Projects sync through a new Sheet tab; no `Code.gs` change needed.
+- Shortcuts: N adds a project, E edits it, Esc goes back.
+- Fixed: a page could replay its slide-in animation when you came back to it.
+
 ## 2026-11-04 b
 - Swiping between pages is more sensitive: about 55 px is enough, or a short quick flick.
 - The page now follows your finger while you swipe. Let go far enough and it slides away while the next page glides in; let go early and it springs back. On the first and last page it only stretches a little. (Turned off if the phone is set to reduce motion.)

@@ -36,7 +36,8 @@ let who = storage.loadSettings().choresWho || "";
 let editingId = null;
 
 // Everyone we know: this phone's name, recipe owners, people on chores.
-function knownNames() {
+// Also used by projects for their "Who" menu.
+export function knownNames() {
   const names = new Set(allOwners(state.getRecipes()));
   const mine = getMyName();
   if (mine) {

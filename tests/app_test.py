@@ -552,7 +552,7 @@ def test_pantry_chores_tabs(p, sheet):
     expect(page.locator(".shop-section", has_text="Produce")).to_contain_text("aubergines")
 
     # ---------- Chores ----------
-    page.click(".tab[data-tab=chores]")
+    page.click(".tab[data-tab=home]")
     expect(page.locator("#chores-empty")).to_be_visible()
     page.click("#chore-add")
     expect(page.locator("#chore-dialog")).to_be_visible()
@@ -606,7 +606,7 @@ def test_pantry_chores_tabs(p, sheet):
     # Narrow phones: nothing sticks out sideways
     for width in (340, 360):
         page.set_viewport_size({"width": width, "height": 800})
-        for tab in ("list", "shopping", "pantry", "chores"):
+        for tab in ("list", "shopping", "pantry", "home"):
             page.click(f".tab[data-tab={tab}]")
             assert not page.evaluate("document.documentElement.scrollWidth > window.innerWidth"), (tab, width)
 
@@ -637,6 +637,128 @@ def test_pantry_chores_tabs(p, sheet):
     print("pantry, chores, tabs: ok")
 
 
+def test_projects(p, sheet):
+    """Projects on the Home tab: steps, things to buy, status; merged between devices."""
+    errors = []
+
+    def device(name, **options):
+        ctx = p.chromium.launch().new_context(**options)
+        ctx.route(SHEET_URL, sheet.handle)
+        ctx.add_init_script(
+            f"if (!localStorage.getItem('kitchen.settings.v1')) localStorage.setItem('kitchen.settings.v1', JSON.stringify({{syncUrl: '{SHEET_URL}', myName: '{name}'}}))"
+        )
+        page = ctx.new_page()
+        watch_errors(page, errors)
+        page.goto(BASE)
+        expect(page.locator("#sync-status")).to_have_attribute("data-state", "ok")
+        return page
+
+    page = device("Kadi", **p.devices["Pixel 7"])
+    # Home tab opens Chores; the switch goes to Projects
+    page.click(".tab[data-tab=home]")
+    expect(page.locator("#view-chores")).to_be_visible()
+    page.click("#view-chores .segment[data-home=projects]")
+    expect(page.locator("#view-projects")).to_be_visible()
+    expect(page.locator(".tab.active")).to_have_attribute("data-tab", "home")
+    expect(page.locator("#projects-empty")).to_be_visible()
+
+    # New project → opens straight away
+    page.click("#project-add")
+    assert page.evaluate("document.activeElement.tagName") == "H2", "keyboard must stay closed"
+    page.fill("#project-title-input", "Hang hallway shelf")
+    page.select_option("#project-effort", "evening")
+    page.click("#project-form button[value=save]")
+    expect(page.locator("#view-project")).to_be_visible()
+    expect(page.locator("#project-title")).to_have_text("Hang hallway shelf")
+    expect(page.locator("#project-meta")).to_contain_text("An evening · Anyone")
+    expect(page.locator("#project-status .segment.active")).to_contain_text("Idea")
+
+    # Steps
+    for step in ("Buy wall plugs", "Drill holes", "Hang shelf"):
+        page.fill("#project-step-input", step)
+        page.keyboard.press("Enter")
+    expect(page.locator("#project-steps .shop-name")).to_have_text(["Buy wall plugs", "Drill holes", "Hang shelf"])
+    page.click("#project-steps .shop-item:has-text('Buy wall plugs') .shop-check")
+    expect(page.locator("#project-progress")).to_have_text("1 of 3 done")
+    # First ticked step: work has started
+    expect(page.locator("#project-status .segment.active")).to_contain_text("Doing")
+
+    # Things to buy → shopping list → ticking there marks them bought
+    for item in ("8 wall plugs", "Spirit level"):
+        page.fill("#project-material-input", item)
+        page.keyboard.press("Enter")
+    expect(page.locator("#project-to-shopping")).to_have_text("Add 2 to shopping list")
+    page.click("#project-to-shopping")
+    expect(page.locator("#project-to-shopping")).to_be_hidden()
+    expect(page.locator("#project-materials")).to_contain_text("On the shopping list")
+    # Notes save by themselves
+    page.fill("#project-notes", "Shelf is 80 cm, concrete wall")
+    page.locator("#project-title").click()
+    page.screenshot(path=SHOTS / "phone-9-project.png", full_page=True)
+
+    page.click(".tab[data-tab=shopping]")
+    expect(page.locator("#view-shopping .shop-item", has_text="wall plugs")).to_contain_text("Hang hallway shelf")
+    page.click("#view-shopping .shop-item:has-text('wall plugs') .shop-check")
+
+    # Back to Home: it remembers Projects
+    page.click(".tab[data-tab=home]")
+    expect(page.locator("#view-projects")).to_be_visible()
+    card = page.locator(".project-card", has_text="Hang hallway shelf")
+    expect(card).to_contain_text("1 of 3 steps · 1 to buy")
+    bar = card.locator(".progress-fill").evaluate("el => el.getBoundingClientRect().width / el.parentElement.getBoundingClientRect().width")
+    assert 0.3 < bar < 0.37, bar
+    expect(page.locator(".project-group.group-doing h2")).to_have_text("In progress (1)")
+
+    # A second project, as an idea
+    page.click("#project-add")
+    page.fill("#project-title-input", "Herb box for the balcony")
+    page.select_option("#project-who", "Kadi")
+    page.click("#project-form button[value=save]")
+    page.click("#project-back")
+    expect(page.locator(".project-group.group-idea")).to_contain_text("Herb box for the balcony")
+    # Coming back must not replay an old slide animation
+    assert page.evaluate("document.getElementById('view-projects').className") == "view", "stale slide class"
+    page.screenshot(path=SHOTS / "phone-10-projects.png", full_page=True)
+    for width in (340, 360):
+        page.set_viewport_size({"width": width, "height": 800})
+        assert not page.evaluate("document.documentElement.scrollWidth > window.innerWidth"), width
+    page.set_viewport_size({"width": 412, "height": 915})
+    page.wait_for_timeout(2500)  # sync
+
+    # The laptop: sees the project, adds a step while the phone ticks one
+    laptop = device("Tõnis", viewport={"width": 1366, "height": 768})
+    laptop.goto(BASE + "#/projects")
+    laptop.click(".project-card:has-text('Hang hallway shelf')")
+    expect(laptop.locator("#project-notes")).to_have_value("Shelf is 80 cm, concrete wall")
+    expect(laptop.locator("#project-materials .shop-item.checked")).to_contain_text("8 wall plugs")
+    laptop.fill("#project-step-input", "Fill old holes")
+    laptop.keyboard.press("Enter")
+    page.click(".project-card:has-text('Hang hallway shelf')")
+    page.click("#project-steps .shop-item:has-text('Drill holes') .shop-check")
+    laptop.wait_for_timeout(2500)
+    page.wait_for_timeout(2500)
+    page.evaluate("window.dispatchEvent(new Event('online'))")  # sync now
+    expect(page.locator("#project-steps .shop-name")).to_have_text(["Buy wall plugs", "Drill holes", "Hang shelf", "Fill old holes"])
+    expect(page.locator("#project-progress")).to_have_text("2 of 4 done")
+    laptop.evaluate("window.dispatchEvent(new Event('online'))")
+    expect(laptop.locator("#project-progress")).to_have_text("2 of 4 done")
+
+    # Keyboard on the laptop: E edits, Esc goes back; marking done
+    laptop.locator("#project-title").click()  # leave the step box first
+    laptop.keyboard.press("e")
+    expect(laptop.locator("#project-dialog")).to_be_visible()
+    laptop.keyboard.press("Escape")
+    laptop.click("#project-status .segment[data-status=done]")
+    expect(laptop.locator("#toast")).to_contain_text("Well done")
+    laptop.keyboard.press("Escape")
+    expect(laptop.locator("#view-projects")).to_be_visible()
+    expect(laptop.locator(".project-group.group-done")).to_contain_text("Hang hallway shelf")
+    laptop.screenshot(path=SHOTS / "laptop-6-projects.png")
+
+    assert not errors, errors
+    print("projects: ok")
+
+
 def main():
     server = subprocess.Popen(
         [sys.executable, "-m", "http.server", str(PORT)],
@@ -651,6 +773,7 @@ def main():
             test_laptop_second_device(p, sheet)
             test_shopping_shared(p, sheet)
             test_pantry_chores_tabs(p, sheet)
+            test_projects(p, sheet)
             test_installable_and_offline(p)
         print(f"all browser tests passed ({sheet.calls} sync calls)")
     finally:

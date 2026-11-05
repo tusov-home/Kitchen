@@ -6,6 +6,7 @@ import * as state from "./state.js";
 import * as shopping from "./shoppingState.js";
 import { pantry } from "./pantryState.js";
 import { chores } from "./choresState.js";
+import { projects } from "./projectsState.js";
 import * as storage from "./storage.js";
 import { normaliseRecipe } from "./lib/recipes.js";
 
@@ -60,6 +61,7 @@ const COLLECTIONS = [
   { name: "shopping", store: shopping },
   { name: "pantry", store: pantry },
   { name: "chores", store: chores },
+  { name: "projects", store: projects },
 ];
 
 // Returns false if the Sheet's script is too old to know about collections.
@@ -106,7 +108,7 @@ export async function syncNow() {
     if (allSynced) {
       report("ok", "Synced " + time);
     } else {
-      report("error", "Recipes synced " + time + ", but shopping, pantry and chores need the new Code.gs (see README)");
+      report("error", "Recipes synced " + time + ", but shopping, pantry, chores and projects need the new Code.gs (see README)");
     }
   } catch (error) {
     console.warn("Sync failed", error);

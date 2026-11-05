@@ -6,6 +6,7 @@ import { newId } from "./lib/recipes.js";
 import { addRecipeItems, manualItem, mergeLists, currentList, normaliseList, nameKey } from "./lib/shopping.js";
 import { findInPantry } from "./lib/pantry.js";
 import { pantry, setStatus } from "./pantryState.js";
+import { setEntry } from "./projectsState.js";
 
 // All lists, including deleted ones (needed for sync).
 let lists = storage.loadShopping().map(normaliseList).filter(Boolean);
@@ -78,9 +79,13 @@ export function toggleItem(key) {
   const items = Object.assign({}, list.items);
   items[key] = Object.assign({}, item, { checked: !item.checked, at: Date.now() });
   update(list, { items: items });
-  // Bought it: if the pantry had it as Low or Out, it's back to Have.
+  // Bought it: if the pantry had it as Low or Out, it's back to Have;
+  // if it's material for a project, it's marked as bought there.
   if (!item.checked) {
     restockPantry(item);
+  }
+  if (item.projectId && item.materialKey) {
+    setEntry(item.projectId, "materials", item.materialKey, !item.checked);
   }
 }
 

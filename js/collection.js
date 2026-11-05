@@ -25,7 +25,9 @@ function writeJson(key, value) {
 }
 
 // name: the Sheet tab ("pantry"); normalise(raw) returns a clean item or null.
-export function createCollection(name, normalise) {
+// mergeItem(a, b) (optional): combines two versions of the same item;
+// by default the newer one wins.
+export function createCollection(name, normalise, mergeItem) {
   const storageKey = "kitchen." + name + ".v1";
   const loaded = readJson(storageKey, []);
   let items = (Array.isArray(loaded) ? loaded : []).map(normalise).filter(Boolean);
@@ -92,7 +94,11 @@ export function createCollection(name, normalise) {
           continue;
         }
         const existing = byId.get(item.id);
-        if (!existing || item.updatedAt > existing.updatedAt) {
+        if (!existing) {
+          byId.set(item.id, item);
+        } else if (mergeItem && !existing.deleted && !item.deleted) {
+          byId.set(item.id, mergeItem(existing, item));
+        } else if (item.updatedAt > existing.updatedAt) {
           byId.set(item.id, item);
         }
       }

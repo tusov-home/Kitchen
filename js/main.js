@@ -20,6 +20,9 @@ import { pantry } from "./pantryState.js";
 import { chores } from "./choresState.js";
 import { initPantry, renderPantry, renderPantryBadge, focusPantryAdd } from "./ui/pantry.js";
 import { initChores, renderChores, renderChoresBadge, openChore } from "./ui/chores.js";
+import { projects } from "./projectsState.js";
+import { initProjects, renderProjects, openProjectDialog } from "./ui/projects.js";
+import { initProject, renderProject, editCurrentProject } from "./ui/project.js";
 
 const views = {
   list: document.getElementById("view-list"),
@@ -28,6 +31,8 @@ const views = {
   shopping: document.getElementById("view-shopping"),
   pantry: document.getElementById("view-pantry"),
   chores: document.getElementById("view-chores"),
+  projects: document.getElementById("view-projects"),
+  project: document.getElementById("view-project"),
 };
 const syncStatus = document.getElementById("sync-status");
 
@@ -76,6 +81,14 @@ function route() {
   } else if (current.screen === "chores") {
     setPlanning(false);
     renderChores();
+  } else if (current.screen === "projects") {
+    setPlanning(false);
+    renderProjects();
+  } else if (current.screen === "project") {
+    if (!renderProject(current.id)) {
+      go("#/projects", true); // project no longer exists
+      return;
+    }
   } else {
     document.title = "Kitchen";
     renderList();
@@ -119,6 +132,22 @@ chores.onChange(function () {
     renderChores();
   }
 });
+projects.onChange(function () {
+  if (current.screen === "projects") {
+    renderProjects();
+  } else if (current.screen === "project") {
+    if (!renderProject(current.id)) {
+      go("#/projects", true);
+    }
+  }
+});
+// "On the shopping list" notes on a project follow the shopping list.
+shoppingState.onChange(function () {
+  if (current.screen === "project") {
+    renderProject(current.id);
+  }
+});
+
 // Back on the app after a while (maybe a new day): chores' due dates
 // and the badge depend on today's date.
 document.addEventListener("visibilitychange", function () {
@@ -150,6 +179,8 @@ initPlan(renderList);
 initShopping();
 initPantry();
 initChores();
+initProjects();
+initProject();
 initTabs(() => current.screen);
 renderCartCount();
 renderPantryBadge();
@@ -180,6 +211,8 @@ initShortcuts(
         setPlanning(false);
       } else if (current.screen === "edit") {
         cancelEditor();
+      } else if (current.screen === "project") {
+        document.getElementById("project-back").click();
       } else if (current.screen !== "list") {
         goBack("#/");
       }
@@ -189,6 +222,8 @@ initShortcuts(
     nextTab: () => stepTab(1),
     focusPantryAdd: focusPantryAdd,
     addChore: () => openChore(null),
+    addProject: () => openProjectDialog(null),
+    editProject: editCurrentProject,
     togglePlanning: () => setPlanning(!isPlanning()),
     showHelp: () => document.getElementById("shortcut-help").showModal(),
   },

@@ -7,6 +7,8 @@
 //   #/shopping    the shopping list
 //   #/pantry      what we have at home
 //   #/chores      household chores
+//   #/projects    home improvement projects
+//   #/project/<id> one project
 // Using the address means the phone's Back button works as expected.
 
 // How many app screens lie behind the current one in the history.
@@ -16,8 +18,12 @@ let replacing = false;
 
 export function parseRoute(hash) {
   const path = (hash || "").replace(/^#/, "") || "/";
-  if (path === "/shopping" || path === "/pantry" || path === "/chores") {
+  if (["/shopping", "/pantry", "/chores", "/projects"].includes(path)) {
     return { screen: path.slice(1), id: null };
+  }
+  const project = path.match(/^\/project\/([^/]+)$/);
+  if (project) {
+    return { screen: "project", id: decodeURIComponent(project[1]) };
   }
   if (path === "/new") {
     return { screen: "edit", id: null };

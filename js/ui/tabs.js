@@ -1,13 +1,19 @@
-// Bottom tab bar: Recipes · Shopping · Pantry · Chores. Tap a tab, swipe
+// Bottom tab bar: Recipes · Shopping · Pantry · Home. Tap a tab, swipe
 // left/right anywhere on a page, or press ← / → on the laptop.
+// The Home tab holds two pages, Chores and Projects, and remembers which
+// one you had open last.
 import { go, goBack } from "./router.js";
+import * as storage from "../storage.js";
 
 export const TABS = [
-  { screen: "list", hash: "#/" },
-  { screen: "shopping", hash: "#/shopping" },
-  { screen: "pantry", hash: "#/pantry" },
-  { screen: "chores", hash: "#/chores" },
+  { id: "list", screens: ["list"], hash: () => "#/" },
+  { id: "shopping", screens: ["shopping"], hash: () => "#/shopping" },
+  { id: "pantry", screens: ["pantry"], hash: () => "#/pantry" },
+  { id: "home", screens: ["chores", "projects"], hash: () => (storage.loadSettings().homeView === "projects" ? "#/projects" : "#/chores") },
 ];
+
+// Pages opened from a tab (not swipeable themselves) still light up its tab.
+const BELONGS_TO = { recipe: "list", project: "home" };
 
 const tabbar = document.getElementById("tabbar");
 
@@ -28,32 +34,51 @@ let getScreen = () => "list";
 let swipeDirection = 0; // -1: came from the left, +1: from the right
 
 export function isTabScreen(screen) {
-  return TABS.some((tab) => tab.screen === screen);
+  return tabIndex(screen) !== -1;
 }
 
 function tabIndex(screen) {
-  return TABS.findIndex((tab) => tab.screen === screen);
+  return TABS.findIndex((tab) => tab.screens.includes(screen));
 }
 
-// Moving between tabs. To keep the phone's Back button sensible:
-// from Recipes, a tab opens on top (Back returns to Recipes); between
-// the other tabs, the page is swapped (Back still returns to Recipes);
-// going to Recipes steps back.
-export function goToTab(screen) {
+function tabOf(screen) {
+  const index = tabIndex(screen);
+  return index !== -1 ? TABS[index].id : BELONGS_TO[screen] || null;
+}
+
+// Moving between tabs (tabId: "list", "shopping", "pantry", "home").
+// To keep the phone's Back button sensible: from Recipes, a tab opens on
+// top (Back returns to Recipes); between the other tabs, the page is
+// swapped (Back still returns to Recipes); going to Recipes steps back.
+export function goToTab(tabId) {
   const from = getScreen();
-  const target = TABS[tabIndex(screen)];
-  if (!target || from === screen) {
+  const targetIndex = TABS.findIndex((tab) => tab.id === tabId);
+  const target = TABS[targetIndex];
+  if (!target) {
+    return;
+  }
+  if (isTabScreen(from) && tabOf(from) === tabId) {
     window.scrollTo({ top: 0, behavior: "smooth" });
     return;
   }
   const fromIndex = tabIndex(from);
-  swipeDirection = fromIndex === -1 ? 0 : tabIndex(screen) > fromIndex ? 1 : -1;
-  if (screen === "list") {
-    goBack("#/");
+  swipeDirection = fromIndex === -1 ? 0 : targetIndex > fromIndex ? 1 : -1;
+  if (tabId === "list" || (!isTabScreen(from) && tabOf(from) === tabId)) {
+    // Back to Recipes, or from a project page back to its list.
+    goBack(target.hash());
   } else if (isTabScreen(from) && from !== "list") {
-    go(target.hash, true);
+    go(target.hash(), true);
   } else {
-    go(target.hash);
+    go(target.hash());
+  }
+}
+
+// Switches between the two Home pages (chores / projects) in place.
+export function showHomePage(screen) {
+  storage.saveSettings(Object.assign(storage.loadSettings(), { homeView: screen }));
+  if (getScreen() !== screen) {
+    swipeDirection = screen === "projects" ? 1 : -1;
+    go("#/" + screen, true);
   }
 }
 
@@ -62,16 +87,23 @@ export function stepTab(direction) {
   const index = tabIndex(getScreen());
   const next = TABS[index + direction];
   if (index !== -1 && next) {
-    goToTab(next.screen);
+    goToTab(next.id);
   }
 }
 
 // Called on every screen change: highlights the tab, plays the slide.
 export function renderTabs(screen, view) {
   tabbar.hidden = screen === "edit";
+  // Remember which Home page was open, for the next tap on Home.
+  if (screen === "chores" || screen === "projects") {
+    const settings = storage.loadSettings();
+    if (settings.homeView !== screen) {
+      storage.saveSettings(Object.assign(settings, { homeView: screen }));
+    }
+  }
   document.body.classList.toggle("has-tabbar", !tabbar.hidden);
   for (const tab of tabbar.querySelectorAll(".tab")) {
-    const active = tab.dataset.tab === screen || (screen === "recipe" && tab.dataset.tab === "list");
+    const active = tab.dataset.tab === tabOf(screen);
     tab.classList.toggle("active", active);
     if (active) {
       tab.setAttribute("aria-current", "page");
@@ -84,12 +116,15 @@ export function renderTabs(screen, view) {
     page.style.transform = "";
     page.style.opacity = "";
     page.style.transition = "";
+    // A leftover slide class would replay whenever the page reappears.
+    page.classList.remove("slide-from-right", "slide-from-left");
   }
   if (view && swipeDirection !== 0) {
     const name = swipeDirection > 0 ? "slide-from-right" : "slide-from-left";
     view.classList.remove("slide-from-right", "slide-from-left");
     void view.offsetWidth; // restart the animation
     view.classList.add(name);
+    view.addEventListener("animationend", () => view.classList.remove(name), { once: true });
   }
   swipeDirection = 0;
 }
@@ -226,6 +261,13 @@ export function initTabs(screenGetter) {
     tab.addEventListener("click", function (event) {
       event.preventDefault();
       goToTab(tab.dataset.tab);
+    });
+  }
+  // The "Chores | Projects" switch at the top of the Home pages.
+  for (const segment of document.querySelectorAll(".segmented a[data-home]")) {
+    segment.addEventListener("click", function (event) {
+      event.preventDefault();
+      showHomePage(segment.dataset.home);
     });
   }
   initSwipe();

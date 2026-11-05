@@ -119,6 +119,10 @@
 
   <!-- Household chores -->
   <main id="view-chores" class="view" hidden>
+    <nav class="segmented" aria-label="Home">
+      <a href="#/chores" class="segment active" data-home="chores" aria-current="page">Chores</a>
+      <a href="#/projects" class="segment" data-home="projects">Projects</a>
+    </nav>
     <div class="page-head">
       <h1 class="page-title">Chores</h1>
       <button id="chore-add" class="primary" type="button" title="Add chore (N)">+ Add chore</button>
@@ -133,6 +137,65 @@
       <span class="spacer"></span>
       <button id="chores-clear-done" class="button" type="button">Clear done</button>
     </div>
+  </main>
+
+  <!-- Home improvement projects (Home tab, second page) -->
+  <main id="view-projects" class="view" hidden>
+    <nav class="segmented" aria-label="Home">
+      <a href="#/chores" class="segment" data-home="chores">Chores</a>
+      <a href="#/projects" class="segment active" data-home="projects" aria-current="page">Projects</a>
+    </nav>
+    <div class="page-head">
+      <h1 class="page-title">Projects</h1>
+      <button id="project-add" class="primary" type="button" title="Add project (N)">+ Add project</button>
+    </div>
+    <div id="projects-filter" class="owner-filter" role="group" aria-label="Show projects for"></div>
+    <div id="projects-groups"></div>
+    <div id="projects-empty" class="empty" hidden>
+      <p class="empty-title">No projects yet</p>
+      <p>Collect small home improvements with no deadline: <em>hang the hallway shelf</em>, <em>reseal the shower</em>, <em>build a herb box</em>. Add steps and things to buy, and pick one up when you have a free evening.</p>
+    </div>
+  </main>
+
+  <!-- One project -->
+  <main id="view-project" class="view" hidden>
+    <div class="actions">
+      <a href="#/projects" class="button" id="project-back" title="Back (Esc)">← Projects</a>
+      <span class="spacer"></span>
+      <button id="project-edit" class="button" type="button" title="Edit (E)">Edit</button>
+    </div>
+    <h1 id="project-title" class="page-title"></h1>
+    <p id="project-meta" class="shop-recipes"></p>
+
+    <div id="project-status" class="segmented status-switch" role="group" aria-label="Status">
+      <button type="button" class="segment" data-status="idea">💡 Idea</button>
+      <button type="button" class="segment" data-status="doing">🔨 Doing</button>
+      <button type="button" class="segment" data-status="done">✅ Done</button>
+    </div>
+
+    <section class="project-section">
+      <h2>Steps <span id="project-progress" class="hint"></span></h2>
+      <ul id="project-steps" class="shop-items"></ul>
+      <form id="project-step-add" class="shop-add">
+        <input id="project-step-input" type="text" placeholder="Add a step, e.g. Buy wall plugs" aria-label="Add a step" autocomplete="off">
+        <button class="button" type="submit">Add</button>
+      </form>
+    </section>
+
+    <section class="project-section">
+      <h2>Things to buy</h2>
+      <ul id="project-materials" class="shop-items"></ul>
+      <form id="project-material-add" class="shop-add">
+        <input id="project-material-input" type="text" placeholder="e.g. 8 wall plugs, white paint 1 l" aria-label="Add something to buy" autocomplete="off">
+        <button class="button" type="submit">Add</button>
+      </form>
+      <button id="project-to-shopping" class="primary" type="button" hidden></button>
+    </section>
+
+    <section class="project-section">
+      <h2>Notes <span class="hint">measurements, links, ideas — saved automatically</span></h2>
+      <textarea id="project-notes" rows="4" aria-label="Notes"></textarea>
+    </section>
   </main>
 
   <!-- One recipe -->
@@ -288,7 +351,7 @@
     <a href="#/" class="tab" data-tab="list" title="Recipes (←/→ to switch pages)"><span class="tab-icon" aria-hidden="true">🍲</span><span class="tab-label">Recipes</span></a>
     <a href="#/shopping" class="tab" data-tab="shopping" title="Shopping list (L)"><span class="tab-icon" aria-hidden="true">🛒</span><span class="tab-label">Shopping</span><span id="cart-count" class="tab-badge" hidden></span></a>
     <a href="#/pantry" class="tab" data-tab="pantry" title="Pantry"><span class="tab-icon" aria-hidden="true">🫙</span><span class="tab-label">Pantry</span><span id="pantry-count" class="tab-badge" hidden></span></a>
-    <a href="#/chores" class="tab" data-tab="chores" title="Chores"><span class="tab-icon" aria-hidden="true">🧹</span><span class="tab-label">Chores</span><span id="chores-count" class="tab-badge" hidden></span></a>
+    <a href="#/chores" class="tab" data-tab="home" title="Home: chores and projects"><span class="tab-icon" aria-hidden="true">🏠</span><span class="tab-label">Home</span><span id="chores-count" class="tab-badge" hidden></span></a>
   </nav>
 
   <!-- Edit one pantry item -->
@@ -340,6 +403,30 @@
       <p id="chore-last" class="hint" hidden></p>
       <div class="actions">
         <button id="chore-delete" class="button danger" type="button" hidden>Delete</button>
+        <span class="spacer"></span>
+        <button class="button" value="cancel" formnovalidate>Cancel</button>
+        <button class="primary" value="save">Save</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Add or edit a project -->
+  <dialog id="project-dialog" class="dialog">
+    <form method="dialog" class="dialog-body" id="project-form">
+      <h2 id="project-dialog-title" tabindex="-1" autofocus class="dialog-title">Add project</h2>
+      <label for="project-title-input">What</label>
+      <input id="project-title-input" type="text" required autocomplete="off" placeholder="e.g. Hang shelf in the hallway">
+      <label for="project-effort">How big</label>
+      <select id="project-effort">
+        <option value="">Not sure</option>
+        <option value="evening">An evening</option>
+        <option value="weekend">A weekend</option>
+        <option value="bigger">Bigger</option>
+      </select>
+      <label for="project-who">Who</label>
+      <select id="project-who"></select>
+      <div class="actions">
+        <button id="project-delete" class="button danger" type="button" hidden>Delete</button>
         <span class="spacer"></span>
         <button class="button" value="cancel" formnovalidate>Cancel</button>
         <button class="primary" value="save">Save</button>
