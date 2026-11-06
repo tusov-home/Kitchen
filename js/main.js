@@ -4,7 +4,7 @@ import * as state from "./state.js";
 import * as sync from "./sync.js";
 import { parseRoute, trackHistory, go, goBack } from "./ui/router.js";
 import { toggleSuggestionOwner } from "./ui/suggestion.js";
-import { initList, renderList, focusSearch, toggleAllRecipes, toggleFilters } from "./ui/list.js";
+import { initList, renderList, focusSearch, toggleKind, toggleFilters } from "./ui/list.js";
 import { initRecipe, renderRecipe, changeServings, canEditCurrent, addCurrentToList } from "./ui/recipe.js";
 import { showToast } from "./ui/toast.js";
 import { rate } from "./ui/rating.js";
@@ -166,7 +166,8 @@ initShortcuts(
   {
     addRecipe: () => go("#/new"),
     focusSearch: focusSearch,
-    toggleAllRecipes: toggleAllRecipes,
+    toggleMeals: () => toggleKind("meal"),
+    toggleSauces: () => toggleKind("sauce"),
     toggleFilters: toggleFilters,
     suggestT: () => toggleSuggestionOwner("T"),
     suggestK: () => toggleSuggestionOwner("K"),

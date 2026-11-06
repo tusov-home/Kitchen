@@ -187,7 +187,7 @@ test("a copy keeps the recipe but not notes, ratings or owner", () => {
     notes: "Kadi's note", ratings: { Kadi: { stars: 5, at: 1 } }, owner: "Kadi",
   };
   const copy = copyForEditing(original);
-  assert.deepEqual(copy, { title: "Ragu", text: "Slow cook.", tags: ["weekend"], servings: 4, notes: "", copyOf: "o1" });
+  assert.deepEqual(copy, { title: "Ragu", kind: "meal", text: "Slow cook.", tags: ["weekend"], servings: 4, notes: "", copyOf: "o1" });
   copy.tags.push("spicy");
   assert.deepEqual(original.tags, ["weekend"], "original tags untouched");
 });
@@ -217,4 +217,14 @@ test("newest stays the default", () => {
 test("filter by owner, and list of owners", () => {
   assert.deepEqual(visibleRecipes(shelf, "", "", { owner: "Tõnis", sort: "az" }).map((r) => r.id), ["1", "3"]);
   assert.deepEqual(allOwners(shelf), ["Kristiina", "Tõnis"]);
+});
+
+test("a recipe is a meal unless it says it's a sauce", () => {
+  assert.equal(normaliseRecipe({ id: "a" }).kind, "meal");
+  assert.equal(normaliseRecipe({ id: "a", kind: "nonsense" }).kind, "meal");
+  assert.equal(normaliseRecipe({ id: "a", kind: "sauce" }).kind, "sauce");
+});
+
+test("a copy keeps the type", () => {
+  assert.equal(copyForEditing({ title: "Chilli oil", text: "Heat.", tags: [], kind: "sauce" }).kind, "sauce");
 });

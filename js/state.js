@@ -39,6 +39,7 @@ export function saveRecipe(input) {
   const recipe = {
     id: id,
     title: input.title.trim(),
+    kind: input.kind || (existing ? existing.kind : "meal"),
     text: input.text.trim(),
     tags: input.tags || [],
     notes: (input.notes || "").trim(),

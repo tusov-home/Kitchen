@@ -454,11 +454,11 @@ button.owner-initial {
 }
 
 .list-title {
-  margin: 0.75rem 0 0;
+  margin: 0.6rem 0 0;
   font-size: 1.2rem;
 }
 
-/* The one row under the search box; a tap unfolds the panel below it */
+/* The rows under the search box; a tap unfolds the panel below it */
 .all-toggle {
   display: flex;
   align-items: center;
@@ -474,15 +474,6 @@ button.owner-initial {
   font: inherit;
   text-align: left;
   cursor: pointer;
-}
-
-.all-toggle:disabled {
-  opacity: 1;
-  cursor: default;
-}
-
-.all-toggle:disabled .all-chevron {
-  display: none;
 }
 
 .all-chevron {
@@ -519,6 +510,18 @@ button.owner-initial {
 .list-tools .text-button:hover,
 .list-tools .text-button[aria-expanded="true"] {
   color: var(--text);
+}
+
+.form-label {
+  display: block;
+  margin-top: 1rem;
+  font-weight: 500;
+}
+
+/* The longer label gets the wider half, to stay on one line */
+#edit-kind .segment[data-kind="sauce"] {
+  flex: 2;
+  white-space: nowrap;
 }
 
 .search-row {

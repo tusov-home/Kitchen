@@ -4,7 +4,8 @@
 const SHORTCUTS = [
   { keys: "n", label: "N", action: "addRecipe", where: ["list", "recipe"], text: "Add recipe" },
   { keys: "/", label: "/", action: "focusSearch", where: ["list"], text: "Search" },
-  { keys: "a", label: "A", action: "toggleAllRecipes", where: ["list"], text: "Show / hide all recipes" },
+  { keys: "a", label: "A", action: "toggleMeals", where: ["list"], text: "Show / hide meals" },
+  { keys: "s", label: "S", action: "toggleSauces", where: ["list"], text: "Show / hide sauces & condiments" },
   { keys: "f", label: "F", action: "toggleFilters", where: ["list"], text: "Show / hide filters" },
   { keys: "t", label: "T / K", action: "suggestT", where: ["list"], text: "Suggestions: whose recipes" },
   { keys: "k", action: "suggestK", where: ["list"] },

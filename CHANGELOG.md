@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-11-06 h
+- Two kinds of recipe: **Meals** and **Sauces & condiments**, each with its own row on the recipes page (A and S on the laptop). Choose the type in the recipe form; existing recipes count as meals.
+- The daily suggestion only picks meals. Search and Plan shopping cover both.
+- Fixed: after cancelling Plan shopping, the Recipes tab did nothing.
+
 ## 2026-11-06 g
 - **Plan shopping** moved to the top of the Shopping page. It opens the recipes to pick from, and Cancel brings you back.
 - Keyboard shortcuts now work right after ticking a checkbox.

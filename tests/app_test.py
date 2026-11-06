@@ -199,7 +199,7 @@ def test_laptop_second_device(p, sheet):
     expect(page.locator("#sync-status")).to_have_attribute("data-state", "ok")
 
     # Tõnis rates the same recipe with the keyboard; both ratings are kept
-    page.click("#all-toggle")
+    page.click("#meals-toggle")
     page.click(".recipe-card")
     expect(page.locator("#view-recipe")).to_be_visible()
     expect(page.locator("#all-ratings")).to_contain_text("Kadi")
@@ -295,7 +295,7 @@ def test_laptop_second_device(p, sheet):
     page.keyboard.press("/")
     page.keyboard.type("shak")
     expect(suggestion).to_be_hidden()
-    expect(page.locator("#recipe-count")).to_have_text("1 of 3")
+    expect(page.locator(".recipe-card")).to_have_count(1)
     page.fill("#search", "")
     expect(suggestion).to_be_visible()
     page.evaluate("document.activeElement.blur()")  # leave the text box
@@ -345,20 +345,20 @@ def test_laptop_second_device(p, sheet):
     page.keyboard.press("/")
     page.keyboard.type("shak")
     expect(page.locator(".recipe-card").first).to_be_visible()
-    expect(page.locator("#all-toggle")).to_be_disabled()
+    expect(page.locator("#meals-toggle")).to_be_hidden()
     page.fill("#search", "")
     expect(panel).to_be_hidden()
     page.evaluate("document.activeElement.blur()")  # leave the text box
     # A shows and hides it; so does a click, for the phone
     page.keyboard.press("a")
     expect(panel).to_be_visible()
-    expect(page.locator("#all-toggle")).to_have_attribute("aria-expanded", "true")
+    expect(page.locator("#meals-toggle")).to_have_attribute("aria-expanded", "true")
     page.screenshot(path=SHOTS / "laptop-5-unfolded.png")
-    page.click("#all-toggle")
+    page.click("#meals-toggle")
     expect(panel).to_be_hidden()
     page.screenshot(path=SHOTS / "laptop-6-folded.png")
     # Folded, the three panels fill the height down to the tab bar
-    gap = page.evaluate("document.getElementById('tabbar').getBoundingClientRect().top - document.getElementById('all-toggle').getBoundingClientRect().bottom")
+    gap = page.evaluate("document.getElementById('tabbar').getBoundingClientRect().top - document.getElementById('sauces-toggle').getBoundingClientRect().bottom")
     assert 0 < gap < 32, gap
     assert page.evaluate("document.documentElement.scrollHeight <= window.innerHeight")
     # Suggestion initials: starts with this phone's owner (Tõnis)
@@ -851,6 +851,76 @@ def test_add_from_recipe(p):
     print("add from recipe: ok")
 
 
+def test_meals_and_sauces(p):
+    """Two kinds of recipe, each with its own row."""
+    ctx = p.chromium.launch().new_context(**p.devices["Pixel 7"])
+    ctx.add_init_script("if (!localStorage.getItem('kitchen.settings.v1')) localStorage.setItem('kitchen.settings.v1', JSON.stringify({myName: 'Kadi'}))")
+    page = ctx.new_page()
+    errors = []
+    watch_errors(page, errors)
+    page.goto(BASE)
+    # No recipes yet: no rows, just how to add the first one
+    expect(page.locator("#empty-list")).to_be_visible()
+    expect(page.locator("#meals-toggle")).to_be_hidden()
+    page.click("#add-recipe")
+    expect(page.locator("#edit-kind .segment.active")).to_have_text("Meal")
+    page.fill("#edit-text", RECIPE)
+    page.click("#edit-form button[type=submit]")
+    expect(page.locator("#view-recipe")).to_be_visible()
+    page.click("a:has-text('Back')")
+    expect(page.locator("#recipe-count")).to_have_text("1")
+    expect(page.locator("#sauce-count")).to_have_text("0")
+    # + from the open sauces row starts a sauce
+    page.click("#sauces-toggle")
+    expect(page.locator("#no-results")).to_contain_text("No sauces or condiments yet")
+    page.screenshot(path=SHOTS / "phone-sauces-empty.png")
+    page.click("#add-recipe")
+    expect(page.locator("#edit-kind .segment.active")).to_have_text("Sauce or condiment")
+    page.fill("#edit-text", "Chilli crisp\n- 200 ml oil\n- 3 tbsp chilli flakes")
+    page.click("#edit-form button[type=submit]")
+    expect(page.locator("#view-recipe")).to_be_visible()
+    page.click("a:has-text('Back')")
+    # Each row lists only its own kind, and the panel sits under it
+    expect(page.locator(".recipe-card-title")).to_have_text(["Chilli crisp"])
+    assert page.evaluate("document.getElementById('sauces-head').nextElementSibling.id") == "all-panel"
+    page.click("#meals-toggle")
+    expect(page.locator(".recipe-card-title")).to_have_text(["Miso Aubergine with Soba"])
+    assert page.evaluate("document.getElementById('meals-head').nextElementSibling.id") == "all-panel"
+    page.click("#meals-toggle")
+    expect(page.locator("#all-panel")).to_be_hidden()
+    expect(page.locator("#recipe-count")).to_have_text("1")
+    expect(page.locator("#sauce-count")).to_have_text("1")
+    # The suggestion only picks meals
+    expect(page.locator("#suggestion-link")).to_have_text("Miso Aubergine with Soba")
+    expect(page.locator("#suggestion-next")).to_be_hidden()
+    assert not page.evaluate("document.documentElement.scrollHeight > window.innerHeight")
+    # Search finds both, with a label on the sauce
+    page.fill("#search", "i")
+    expect(page.locator(".recipe-card")).to_have_count(2)
+    expect(page.locator(".recipe-card", has_text="Chilli crisp")).to_contain_text("Sauce or condiment")
+    page.fill("#search", "")
+    # Plan shopping shows both
+    page.click(".tab[data-tab=shopping]")
+    page.click("#plan-start")
+    expect(page.locator(".recipe-card")).to_have_count(2)
+    page.click("#plan-cancel")
+    # Changing the type moves it to the other row, and it survives a reload
+    page.click(".tab[data-tab=list]")
+    page.click("#sauces-toggle")
+    page.click(".recipe-card")
+    page.click("#edit-link")
+    expect(page.locator("#edit-kind .segment.active")).to_have_text("Sauce or condiment")
+    page.click("#edit-kind .segment[data-kind=meal]")
+    page.click("#edit-form button[type=submit]")
+    expect(page.locator("#view-recipe")).to_be_visible()
+    page.goto(BASE)
+    page.reload()
+    expect(page.locator("#recipe-count")).to_have_text("2")
+    expect(page.locator("#sauce-count")).to_have_text("0")
+    assert not errors, errors
+    print("meals and sauces: ok")
+
+
 # A small web server for test_site_missing: serves the app until a file
 # named OFF appears next to it, then answers 404 for everything, like
 # GitHub Pages does while a site is unpublished.
@@ -903,7 +973,7 @@ def test_site_missing(p):
         # Switch the site off: every file now answers 404
         off.write_text("off")
         page.goto(url)
-        expect(page.locator("#all-toggle")).to_be_visible()
+        expect(page.locator("#meals-toggle")).to_be_visible()
         expect(page.locator("#recipe-list")).to_contain_text("Lentil soup")
         print("site missing: ok")
     finally:
@@ -975,6 +1045,7 @@ def main():
             test_projects(p, sheet)
             test_installable_and_offline(p)
             test_add_from_recipe(p)
+            test_meals_and_sauces(p)
             test_site_missing(p)
             test_update_after_publish(p)
         print(f"all browser tests passed ({sheet.calls} sync calls)")

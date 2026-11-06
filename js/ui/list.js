@@ -1,8 +1,9 @@
-// The recipes page: today's suggestion, search, and "All recipes", a
-// folded panel holding the list, its filters and the Plan and + buttons.
+// The recipes page: today's suggestion, search, and two folded rows,
+// Meals and Sauces & condiments. One panel holds the list and its filters,
+// and sits under whichever row is open.
 import * as state from "../state.js";
 import * as storage from "../storage.js";
-import { visibleRecipes, allTags, allOwners, averageRating } from "../lib/recipes.js";
+import { visibleRecipes, allTags, allOwners, averageRating, kindOf } from "../lib/recipes.js";
 import { isPlanning, isSelected, toggleSelected } from "./plan.js";
 import { renderSuggestion, initSuggestion } from "./suggestion.js";
 
@@ -17,11 +18,16 @@ const sortSelect = document.getElementById("sort-select");
 const filterToggle = document.getElementById("filter-toggle");
 const filterPanel = document.getElementById("filter-panel");
 const recipeCount = document.getElementById("recipe-count");
-const allToggle = document.getElementById("all-toggle");
+const sauceCount = document.getElementById("sauce-count");
+const mealsHead = document.getElementById("meals-head");
+const saucesHead = document.getElementById("sauces-head");
+const mealsToggle = document.getElementById("meals-toggle");
+const saucesToggle = document.getElementById("sauces-toggle");
 const allPanel = document.getElementById("all-panel");
 
-// Folded on every app start, so the page opens on today's suggestion.
-let allOpen = false;
+// Which row is open: "meal", "sauce" or "" for neither. Folded on every
+// app start, so the page opens on today's suggestion.
+let openKind = "";
 let filterOpen = false;
 
 let activeTag = "";
@@ -63,7 +69,12 @@ function tagChip(tag, selected, onClick) {
 
 export function renderList() {
   const all = state.getRecipes();
-  const tags = allTags(all);
+  const meals = all.filter((recipe) => kindOf(recipe) === "meal");
+  // Searching and planning look through everything, so do without the rows.
+  // With no recipes at all, the panel explains how to add the first one.
+  const everything = Boolean(searchInput.value.trim()) || isPlanning() || all.length === 0;
+  const pool = everything ? all : all.filter((recipe) => kindOf(recipe) === (openKind || "meal"));
+  const tags = allTags(pool);
   if (!tags.includes(activeTag)) {
     activeTag = "";
   }
@@ -86,7 +97,7 @@ export function renderList() {
   }
 
   // The list
-  const shown = visibleRecipes(all, searchInput.value, activeTag, { owner: activeOwner, sort: sortOrder });
+  const shown = visibleRecipes(pool, searchInput.value, activeTag, { owner: activeOwner, sort: sortOrder });
   list.replaceChildren();
   for (const recipe of shown) {
     const item = document.createElement("li");
@@ -120,6 +131,9 @@ export function renderList() {
     // Info line: ★ 4.5 · Kadi · quick · weekend
     const average = averageRating(recipe);
     const parts = [];
+    if (everything && kindOf(recipe) === "sauce") {
+      parts.push("Sauce or condiment");
+    }
     if (average !== null) {
       const stars = document.createElement("span");
       stars.className = "card-stars";
@@ -154,39 +168,58 @@ export function renderList() {
 
   emptyList.hidden = all.length > 0;
   noResults.hidden = all.length === 0 || shown.length > 0;
+  noResults.textContent = pool.length === 0 ? "No sauces or condiments yet. Tap + to add one." : "No recipes match your search.";
 
-  // How many recipes are shown, e.g. "21" or "4 of 21".
-  recipeCount.textContent = all.length === 0 ? "" : shown.length === all.length ? String(all.length) : shown.length + " of " + all.length;
+  // How many in each row; the open one can show e.g. "4 of 21".
+  const sauces = all.length - meals.length;
+  const filtered = openKind && shown.length < pool.length ? shown.length + " of " : "";
+  recipeCount.textContent = (openKind !== "sauce" ? filtered : "") + meals.length;
+  sauceCount.textContent = (openKind === "sauce" ? filtered : "") + sauces;
 
   // Filter panel: open on request; it also stays open while a filter is
   // active, so a hidden filter never makes recipes seem to disappear.
   const activeFilters = (activeOwner ? 1 : 0) + (activeTag ? 1 : 0);
-  filterPanel.hidden = !(filterOpen || activeFilters > 0) || all.length === 0;
-  filterToggle.hidden = all.length === 0;
+  filterPanel.hidden = !(filterOpen || activeFilters > 0) || pool.length === 0;
+  filterToggle.hidden = pool.length === 0;
   filterToggle.textContent = activeFilters ? "Filter (" + activeFilters + ")" : "Filter";
   filterToggle.setAttribute("aria-expanded", filterPanel.hidden ? "false" : "true");
 
-  // "All recipes": folded unless opened, but it must be open to show search
-  // results, to pick recipes, and when there are none yet (for the + button).
-  const mustBeOpen = Boolean(searchInput.value.trim()) || isPlanning() || all.length === 0;
-  allPanel.hidden = !(allOpen || mustBeOpen);
-  allToggle.disabled = mustBeOpen;
-  allToggle.setAttribute("aria-expanded", allPanel.hidden ? "false" : "true");
-  allToggle.title = allPanel.hidden ? "Show all recipes (A)" : "Hide all recipes (A)";
+  // The rows, and the panel under the open one.
+  mealsHead.hidden = everything;
+  saucesHead.hidden = everything;
+  allPanel.hidden = !(openKind || everything);
+  const anchor = openKind === "meal" && !everything ? mealsHead : saucesHead;
+  if (anchor.nextElementSibling !== allPanel) {
+    anchor.after(allPanel);
+  }
+  renderRow(mealsToggle, "meal", "meals", "A");
+  renderRow(saucesToggle, "sauce", "sauces and condiments", "S");
 
   // The suggestion steps aside while you search or plan.
-  renderSuggestion(all, !searchInput.value.trim() && !isPlanning());
+  renderSuggestion(meals, !searchInput.value.trim() && !isPlanning());
 }
 
-export function toggleAllRecipes() {
-  allOpen = allPanel.hidden;
+function renderRow(toggle, kind, words, key) {
+  const open = openKind === kind;
+  toggle.setAttribute("aria-expanded", open ? "true" : "false");
+  toggle.title = (open ? "Hide " : "Show ") + words + " (" + key + ")";
+}
+
+// Opens one row, or folds it if it's already open.
+export function toggleKind(kind) {
+  openKind = openKind === kind ? "" : kind;
   renderList();
+}
+
+// Which row is open, so + can start a recipe of that type.
+export function getOpenKind() {
+  return openKind;
 }
 
 export function toggleFilters() {
   // F while folded: unfold first, so the filters can be seen.
   if (allPanel.hidden) {
-    allOpen = true;
+    openKind = "meal";
     filterOpen = true;
     renderList();
     return;
@@ -209,7 +242,8 @@ export function focusSearch() {
 export function initList() {
   initSuggestion();
   searchInput.addEventListener("input", renderList);
-  allToggle.addEventListener("click", toggleAllRecipes);
+  mealsToggle.addEventListener("click", () => toggleKind("meal"));
+  saucesToggle.addEventListener("click", () => toggleKind("sauce"));
   filterToggle.addEventListener("click", toggleFilters);
   sortSelect.addEventListener("change", function () {
     sortOrder = sortSelect.value;

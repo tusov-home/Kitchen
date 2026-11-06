@@ -176,9 +176,16 @@ export function canEdit(recipe, myName) {
 
 // The starting point for "Make my copy": same recipe, new owner,
 // empty notes and ratings, and a link back to the original.
+// A recipe is a "meal" or a "sauce" (sauces & condiments). Recipes from
+// before this existed have no kind, and count as meals.
+export function kindOf(recipe) {
+  return recipe.kind === "sauce" ? "sauce" : "meal";
+}
+
 export function copyForEditing(recipe) {
   return {
     title: recipe.title,
+    kind: kindOf(recipe),
     // Without the title line, so renaming the copy doesn't leave the
     // old title behind inside the text.
     text: bodyWithoutTitle(recipe.text, recipe.title),
@@ -246,6 +253,7 @@ export function normaliseRecipe(raw) {
   return {
     id: raw.id,
     title: String(raw.title || ""),
+    kind: kindOf(raw),
     text: String(raw.text || ""),
     tags: Array.isArray(tags) ? tags.map(String) : [],
     notes: String(raw.notes || ""),

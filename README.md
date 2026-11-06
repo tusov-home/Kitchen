@@ -12,6 +12,7 @@ Kitchen lives in the `tusov-home` organization so it has its own web address. Pa
 
 ## Use it
 
+- **Meals and sauces:** every recipe is a **Meal** or a **Sauce or condiment**; choose in the recipe form. The daily suggestion only picks meals; search and Plan shopping cover both. Recipes from before this count as meals, and the owner can change the type.
 - **Add a recipe:** copy the recipe from Claude, tap **+** next to the search box, tap the text box and paste. On the laptop, N then Ctrl+V is enough. The first line becomes the title (you can change it). Add tags like `quick, weekend, chicken`.
 - **Find it again:** search by name, tag or ingredient, or tap a tag to filter.
 - **Cook it:** open the recipe. **✓ Cooked today** adds the date to the notes; **Edit** lets you change anything and add notes ("less chilli next time").
@@ -20,8 +21,8 @@ Kitchen lives in the `tusov-home` organization so it has its own web address. Pa
 - **Pages:** the tab bar at the bottom switches between **Recipes**, **Shopping**, **Pantry** and **Projects**. Swipe left or right to move between them: the page follows your finger, and a short swipe or quick flick is enough (start a little away from the screen edge, which Android uses for Back). The small numbers show what needs attention.
 - **Pantry:** what you have at home. Tap **Have** to mark something **Low**, again for **Out**. **Add to shopping list** puts everything low or out on the list, and ticking it off while shopping marks it as **Have** again. Shopping lists made from recipes put things you have under **Check you have** (the pantry doesn't know amounts, so they're not removed). Tap a name to rename it, move it to another section or delete it.
 - **Projects:** home improvements with no deadline. **+ Add project**, then add **steps** (tick them off as you go) and **things to buy** (**Add to shopping list** puts them on the shared list; ticking them off there marks them bought). Set the status with 💡 Idea / 🔨 Doing / ✅ Done, and keep measurements or links in **Notes**, which save by themselves. You can both work on the same project at once.
-- **Today's suggestion:** the recipes page opens with one dish to cook today and why it was picked. Below it are the search and a folded **All recipes** row; tap it or press A for the list. It changes daily, favours well-rated dishes you haven't cooked lately (it reads the "Cooked …" dates in the notes) and weekend dishes on weekends. **Another idea** shows the next one. The initials in its corner (**T**, **K**) choose whose recipes it picks from: both on means all recipes, and one always stays on. Each phone starts with its own person and remembers your choice, so the two phones can show different dishes.
-- **Owner, tags and sorting:** unfold **All recipes** and tap **Filter** (or press F). Tap a name to see only that person's recipes, a tag to narrow down, and **Sort** for Newest, A–Z or Best rated. Each phone remembers its sort order.
+- **Today's suggestion:** the recipes page opens with one dish to cook today and why it was picked. Below it are the search and two folded rows, **Meals** and **Sauces & condiments**; tap one for its list (or press A or S on the laptop). It changes daily, favours well-rated dishes you haven't cooked lately (it reads the "Cooked …" dates in the notes) and weekend dishes on weekends. **Another idea** shows the next one. The initials in its corner (**T**, **K**) choose whose recipes it picks from: both on means all recipes, and one always stays on. Each phone starts with its own person and remembers your choice, so the two phones can show different dishes.
+- **Owner, tags and sorting:** unfold a row and tap **Filter** (or press F). Tap a name to see only that person's recipes, a tag to narrow down, and **Sort** for Newest, A–Z or Best rated. Each phone remembers its sort order.
 - **One recipe to the list:** on a recipe, set the servings and tap **Add to shopping list** (or press A). It joins the current list, and **Open list** takes you there.
 - **Shopping list:** on the Shopping page tap **Plan shopping**, tap the recipes you'll cook, then **Make shopping list**. Items are sorted by shop section and the same ingredient is added up (two recipes with 200 g feta → 400 g feta; "7+ tbsp olive oil" means some recipes didn't say how much). Things you probably have (salt, oil, spices) go under **Check you have**. Tick items off as you shop, ✕ to remove one, or add your own. With sync, you both see the same list and ticks. 🛒 in the top bar opens it.
 - **Rate it:** tap 1–5 stars after eating. Each of you rates on your own phone (the app asks your name once; change it in ⚙). Tap the same star again to clear. The list shows the average.
@@ -67,7 +68,8 @@ Then in Kitchen: **⚙ → Import from file** and pick `kitchen-recipes.json`. T
 |---|---|---|
 | `N` | Add recipe | list, recipe |
 | `/` | Search | list |
-| `A` | Show / hide all recipes | list |
+| `A` | Show / hide meals | list |
+| `S` | Show / hide sauces & condiments | list |
 | `F` | Show / hide filters | list |
 | `T` / `K` | Suggestions: whose recipes | list |
 | `A` | Add ingredients to the shopping list | recipe |

@@ -3,7 +3,7 @@
 import * as state from "../state.js";
 import * as shopping from "../shoppingState.js";
 import { progress } from "../lib/shopping.js";
-import { go } from "./router.js";
+import { go, goBack } from "./router.js";
 import { showToast } from "./toast.js";
 
 const startButton = document.getElementById("plan-start");
@@ -56,7 +56,7 @@ export function startPlanning() {
 // Cancel goes back to where planning started.
 export function cancelPlanning() {
   setPlanning(false);
-  go("#/shopping", true);
+  goBack("#/shopping");
 }
 
 function renderBar() {

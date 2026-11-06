@@ -48,9 +48,15 @@
     </div>
 
     <!-- Everything else stays folded until asked for -->
-    <h2 class="list-title">
-      <button id="all-toggle" class="all-toggle" type="button" aria-expanded="false" aria-controls="all-panel" title="Show all recipes (A)">
-        <span>All recipes <span id="recipe-count" class="hint"></span></span>
+    <h2 id="meals-head" class="list-title">
+      <button id="meals-toggle" class="all-toggle" type="button" aria-expanded="false" aria-controls="all-panel" title="Show meals (A)">
+        <span>Meals <span id="recipe-count" class="hint"></span></span>
+        <svg class="line-icon all-chevron" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 9.5l6 6 6-6"/></svg>
+      </button>
+    </h2>
+    <h2 id="sauces-head" class="list-title">
+      <button id="sauces-toggle" class="all-toggle" type="button" aria-expanded="false" aria-controls="all-panel" title="Show sauces and condiments (S)">
+        <span>Sauces &amp; condiments <span id="sauce-count" class="hint"></span></span>
         <svg class="line-icon all-chevron" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 9.5l6 6 6-6"/></svg>
       </button>
     </h2>
@@ -258,6 +264,12 @@
 
       <label for="edit-title">Title</label>
       <input id="edit-title" type="text" required>
+
+      <span class="form-label">Type</span>
+      <div id="edit-kind" class="segmented" role="group" aria-label="Type">
+        <button type="button" class="segment" data-kind="meal">Meal</button>
+        <button type="button" class="segment" data-kind="sauce">Sauce or condiment</button>
+      </div>
 
       <label for="edit-servings">Servings <span class="hint">how many the recipe makes as written — found automatically from "Serves 2"</span></label>
       <input id="edit-servings" class="short-input" type="number" min="1" max="50" step="1" inputmode="numeric">

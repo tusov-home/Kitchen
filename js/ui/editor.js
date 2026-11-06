@@ -1,10 +1,11 @@
 // The form for adding or editing a recipe.
 import * as state from "../state.js";
-import { titleFromText, parseTags, canEdit, copyForEditing } from "../lib/recipes.js";
+import { titleFromText, parseTags, canEdit, copyForEditing, kindOf } from "../lib/recipes.js";
 import { detectServings } from "../lib/scale.js";
 import { showToast } from "./toast.js";
 import { go, goBack } from "./router.js";
 import { getMyName, withMyName } from "./name.js";
+import { getOpenKind } from "./list.js";
 
 const form = document.getElementById("edit-form");
 const heading = document.getElementById("edit-heading");
@@ -12,6 +13,7 @@ const basedOn = document.getElementById("edit-based-on");
 const textInput = document.getElementById("edit-text");
 const titleInput = document.getElementById("edit-title");
 const servingsInput = document.getElementById("edit-servings");
+const kindButtons = document.querySelectorAll("#edit-kind .segment");
 const tagsInput = document.getElementById("edit-tags");
 const notesInput = document.getElementById("edit-notes");
 const deleteButton = document.getElementById("delete-recipe");
@@ -23,6 +25,16 @@ let copyOf = "";
 // True until the user types in the title / servings box themselves.
 let titleIsAutomatic = true;
 let servingsIsAutomatic = true;
+let chosenKind = "meal";
+
+function chooseKind(kind) {
+  chosenKind = kind;
+  for (const button of kindButtons) {
+    const on = button.dataset.kind === kind;
+    button.classList.toggle("active", on);
+    button.setAttribute("aria-pressed", on ? "true" : "false");
+  }
+}
 
 // id = null for a new recipe; copyFrom = id of a recipe to start a copy from.
 // Returns "ok", "missing" (no such recipe) or "locked" (someone else's).
@@ -48,6 +60,8 @@ export function openEditor(id, copyFrom) {
   const start = recipe || (source ? copyForEditing(source) : null);
   textInput.value = start ? start.text : "";
   titleInput.value = start ? start.title : "";
+  // A new recipe starts as the type of the row you came from.
+  chooseKind(start ? kindOf(start) : getOpenKind() || "meal");
   servingsInput.value = start && start.servings ? start.servings : "";
   servingsIsAutomatic = !servingsInput.value;
   tagsInput.value = start ? start.tags.join(", ") : "";
@@ -72,6 +86,7 @@ function save(myName) {
   const id = state.saveRecipe({
     id: editingId,
     title: titleInput.value,
+    kind: chosenKind,
     text: textInput.value,
     tags: parseTags(tagsInput.value),
     notes: notesInput.value,
@@ -107,6 +122,9 @@ function pasteIntoRecipe(event) {
 
 export function initEditor() {
   form.addEventListener("paste", pasteIntoRecipe);
+  for (const button of kindButtons) {
+    button.addEventListener("click", () => chooseKind(button.dataset.kind));
+  }
   // Fill in the title from the first line, unless the user wrote their own.
   textInput.addEventListener("input", function () {
     if (titleIsAutomatic) {
