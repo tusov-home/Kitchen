@@ -1,12 +1,12 @@
-// "Plan shopping" mode on the recipe list: tap recipes to pick them,
-// then make a shopping list from them.
+// "Plan shopping" starts on the shopping page and opens the recipe list:
+// tap recipes to pick them, then make a shopping list from them.
 import * as state from "../state.js";
 import * as shopping from "../shoppingState.js";
 import { progress } from "../lib/shopping.js";
 import { go } from "./router.js";
 import { showToast } from "./toast.js";
 
-const toggleButton = document.getElementById("plan-toggle");
+const startButton = document.getElementById("plan-start");
 const hint = document.getElementById("plan-hint");
 const bar = document.getElementById("plan-bar");
 const countText = document.getElementById("plan-count");
@@ -47,6 +47,18 @@ export function setPlanning(on) {
   rerender();
 }
 
+// From the shopping page to the recipe list, picking.
+export function startPlanning() {
+  setPlanning(true);
+  go("#/");
+}
+
+// Cancel goes back to where planning started.
+export function cancelPlanning() {
+  setPlanning(false);
+  go("#/shopping", true);
+}
+
 function renderBar() {
   // Forget recipes that were deleted meanwhile.
   for (const id of selected) {
@@ -56,7 +68,6 @@ function renderBar() {
   }
   bar.hidden = !planning;
   hint.hidden = !planning;
-  toggleButton.textContent = planning ? "Done planning" : "Plan shopping";
   countText.textContent = selected.size + (selected.size === 1 ? " recipe" : " recipes");
   makeButton.disabled = selected.size === 0;
 }
@@ -90,8 +101,8 @@ export function makeList() {
 // onChange: called when the list should be drawn again.
 export function initPlan(onChange) {
   rerender = onChange;
-  toggleButton.addEventListener("click", () => setPlanning(!planning));
-  cancelButton.addEventListener("click", () => setPlanning(false));
+  startButton.addEventListener("click", startPlanning);
+  cancelButton.addEventListener("click", cancelPlanning);
   makeButton.addEventListener("click", makeList);
   dialog.addEventListener("close", function () {
     if (dialog.returnValue === "add" || dialog.returnValue === "new") {

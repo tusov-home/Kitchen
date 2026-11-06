@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-06 g
+- **Plan shopping** moved to the top of the Shopping page. It opens the recipes to pick from, and Cancel brings you back.
+- Keyboard shortcuts now work right after ticking a checkbox.
+
 ## 2026-11-06 f
 - Opening the recipe form no longer jumps into the text box, so the phone keyboard stays closed until you tap.
 - On the laptop, N then Ctrl+V still works: pasting lands in the recipe text.

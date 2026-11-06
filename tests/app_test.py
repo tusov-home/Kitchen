@@ -394,8 +394,16 @@ def test_laptop_second_device(p, sheet):
     page.screenshot(path=SHOTS / "laptop-4-sorted.png")
     page.select_option("#sort-select", "newest")
 
-    # Plan shopping: pick two recipes, make a list sorted by shop section
+    # Plan shopping starts on the Shopping page; Esc comes back to it
+    page.keyboard.press("l")
+    expect(page.locator("#view-shopping")).to_be_visible()
     page.keyboard.press("p")
+    expect(page.locator("#plan-bar")).to_be_visible()
+    page.keyboard.press("Escape")
+    expect(page.locator("#view-shopping")).to_be_visible()
+    expect(page.locator("#plan-bar")).to_be_hidden()
+    # Pick two recipes, make a list sorted by shop section
+    page.click("#plan-start")
     expect(page.locator("#plan-bar")).to_be_visible()
     expect(page.locator("#suggestion")).to_be_hidden()  # the list has the stage
     page.click(".recipe-card:has-text('Miso Aubergine with Soba')")
@@ -424,9 +432,11 @@ def test_laptop_second_device(p, sheet):
     assert ticked == ["beef mince"], ticked
 
     # Making another list asks whether to add or start over
-    page.keyboard.press("Escape")
-    expect(page.locator("#view-list")).to_be_visible()
+    # (and shortcuts work right after ticking a checkbox)
+    page.click(".shop-item:has-text('aubergines') .shop-check")
+    page.click(".shop-item:has-text('aubergines') .shop-check")
     page.keyboard.press("p")
+    expect(page.locator("#plan-bar")).to_be_visible()
     page.click(".recipe-card:has-text('Spicy Miso Aubergine')")
     page.click("#plan-make")
     expect(page.locator("#make-list-dialog")).to_be_visible()
@@ -642,9 +652,8 @@ def test_pantry_tabs(p, sheet):
     # A recipe shopping list moves what you have to "Check you have"
     page.fill("#pantry-add-input", "White miso")
     page.keyboard.press("Enter")
-    page.click(".tab[data-tab=list]")
-    page.click("#all-toggle")
-    page.click("#plan-toggle")
+    page.click(".tab[data-tab=shopping]")
+    page.click("#plan-start")
     page.click(".recipe-card:has-text('Miso Aubergine with Soba')")
     page.click("#plan-make")
     page.click("#make-list-dialog button[value=new]")

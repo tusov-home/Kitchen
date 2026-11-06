@@ -14,7 +14,7 @@ import { initSettings, setSettingsStatus } from "./ui/settings.js";
 import { initShortcuts } from "./ui/shortcuts.js";
 import { initPwa, onInstallAvailable, install } from "./pwa.js";
 import * as shoppingState from "./shoppingState.js";
-import { initPlan, isPlanning, setPlanning } from "./ui/plan.js";
+import { initPlan, isPlanning, setPlanning, startPlanning, cancelPlanning } from "./ui/plan.js";
 import { initShopping, renderShopping, renderCartCount } from "./ui/shopping.js";
 import { initTabs, renderTabs, goToTab, stepTab } from "./ui/tabs.js";
 import { pantry } from "./pantryState.js";
@@ -189,7 +189,7 @@ initShortcuts(
     save: saveFromEditor,
     back: function () {
       if (current.screen === "list" && isPlanning()) {
-        setPlanning(false);
+        cancelPlanning();
       } else if (current.screen === "edit") {
         cancelEditor();
       } else if (current.screen === "project") {
@@ -204,7 +204,7 @@ initShortcuts(
     focusPantryAdd: focusPantryAdd,
     addProject: () => openProjectDialog(null),
     editProject: editCurrentProject,
-    togglePlanning: () => setPlanning(!isPlanning()),
+    startPlanning: startPlanning,
     showHelp: () => document.getElementById("shortcut-help").showModal(),
   },
   () => current.screen

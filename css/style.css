@@ -1400,6 +1400,16 @@ body {
   gap: 0.5rem;
 }
 
+.page-head .page-title,
+.page-head .primary {
+  white-space: nowrap;
+}
+
+/* The title gives way a little on narrow phones, so both stay on one line */
+.page-head .page-title {
+  font-size: clamp(1.45rem, 7vw, 1.85rem);
+}
+
 .restock {
   display: flex;
   flex-wrap: wrap;

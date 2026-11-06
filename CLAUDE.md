@@ -80,8 +80,8 @@ explains the app itself (features, files, shortcuts, sync setup).
   signature element. Keep everything else quiet: no all-caps labels,
   generous spacing, soft rectangles rather than pills.
 - Recipes page order: today's suggestion → search with + on the right →
-  framed "All recipes" row, filling the phone's height while folded. List,
-  Filter and Plan shopping fold behind that row.
+  framed "All recipes" row, filling the phone's height while folded. List
+  and Filter fold behind that row. Plan shopping starts on the Shopping page.
 - Dialogs and the recipe form must not pop up the phone keyboard on open:
   the heading takes the focus (`tabindex="-1"`), never a text box.
 - Every frequent action gets a keyboard shortcut in `js/ui/shortcuts.js`

@@ -27,12 +27,16 @@ const SHORTCUTS = [
   { keys: "n", label: "N", action: "addProject", where: ["projects"], text: "Projects: add a project" },
   { keys: "e", label: "E", action: "editProject", where: ["project"], text: "Project: edit" },
   { keys: "l", label: "L", action: "openShopping", where: ["list", "recipe"], text: "Open shopping list" },
-  { keys: "p", label: "P", action: "togglePlanning", where: ["list"], text: "Plan shopping: pick recipes" },
+  { keys: "p", label: "P", action: "startPlanning", where: ["shopping"], text: "Plan shopping: pick recipes" },
   { keys: "?", label: "?", action: "showHelp", where: ["any"], text: "Show this list" },
 ];
 
 function isTyping(target) {
   const tag = target.tagName;
+  // A ticked checkbox keeps the focus, but nothing is being typed there.
+  if (tag === "INPUT" && (target.type === "checkbox" || target.type === "radio")) {
+    return false;
+  }
   return tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || target.isContentEditable;
 }
 

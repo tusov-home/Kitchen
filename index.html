@@ -58,7 +58,6 @@
     <div id="all-panel" hidden>
     <div class="list-tools">
       <button id="filter-toggle" class="text-button" type="button" aria-expanded="false" aria-controls="filter-panel" title="Filter and sort (F)">Filter</button>
-      <button id="plan-toggle" class="text-button" type="button" title="Pick recipes for a shopping list (P)">Plan shopping</button>
     </div>
     <p id="plan-hint" class="hint plan-hint" hidden>Tap the recipes you want to cook</p>
 
@@ -94,7 +93,10 @@
 
   <!-- Shopping list -->
   <main id="view-shopping" class="view" hidden>
-    <h1 class="page-title">Shopping list</h1>
+    <div class="page-head">
+      <h1 class="page-title">Shopping list</h1>
+      <button id="plan-start" class="primary" type="button" title="Pick recipes for a shopping list (P)">Plan shopping</button>
+    </div>
     <p id="shop-recipes" class="shop-recipes"></p>
 
     <div id="shop-progress" class="shop-progress">
@@ -111,7 +113,7 @@
 
     <div id="shop-empty" class="empty" hidden>
       <p class="empty-title">No shopping list yet</p>
-      <p>On the recipe list, tap <strong>Plan shopping</strong>, pick the recipes you'll cook, then <strong>Make shopping list</strong>.</p>
+      <p>Tap <strong>Plan shopping</strong>, pick the recipes you'll cook, then <strong>Make shopping list</strong>.</p>
     </div>
 
     <div id="shop-footer" class="actions">
