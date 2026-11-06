@@ -1036,45 +1036,6 @@ body.has-tabbar .plan-bar {
 
 /* ---------- Servings ---------- */
 
-.servings {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin: 1rem 0 0.25rem;
-  padding: 0.35rem;
-  border-radius: var(--radius);
-  background: var(--surface);
-  width: fit-content;
-}
-
-.round-button {
-  width: 2.75rem;
-  height: 2.75rem;
-  border: none;
-  border-radius: var(--radius-sm);
-  background: var(--surface-2);
-  color: var(--text);
-  font: inherit;
-  font-size: 1.4rem;
-  font-weight: 400;
-  line-height: 1;
-  cursor: pointer;
-  user-select: none;
-  -webkit-user-select: none;
-  -webkit-touch-callout: none;
-}
-
-.round-button:disabled {
-  opacity: 0.4;
-  cursor: default;
-}
-
-.servings-label {
-  min-width: 6.5rem;
-  text-align: center;
-  font-weight: 500;
-}
-
 .text-button {
   min-height: 2.75rem;
   padding: 0 0.75rem;
@@ -1790,6 +1751,63 @@ body:has(#view-recipe:not([hidden])):has(#recipe-jump:not([hidden])) {
   cursor: pointer;
 }
 
+.dock-servings {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  margin: 0 0.25rem 0 0.5rem;
+  align-items: center;
+  justify-content: center;
+  max-width: 8rem;
+  min-width: 0;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 500;
+}
+
+.dock-stepper {
+  display: flex;
+  align-items: center;
+}
+
+.step-button,
+.step-value {
+  height: 2rem;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.step-button {
+  width: 2rem;
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  font-size: 1.15rem;
+  line-height: 1;
+}
+
+.step-button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.step-value {
+  min-width: 1.9rem;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.step-value:disabled {
+  color: var(--text);
+  cursor: default;
+}
+
 .dock-button.rated {
   color: var(--star);
 }
@@ -1801,8 +1819,7 @@ body:has(#view-recipe:not([hidden])):has(#recipe-jump:not([hidden])) {
 
 /* Jumping leaves the heading clear of the top bar */
 #recipe-body > *,
-#recipe-notes-box,
-#recipe-servings {
+#recipe-notes-box {
   scroll-margin-top: 4.25rem;
 }
 

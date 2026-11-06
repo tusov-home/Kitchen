@@ -26,16 +26,20 @@ const cookedButton = document.getElementById("cooked-today");
 const servingsDown = document.getElementById("servings-down");
 const servingsUp = document.getElementById("servings-up");
 const servingsLabel = document.getElementById("servings-label");
-const servingsReset = document.getElementById("servings-reset");
+const servingsCaption = document.getElementById("servings-caption");
 const addToListButton = document.getElementById("add-to-list");
 const addedDialog = document.getElementById("added-dialog");
 const addedTitle = document.getElementById("added-title");
 const addedText = document.getElementById("added-text");
+const addedCancel = document.getElementById("added-cancel");
 
 let currentId = null;
 // The servings shown. Without a known base it's a multiplier (1 = as written).
 let shownServings = 1;
 let shownBase = null;
+// What Cancel on the notice puts back: { before: the list, or null }, or
+// null when the notice didn't add anything.
+let undo = null;
 
 // How much the shown servings differ from the recipe as written.
 function shownFactor(recipe) {
@@ -46,13 +50,11 @@ function renderServingsAndBody(recipe) {
   const base = recipe.servings;
   const factor = shownFactor(recipe);
 
-  if (base) {
-    servingsLabel.textContent = shownServings + (shownServings === 1 ? " serving" : " servings");
-  } else {
-    servingsLabel.textContent = factor === 1 ? "As written" : "× " + formatAmount(factor);
-  }
+  servingsLabel.textContent = base ? String(shownServings) : "× " + formatAmount(factor);
+  servingsCaption.textContent = base ? (shownServings === 1 ? "serving" : "servings") : "amounts";
   servingsDown.disabled = base ? shownServings <= 1 : shownServings <= 0.5;
-  servingsReset.hidden = factor === 1;
+  // Tapping the number goes back to the recipe as written.
+  servingsLabel.disabled = factor === 1;
 
   // renderMarkdown escapes all HTML, so this is safe.
   body.innerHTML = renderMarkdown(bodyWithoutTitle(recipe.text, recipe.title), { scale: factor });
@@ -168,7 +170,9 @@ export function showNextRecipe() {
   go("#/r/" + encodeURIComponent(next), true);
 }
 
-function showAddedNotice(heading, text) {
+function showAddedNotice(heading, text, undoThis) {
+  undo = undoThis || null;
+  addedCancel.hidden = !undo;
   addedTitle.textContent = heading;
   addedText.textContent = text;
   addedDialog.returnValue = "";
@@ -187,8 +191,10 @@ export function addAndContinue() {
   } else if (shopping.hasRecipe(recipe.id)) {
     showAddedNotice("Already on the list", recipe.title + " is on the shopping list.");
   } else {
+    const before = shopping.getCurrent();
     shopping.addRecipes([recipe], "add", shownFactor(recipe));
-    showAddedNotice("Added to the shopping list", servingsLabel.textContent === "As written" ? recipe.title : recipe.title + ", " + servingsLabel.textContent);
+    const amount = shownFactor(recipe) === 1 && !recipe.servings ? "" : ", " + servingsLabel.textContent + " " + servingsCaption.textContent;
+    showAddedNotice("Added to the shopping list", recipe.title + amount, { before: before });
   }
 }
 
@@ -205,6 +211,10 @@ export function initRecipe() {
   addedDialog.addEventListener("close", function () {
     if (addedDialog.returnValue === "ok") {
       showNextRecipe();
+    } else if (undo) {
+      // Cancel or Esc: a swipe by accident, so it's as if it never happened.
+      shopping.undoAdd(undo.before);
+      showToast("Removed from the shopping list");
     }
   });
   cookedButton.addEventListener("click", function () {
@@ -220,7 +230,7 @@ export function initRecipe() {
   addToListButton.addEventListener("click", addCurrentToList);
   servingsUp.addEventListener("click", () => changeServings(1));
   servingsDown.addEventListener("click", () => changeServings(-1));
-  servingsReset.addEventListener("click", function () {
+  servingsLabel.addEventListener("click", function () {
     const recipe = state.getRecipe(currentId);
     shownServings = (recipe && recipe.servings) || 1;
     renderServingsAndBody(recipe);

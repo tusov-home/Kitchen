@@ -103,7 +103,8 @@ above. If a look-only change turns out bigger than expected, say so.
   starts on the Shopping page.
 - Recipe page: all navigation and editing buttons in a bottom dock, with a
   jump bar above them. Stars live behind the Rate button. Swipe left = next
-  recipe, swipe right = add to shopping list, then OK = next.
+  recipe, swipe right = add to shopping list, then OK = next, Cancel = undo.
+  Servings live in the dock; no Back button there (phone Back or tab icons).
 - Dialogs and the recipe form must not pop up the phone keyboard on open:
   the heading takes the focus (`tabindex="-1"`), never a text box.
 - Every frequent action gets a keyboard shortcut in `js/ui/shortcuts.js`

@@ -145,18 +145,18 @@ def test_phone(p, sheet):
     expect(page.locator("#all-ratings")).to_contain_text("Kadi")
 
     # Servings: found "Serves 2", step up to 4 → ingredients double, method doesn't
-    expect(page.locator("#servings-label")).to_have_text("2 servings")
+    expect(page.locator("#servings-label")).to_have_text("2")
     page.click("#servings-up")
     page.click("#servings-up")
-    expect(page.locator("#servings-label")).to_have_text("4 servings")
+    expect(page.locator("#servings-label")).to_have_text("4")
     body = page.locator("#recipe-body")
     expect(body).to_contain_text("4 aubergines")
     expect(body).to_contain_text("400 g soba noodles")
     expect(body).to_contain_text("2 tbsp sesame")
     expect(body).to_contain_text("Roast at 220 °C for 20 minutes")
     page.screenshot(path=SHOTS / "phone-3-recipe.png", full_page=True)
-    page.click("#servings-reset")
-    expect(page.locator("#servings-label")).to_have_text("2 servings")
+    page.click("#servings-label")
+    expect(page.locator("#servings-label")).to_have_text("2")
     expect(body).to_contain_text("2 aubergines")
 
     # Phone Back button goes to the list, not back to the form
@@ -213,9 +213,9 @@ def test_laptop_second_device(p, sheet):
     expect(page.locator("#all-ratings")).to_contain_text("Tõnis")
     expect(page.locator("#all-ratings")).to_contain_text("Kadi")
     page.keyboard.press("+")
-    expect(page.locator("#servings-label")).to_have_text("3 servings")
+    expect(page.locator("#servings-label")).to_have_text("3")
     page.keyboard.press("-")
-    expect(page.locator("#servings-label")).to_have_text("2 servings")
+    expect(page.locator("#servings-label")).to_have_text("2")
     page.keyboard.press("Escape")
     expect(page.locator(".card-stars")).to_have_text("★ 4.5")
     page.wait_for_timeout(2500)  # sync runs shortly after a change
@@ -833,10 +833,10 @@ def test_add_from_recipe(p):
     page.fill("#edit-text", RECIPE)
     page.click("#edit-form button[type=submit]")
     expect(page.locator("#view-recipe")).to_be_visible()
-    expect(page.locator("#servings-label")).to_have_text("2 servings")
+    expect(page.locator("#servings-label")).to_have_text("2")
     page.click("#servings-up")
     page.click("#servings-up")
-    expect(page.locator("#servings-label")).to_have_text("4 servings")
+    expect(page.locator("#servings-label")).to_have_text("4")
     page.screenshot(path=SHOTS / "phone-recipe-add.png")
     page.click("#add-to-list")
     expect(page.locator("#toast")).to_contain_text("Added to the shopping list")
@@ -873,7 +873,7 @@ def test_meals_and_sauces(p):
     page.fill("#edit-text", RECIPE)
     page.click("#edit-form button[type=submit]")
     expect(page.locator("#view-recipe")).to_be_visible()
-    page.click("a.dock-button:has-text('Back')")
+    page.go_back()
     expect(page.locator("#recipe-count")).to_have_text("1")
     expect(page.locator("#sauce-count")).to_have_text("0")
     # + from the open sauces row starts a sauce
@@ -885,7 +885,7 @@ def test_meals_and_sauces(p):
     page.fill("#edit-text", "Chilli crisp\n- 200 ml oil\n- 3 tbsp chilli flakes")
     page.click("#edit-form button[type=submit]")
     expect(page.locator("#view-recipe")).to_be_visible()
-    page.click("a.dock-button:has-text('Back')")
+    page.go_back()
     # Each row lists only its own kind, and the panel sits under it
     expect(page.locator(".recipe-card-title")).to_have_text(["Chilli crisp"])
     assert page.evaluate("document.getElementById('sauces-head').nextElementSibling.id") == "all-panel"
@@ -1034,7 +1034,6 @@ def test_recipe_layout(p):
     page.click(".jump-button:has-text('Ingredients')")
     page.wait_for_timeout(900)
     expect(page.locator(".jump-button.active")).to_have_text("Ingredients")
-    expect(page.locator("#recipe-servings")).to_be_in_viewport()
     # The text can scroll clear of the dock
     page.evaluate("window.scrollTo(0, document.documentElement.scrollHeight)")
     page.wait_for_timeout(200)
@@ -1044,7 +1043,7 @@ def test_recipe_layout(p):
     page.evaluate("window.scrollTo(0, 0)")
     page.click("#servings-up")
     expect(page.locator(".jump-button")).to_have_count(3)
-    page.click("a.dock-button:has-text('Back')")
+    page.go_back()
     expect(page.locator("#view-list")).to_be_visible()
     expect(dock).to_be_hidden()
     # A recipe without headings has no bar
@@ -1108,6 +1107,16 @@ def test_recipe_swipe(p):
     assert page.evaluate("document.activeElement.tagName") == "H2"
     expect(title).to_have_text(cards[1])
     expect(page.locator("#cart-count")).to_have_text("1")
+    # Cancel: as if it never happened, even when it started the list
+    page.click("#added-dialog button[value=cancel]")
+    expect(page.locator("#toast")).to_contain_text("Removed from the shopping list")
+    expect(title).to_have_text(cards[1])
+    expect(page.locator("#cart-count")).to_be_hidden()
+    page.wait_for_timeout(400)
+    # Swipe again, this time for real
+    swipe(page, 90, 300)
+    expect(page.locator("#added-title")).to_have_text("Added to the shopping list")
+    expect(page.locator("#cart-count")).to_have_text("1")
     page.click("#added-dialog button[value=ok]")
     expect(title).to_have_text(cards[2])
     page.wait_for_timeout(400)
@@ -1124,6 +1133,22 @@ def test_recipe_swipe(p):
     page.click("#added-dialog button[value=ok]")
     expect(title).to_have_text(cards[2])
     page.wait_for_timeout(400)
+    # Cancel on a list that already has things: the rest stays
+    page.wait_for_timeout(400)
+    swipe(page, 90, 300)
+    expect(page.locator("#added-title")).to_have_text("Added to the shopping list")
+    expect(page.locator("#cart-count")).to_have_text("2")
+    page.keyboard.press("Escape")
+    expect(page.locator("#cart-count")).to_have_text("1")
+    expect(page.locator("#added-dialog")).to_be_hidden()
+    expect(title).to_have_text(cards[2])
+    # Changed your mind again: it can be added after all
+    page.wait_for_timeout(400)
+    swipe(page, 90, 300)
+    expect(page.locator("#added-title")).to_have_text("Added to the shopping list")
+    expect(page.locator("#cart-count")).to_have_text("2")
+    page.keyboard.press("Escape")
+    expect(page.locator("#cart-count")).to_have_text("1")
     # After the last one: back to the list, with a message
     swipe(page, 330, 120)
     expect(page.locator("#view-list")).to_be_visible()

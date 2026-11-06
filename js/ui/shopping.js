@@ -69,7 +69,7 @@ export function renderShopping() {
   const p = list ? progress(list.items) : { done: 0, total: 0 };
 
   // Which recipes it's for: "For: Ragu (2) · Menemen (2)"
-  const recipes = list ? Object.values(list.recipes) : [];
+  const recipes = list ? Object.values(list.recipes).filter((recipe) => !recipe.removed) : [];
   recipesLine.textContent = recipes.length
     ? "For: " + recipes.map((r) => r.title + (r.servings ? " (" + r.servings + ")" : "")).join(" · ")
     : "";

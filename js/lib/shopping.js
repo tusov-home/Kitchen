@@ -297,6 +297,21 @@ export function mergeLists(listA, listB) {
   return [...byId.values()];
 }
 
+// Takes back what was added to a list: before and after are its maps of
+// timestamped entries (items or recipes). New entries become removed
+// markers and changed ones go back, stamped now, so the undo also wins on
+// the other phone if the addition already reached it.
+export function undoAdded(before, after, now) {
+  const result = Object.assign({}, after);
+  for (const [key, entry] of Object.entries(after)) {
+    if (before[key] === entry) {
+      continue;
+    }
+    result[key] = Object.assign({}, before[key] || entry, before[key] ? {} : { removed: true }, { at: now });
+  }
+  return result;
+}
+
 // The list in use: the newest one that isn't deleted.
 export function currentList(lists) {
   return lists

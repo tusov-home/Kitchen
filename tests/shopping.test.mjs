@@ -3,7 +3,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
   parseIngredient, nameKey, sectionFor, addRecipeItems, manualItem, itemLabel,
-  groupBySection, progress, mergeLists, currentList,
+  groupBySection, progress, mergeLists, currentList, undoAdded,
 } from "../js/lib/shopping.js";
 import { ingredientLines } from "../js/lib/sections.js";
 
@@ -100,4 +100,17 @@ test("the current list is the newest one not deleted", () => {
   ];
   assert.equal(currentList(lists).id, "c");
   assert.equal(currentList([]), null);
+});
+
+test("undoing an addition restores amounts and marks new items removed", () => {
+  const onion = { name: "onion", amount: 1, at: 100 };
+  const bread = { name: "bread", at: 100 };
+  const before = { onion: onion, bread: bread };
+  const after = { onion: { name: "onion", amount: 3, at: 200 }, bread: bread, salt: { name: "salt", at: 200 } };
+  const undone = undoAdded(before, after, 300);
+  assert.equal(undone.onion.amount, 1);
+  assert.equal(undone.onion.at, 300);
+  assert.equal(undone.bread, bread);
+  assert.equal(undone.salt.removed, true);
+  assert.equal(undone.salt.at, 300);
 });

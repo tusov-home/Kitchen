@@ -234,13 +234,6 @@
         <p id="recipe-notes"></p>
       </section>
 
-      <div id="recipe-servings" class="servings" aria-label="Servings">
-        <button id="servings-down" class="round-button" type="button" aria-label="Fewer servings" title="Fewer servings (−)">−</button>
-        <span id="servings-label" class="servings-label" aria-live="polite"></span>
-        <button id="servings-up" class="round-button" type="button" aria-label="More servings" title="More servings (+)">+</button>
-        <button id="servings-reset" class="text-button" type="button" hidden>Reset</button>
-      </div>
-
       <div id="recipe-body" class="recipe-body"></div>
     </article>
   </main>
@@ -366,7 +359,14 @@
   <nav id="recipe-dock" class="recipe-dock" aria-label="Recipe">
     <div id="recipe-jump" class="recipe-jump" role="group" aria-label="Jump to" hidden></div>
     <div class="dock-buttons">
-      <a href="#/" class="dock-button" title="Back (Esc)"><svg class="line-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M10 6l-6 6 6 6M4.5 12H20"/></svg><span>Back</span></a>
+      <div id="recipe-servings" class="dock-servings" role="group" aria-label="Servings">
+        <div class="dock-stepper">
+          <button id="servings-down" class="step-button" type="button" aria-label="Fewer servings" title="Fewer servings (−)">−</button>
+          <button id="servings-label" class="step-value" type="button" aria-live="polite" title="Back to as written"></button>
+          <button id="servings-up" class="step-button" type="button" aria-label="More servings" title="More servings (+)">+</button>
+        </div>
+        <span id="servings-caption"></span>
+      </div>
       <button id="rate-open" class="dock-button" type="button" title="Rate this recipe (R)"><svg class="line-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 4l2.5 5.2 5.7.8-4.1 4 1 5.7L12 17.2 6.9 19.7l1-5.7-4.1-4 5.7-.8z"/></svg><span id="rate-open-label">Rate</span></button>
       <button id="add-to-list" class="dock-button" type="button" title="Add the ingredients, for these servings (A)"><svg class="line-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3.5 10h17l-1.7 8.4a2 2 0 0 1-2 1.6H7.2a2 2 0 0 1-2-1.6z"/><path d="M8 10l3.2-5.5"/><path d="M16 10l-3.2-5.5"/></svg><span>To list</span></button>
       <button id="cooked-today" class="dock-button" type="button" title="Add today's date to the notes"><svg class="line-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span>Cooked</span></button>
@@ -378,13 +378,14 @@
   <!-- Shows what letting go of a swipe on a recipe will do -->
   <div id="swipe-hint" class="swipe-hint" aria-hidden="true" hidden></div>
 
-  <!-- Confirms a swipe to the shopping list; OK brings the next recipe -->
+  <!-- Confirms a swipe to the shopping list: OK brings the next recipe, Cancel takes it back -->
   <dialog id="added-dialog" class="dialog">
     <form method="dialog" class="dialog-body">
       <h2 id="added-title" tabindex="-1" autofocus class="dialog-title"></h2>
       <p id="added-text"></p>
       <div class="actions">
         <span class="spacer"></span>
+        <button id="added-cancel" class="button" value="cancel">Cancel</button>
         <button class="primary" value="ok">OK</button>
       </div>
     </form>

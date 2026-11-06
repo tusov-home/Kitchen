@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-06 n
+- The notice after swiping right has a **Cancel** button, which takes the recipe off the list and stays on it.
+- Servings moved into the bottom bar, where Back was; tap the number to go back to the recipe as written. Use the phone's Back or the page icons to leave a recipe.
+
 ## 2026-11-06 m
 - Swipe through recipes: left brings the next one, right adds this one to the shopping list, and OK on the notice brings the next. The order follows the list you came from. On the laptop: → and ←.
 

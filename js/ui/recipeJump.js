@@ -5,7 +5,6 @@ import { findJumps, headingOf } from "../lib/sections.js";
 const bar = document.getElementById("recipe-jump");
 const view = document.getElementById("view-recipe");
 const notesBox = document.getElementById("recipe-notes-box");
-const servingsBox = document.getElementById("recipe-servings");
 
 let jumps = []; // { label, target, button }
 // The part you just jumped to stays marked, even when a short part leaves
@@ -58,9 +57,7 @@ export function renderJump(body) {
     parts.push({ label: "Notes", target: notesBox });
   }
   if (found.ingredients !== -1) {
-    // Ingredients first in the text: land on the servings just above them.
-    const first = found.ingredients === 0 && !headings[0].previousElementSibling;
-    parts.push({ label: "Ingredients", target: first ? servingsBox : headings[found.ingredients] });
+    parts.push({ label: "Ingredients", target: headings[found.ingredients] });
   }
   if (found.method !== -1) {
     parts.push({ label: "Method", target: headings[found.method] });

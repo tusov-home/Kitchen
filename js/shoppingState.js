@@ -3,7 +3,7 @@
 // the Sheet's "shopping" tab.
 import * as storage from "./storage.js";
 import { newId } from "./lib/recipes.js";
-import { addRecipeItems, manualItem, mergeLists, currentList, normaliseList, nameKey } from "./lib/shopping.js";
+import { addRecipeItems, manualItem, mergeLists, currentList, normaliseList, nameKey, undoAdded } from "./lib/shopping.js";
 import { findInPantry } from "./lib/pantry.js";
 import { pantry, setStatus } from "./pantryState.js";
 import { setEntry } from "./projectsState.js";
@@ -71,10 +71,28 @@ export function addRecipes(recipes, mode, factor) {
   return update(list, { items: items, recipes: listRecipes });
 }
 
+// Puts the list back as it was before an addition. before: getCurrent()
+// from just before adding; null if that addition started the list.
+export function undoAdd(before) {
+  const list = getCurrent();
+  if (!list) {
+    return;
+  }
+  if (!before) {
+    update(list, { deleted: true });
+    return;
+  }
+  const now = Date.now();
+  update(list, {
+    items: undoAdded(before.items, list.items, now),
+    recipes: undoAdded(before.recipes, list.recipes, now),
+  });
+}
+
 // Is this recipe already on the current list?
 export function hasRecipe(id) {
   const list = getCurrent();
-  return Boolean(list && list.recipes[id]);
+  return Boolean(list && list.recipes[id] && !list.recipes[id].removed);
 }
 
 export function toggleItem(key) {
