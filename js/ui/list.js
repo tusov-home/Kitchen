@@ -6,6 +6,7 @@ import * as storage from "../storage.js";
 import { visibleRecipes, allTags, allOwners, averageRating, kindOf } from "../lib/recipes.js";
 import { isPlanning, isSelected, toggleSelected } from "./plan.js";
 import { renderSuggestion, initSuggestion } from "./suggestion.js";
+import { setQueue } from "./recipeQueue.js";
 
 const searchInput = document.getElementById("search");
 const tagFilter = document.getElementById("tag-filter");
@@ -103,6 +104,8 @@ export function renderList() {
     const item = document.createElement("li");
     const link = document.createElement("a");
     link.href = "#/r/" + encodeURIComponent(recipe.id);
+    // Swiping on the recipe goes through this list, as you see it now.
+    link.addEventListener("click", () => setQueue(shown.map((item) => item.id)));
     link.className = "recipe-card";
 
     // While planning, a tap picks the recipe instead of opening it.

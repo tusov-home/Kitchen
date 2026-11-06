@@ -1062,6 +1062,89 @@ def test_recipe_layout(p):
     print("recipe layout: ok")
 
 
+def test_recipe_swipe(p):
+    """Swiping through recipes: left skips, right adds, OK moves on."""
+    ctx = p.chromium.launch().new_context(**p.devices["Pixel 7"])
+    ctx.add_init_script("if (!localStorage.getItem('kitchen.settings.v1')) localStorage.setItem('kitchen.settings.v1', JSON.stringify({myName: 'Kadi'}))")
+    page = ctx.new_page()
+    errors = []
+    watch_errors(page, errors)
+    page.goto(BASE)
+    for name in ["Apple soup", "Bean stew", "Corn cakes"]:
+        page.click("#add-recipe")
+        page.fill("#edit-text", f"{name}\n\nServes 2\n\n## Ingredients\n- 2 {name.split()[0].lower()}s\n\n## Method\n1. Cook it.")
+        page.click("#edit-form button[type=submit]")
+        expect(page.locator("#view-recipe")).to_be_visible()
+        page.click(".brand")
+        expect(page.locator("#view-list")).to_be_visible()
+    title = page.locator("#recipe-title")
+    page.click("#meals-toggle")
+    cards = page.locator(".recipe-card-title").all_inner_texts()
+    assert len(cards) == 3, cards
+    page.locator(".recipe-card").first.click()
+    expect(title).to_have_text(cards[0])
+    # A small move does nothing; while dragging, a hint says what will happen
+    swipe(page, 300, 275)
+    page.wait_for_timeout(300)
+    expect(title).to_have_text(cards[0])
+    swipe(page, 330, 120, lift=False)
+    expect(page.locator("#swipe-hint")).to_have_text("Next recipe")
+    page.evaluate("""() => {
+        const t = new Touch({ identifier: 1, target: document.body, clientX: 330, clientY: 400 });
+        document.body.dispatchEvent(new TouchEvent("touchcancel", { touches: [], changedTouches: [t], bubbles: true }));
+    }""")
+    expect(page.locator("#swipe-hint")).to_be_hidden()
+    page.wait_for_timeout(350)
+    # Left: the next recipe
+    swipe(page, 330, 120)
+    expect(title).to_have_text(cards[1])
+    page.wait_for_timeout(400)
+    # Right: added, the notice waits for OK, then the next recipe
+    page.click("#servings-up")
+    swipe(page, 90, 300)
+    expect(page.locator("#added-dialog")).to_be_visible()
+    expect(page.locator("#added-title")).to_have_text("Added to the shopping list")
+    expect(page.locator("#added-text")).to_contain_text("3 servings")
+    assert page.evaluate("document.activeElement.tagName") == "H2"
+    expect(title).to_have_text(cards[1])
+    expect(page.locator("#cart-count")).to_have_text("1")
+    page.click("#added-dialog button[value=ok]")
+    expect(title).to_have_text(cards[2])
+    page.wait_for_timeout(400)
+    # Back returns to the list, not through the swiped recipes
+    page.go_back()
+    expect(page.locator("#view-list")).to_be_visible()
+    # Already on the list: not added twice
+    page.locator(".recipe-card", has_text=cards[1]).click()
+    expect(title).to_have_text(cards[1])
+    page.wait_for_timeout(400)
+    swipe(page, 90, 300)
+    expect(page.locator("#added-title")).to_have_text("Already on the list")
+    expect(page.locator("#cart-count")).to_have_text("1")
+    page.click("#added-dialog button[value=ok]")
+    expect(title).to_have_text(cards[2])
+    page.wait_for_timeout(400)
+    # After the last one: back to the list, with a message
+    swipe(page, 330, 120)
+    expect(page.locator("#view-list")).to_be_visible()
+    expect(page.locator("#toast")).to_contain_text("That was the last recipe")
+    # From the suggestion, it goes on through the other ideas
+    page.reload()
+    shown = page.locator("#suggestion-link").inner_text()
+    page.click("#suggestion-open")
+    expect(title).to_have_text(shown)
+    page.wait_for_timeout(400)
+    swipe(page, 330, 120)
+    expect(title).not_to_have_text(shown)
+    # The keyboard does the same
+    page.wait_for_timeout(400)
+    before = title.inner_text()
+    page.keyboard.press("ArrowRight")
+    expect(title).not_to_have_text(before)
+    assert not errors, errors
+    print("recipe swipe: ok")
+
+
 # A small web server for test_site_missing: serves the app until a file
 # named OFF appears next to it, then answers 404 for everything, like
 # GitHub Pages does while a site is unpublished.
@@ -1188,6 +1271,7 @@ def main():
             test_add_from_recipe(p)
             test_meals_and_sauces(p)
             test_recipe_layout(p)
+            test_recipe_swipe(p)
             test_pantry_categories(p, FakeSheet())
             test_site_missing(p)
             test_update_after_publish(p)

@@ -12,6 +12,8 @@ const SHORTCUTS = [
   { keys: "e", label: "E", action: "editRecipe", where: ["recipe"], text: "Edit recipe (your own)" },
   { keys: "c", label: "C", action: "copyRecipe", where: ["recipe"], text: "Make my copy" },
   { keys: "a", label: "A", action: "addToList", where: ["recipe"], text: "Add ingredients to the shopping list" },
+  { keys: "arrowright", label: "→", action: "nextRecipe", where: ["recipe"], text: "Next recipe" },
+  { keys: "arrowleft", label: "←", action: "addAndNext", where: ["recipe"], text: "Add to the shopping list, then next" },
   { keys: "r", label: "R", action: "openRating", where: ["recipe"], text: "Open the rating" },
   { keys: "i", label: "I", action: "jumpIngredients", where: ["recipe"], text: "Jump to ingredients" },
   { keys: "m", label: "M", action: "jumpMethod", where: ["recipe"], text: "Jump to method" },

@@ -1,5 +1,8 @@
 # Changelog
 
+## 2026-11-06 m
+- Swipe through recipes: left brings the next one, right adds this one to the shopping list, and OK on the notice brings the next. The order follows the list you came from. On the laptop: → and ←.
+
 ## 2026-11-06 l
 - Recipe page: all the buttons now sit at the bottom, in thumb reach.
 - A new bar above them jumps straight to Notes, Ingredients or Method, and shows where you are (I and M on the laptop).

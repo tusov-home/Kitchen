@@ -375,6 +375,21 @@
     </div>
   </nav>
 
+  <!-- Shows what letting go of a swipe on a recipe will do -->
+  <div id="swipe-hint" class="swipe-hint" aria-hidden="true" hidden></div>
+
+  <!-- Confirms a swipe to the shopping list; OK brings the next recipe -->
+  <dialog id="added-dialog" class="dialog">
+    <form method="dialog" class="dialog-body">
+      <h2 id="added-title" tabindex="-1" autofocus class="dialog-title"></h2>
+      <p id="added-text"></p>
+      <div class="actions">
+        <span class="spacer"></span>
+        <button class="primary" value="ok">OK</button>
+      </div>
+    </form>
+  </dialog>
+
   <!-- Your rating, and everyone's -->
   <dialog id="rate-dialog" class="dialog">
     <form method="dialog" class="dialog-body">

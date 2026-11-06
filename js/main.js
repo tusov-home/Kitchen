@@ -5,7 +5,7 @@ import * as sync from "./sync.js";
 import { parseRoute, trackHistory, go, goBack } from "./ui/router.js";
 import { toggleSuggestionOwner } from "./ui/suggestion.js";
 import { initList, renderList, focusSearch, toggleKind, toggleFilters } from "./ui/list.js";
-import { initRecipe, renderRecipe, changeServings, canEditCurrent, addCurrentToList } from "./ui/recipe.js";
+import { initRecipe, renderRecipe, changeServings, canEditCurrent, addCurrentToList, swipeRecipe, showNextRecipe, addAndContinue } from "./ui/recipe.js";
 import { showToast } from "./ui/toast.js";
 import { rate, initRating, openRating } from "./ui/rating.js";
 import { initRecipeJump, jumpTo } from "./ui/recipeJump.js";
@@ -17,7 +17,7 @@ import { initPwa, onInstallAvailable, install } from "./pwa.js";
 import * as shoppingState from "./shoppingState.js";
 import { initPlan, isPlanning, setPlanning, startPlanning, cancelPlanning } from "./ui/plan.js";
 import { initShopping, renderShopping, renderCartCount } from "./ui/shopping.js";
-import { initTabs, renderTabs, goToTab, stepTab } from "./ui/tabs.js";
+import { initTabs, renderTabs, goToTab, stepTab, onRecipeSwipe } from "./ui/tabs.js";
 import { pantry, pantrySections } from "./pantryState.js";
 import { initPantry, renderPantry, renderPantryBadge, focusPantryAdd } from "./ui/pantry.js";
 import { initPantrySections, openSections } from "./ui/pantrySections.js";
@@ -157,6 +157,7 @@ document.getElementById("add-recipe").addEventListener("click", function () {
 
 initList();
 initRecipe();
+onRecipeSwipe(swipeRecipe);
 initRating();
 initRecipeJump();
 initName();
@@ -198,6 +199,8 @@ initShortcuts(
     rate4: () => rate(4),
     rate5: () => rate(5),
     addToList: addCurrentToList,
+    nextRecipe: showNextRecipe,
+    addAndNext: addAndContinue,
     moreServings: () => changeServings(1),
     fewerServings: () => changeServings(-1),
     save: saveFromEditor,

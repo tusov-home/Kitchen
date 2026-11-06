@@ -1805,3 +1805,22 @@ body:has(#view-recipe:not([hidden])):has(#recipe-jump:not([hidden])) {
 #recipe-servings {
   scroll-margin-top: 4.25rem;
 }
+
+/* Beside the recipe as it's dragged */
+.swipe-hint {
+  position: fixed;
+  top: 45%;
+  right: 1rem;
+  z-index: 20;
+  max-width: 8rem;
+  color: var(--accent);
+  font-weight: 500;
+  text-align: right;
+  pointer-events: none;
+}
+
+.swipe-hint.from-left {
+  right: auto;
+  left: 1rem;
+  text-align: left;
+}

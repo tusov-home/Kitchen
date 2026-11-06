@@ -6,6 +6,7 @@ import { dailySuggestions, activeOwners, toggleOwner, recipesOfOwners, initial }
 import { allOwners } from "../lib/recipes.js";
 import { toDateString } from "../lib/dates.js";
 import { getMyName } from "./name.js";
+import { setQueue } from "./recipeQueue.js";
 
 const box = document.getElementById("suggestion");
 const label = document.getElementById("suggestion-label");
@@ -131,7 +132,16 @@ export function renderSuggestion(recipes, visible) {
   nextButton.hidden = list.length < 2;
 }
 
+// Swiping on the recipe goes on through today's other ideas.
+function queueFromHere() {
+  const ids = todaysList(lastRecipes, toDateString(new Date())).map((item) => item.recipe.id);
+  const start = ids.indexOf(shownId);
+  setQueue([...ids.slice(start), ...ids.slice(0, start)]);
+}
+
 export function initSuggestion() {
+  link.addEventListener("click", queueFromHere);
+  openButton.addEventListener("click", queueFromHere);
   nextButton.addEventListener("click", function () {
     const today = toDateString(new Date());
     saveOffset(today, loadOffset(today) + 1);

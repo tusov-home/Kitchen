@@ -26,6 +26,7 @@ Kitchen lives in the `tusov-home` organization so it has its own web address. Pa
 - **Owner, tags and sorting:** unfold a row and tap **Filter** (or press F). Tap a name to see only that person's recipes, a tag to narrow down, and **Sort** for Newest, A–Z or Best rated. Each phone remembers its sort order.
 - **One recipe to the list:** on a recipe, set the servings and tap **Add to shopping list** (or press A). It joins the current list, and **Open list** takes you there.
 - **Shopping list:** on the Shopping page tap **Plan shopping**, tap the recipes you'll cook, then **Make shopping list**. Items are sorted by shop section and the same ingredient is added up (two recipes with 200 g feta → 400 g feta; "7+ tbsp olive oil" means some recipes didn't say how much). Things you probably have (salt, oil, spices) go under **Check you have**. Tick items off as you shop, ✕ to remove one, or add your own. With sync, you both see the same list and ticks. 🛒 in the top bar opens it.
+- **Swipe through recipes:** on an open recipe, swipe left for the next one, or right to add it to the shopping list; OK on the notice brings the next. The order follows the list you came from, or today's ideas if you opened the suggestion. Back returns to the list. On the laptop: → and ←.
 - **Jump around a recipe:** the bar at the bottom goes straight to the notes, ingredients or method (I and M on the laptop).
 - **Rate it:** tap **Rate** at the bottom and choose 1–5 stars after eating. Each of you rates on your own phone (the app asks your name once; change it in ⚙). Tap the same star again to clear. The list shows the average.
 ## Install as an app
@@ -77,6 +78,8 @@ Then in Kitchen: **⚙ → Import from file** and pick `kitchen-recipes.json`. T
 | `A` | Add ingredients to the shopping list | recipe |
 | `E` | Edit recipe (your own) | recipe |
 | `C` | Make my copy | recipe |
+| `→` | Next recipe | recipe |
+| `←` | Add to the shopping list, then next | recipe |
 | `R` | Open the rating | recipe |
 | `I` / `M` | Jump to ingredients / method | recipe |
 | `1` … `5` | Rate (same again clears) | recipe |
@@ -153,6 +156,7 @@ js/ui/suggestion.js   today's suggestion
 js/ui/recipe.js       one recipe, servings stepper
 js/ui/rating.js       the Rate button and star ratings
 js/ui/recipeJump.js   the bar jumping to notes, ingredients and method
+js/ui/recipeQueue.js  which recipe comes next when swiping
 js/ui/name.js         whose phone this is (asked once)
 js/ui/plan.js         Plan shopping: picking recipes for a list
 js/ui/shopping.js     the shopping list screen

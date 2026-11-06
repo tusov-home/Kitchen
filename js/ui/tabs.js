@@ -10,10 +10,11 @@ export const TABS = [
   { id: "projects", screens: ["projects"], hash: () => "#/projects" },
 ];
 
-// Pages opened from a tab (not swipeable themselves) still light up its tab.
+// Pages opened from a tab still light up its tab.
 const BELONGS_TO = { recipe: "list", project: "projects" };
 
 const tabbar = document.getElementById("tabbar");
+const swipeHint = document.getElementById("swipe-hint");
 
 // Android uses the outer edges for its own Back gesture; leave them alone.
 const EDGE_PX = 20;
@@ -30,6 +31,17 @@ const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
 let getScreen = () => "list";
 let swipeDirection = 0; // -1: came from the left, +1: from the right
+// On a recipe, a swipe doesn't change tabs: this decides what it does.
+let recipeSwipe = () => {};
+
+export function onRecipeSwipe(handler) {
+  recipeSwipe = handler;
+}
+
+// The next screen slides in from the right.
+export function slideInNext() {
+  swipeDirection = 1;
+}
 
 export function isTabScreen(screen) {
   return tabIndex(screen) !== -1;
@@ -120,8 +132,25 @@ export function setBadge(id, count) {
 // Where a swipe must not switch pages.
 function blocksSwipe(target) {
   return Boolean(
-    target.closest("input, textarea, select, .table-wrap, dialog, [contenteditable]")
+    target.closest("input, textarea, select, .table-wrap, dialog, [contenteditable], .recipe-dock")
   );
+}
+
+function canSwipe(screen) {
+  return isTabScreen(screen) || screen === "recipe";
+}
+
+// While dragging a recipe: what letting go will do.
+function showHint(dx) {
+  const reached = Math.min(Math.abs(dx) / COMMIT_PX, 1);
+  swipeHint.hidden = false;
+  swipeHint.textContent = dx < 0 ? "Next recipe" : "Add to shopping list";
+  swipeHint.classList.toggle("from-left", dx > 0);
+  swipeHint.style.opacity = String(reached);
+}
+
+function hideHint() {
+  swipeHint.hidden = true;
 }
 
 function currentView() {
@@ -143,9 +172,9 @@ function springBack(view) {
 }
 
 // Far enough: the page slides out, then the next one slides in.
-function slideOut(view, direction) {
+function slideOut(view, direction, whenDone) {
   if (reduceMotion.matches) {
-    stepTab(direction);
+    whenDone();
     return;
   }
   view.style.transition = "transform 0.16s ease-in, opacity 0.16s ease-in";
@@ -155,7 +184,7 @@ function slideOut(view, direction) {
   const finish = function () {
     if (!done) {
       done = true;
-      stepTab(direction);
+      whenDone();
     }
   };
   view.addEventListener("transitionend", finish, { once: true });
@@ -163,6 +192,9 @@ function slideOut(view, direction) {
 }
 
 function hasNeighbour(direction) {
+  if (getScreen() === "recipe") {
+    return true;
+  }
   const index = tabIndex(getScreen());
   return index !== -1 && Boolean(TABS[index + direction]);
 }
@@ -174,7 +206,7 @@ function initSwipe() {
   document.addEventListener("touchstart", function (event) {
     drag = null;
     const touch = event.touches[0];
-    if (event.touches.length !== 1 || !isTabScreen(getScreen()) || document.querySelector("dialog[open]")) {
+    if (event.touches.length !== 1 || !canSwipe(getScreen()) || document.querySelector("dialog[open]")) {
       return;
     }
     if (touch.clientX < EDGE_PX || touch.clientX > window.innerWidth - EDGE_PX || blocksSwipe(event.target)) {
@@ -205,6 +237,9 @@ function initSwipe() {
     drag.speed = (touch.clientX - drag.lastX) / Math.max(now - drag.lastTime, 1);
     drag.lastX = touch.clientX;
     drag.lastTime = now;
+    if (getScreen() === "recipe") {
+      showHint(dx);
+    }
     if (reduceMotion.matches) {
       return;
     }
@@ -218,6 +253,7 @@ function initSwipe() {
     }
     const current = drag;
     drag = null;
+    hideHint();
     if (current.axis !== "x") {
       return;
     }
@@ -225,8 +261,17 @@ function initSwipe() {
     const dx = (touch ? touch.clientX : current.lastX) - current.x;
     const direction = dx < 0 ? 1 : -1;
     const flicked = Math.abs(dx) > FLICK_PX && Math.abs(current.speed) > FLICK_SPEED && Math.sign(current.speed) === Math.sign(dx);
-    if (!cancelled && hasNeighbour(direction) && (Math.abs(dx) > COMMIT_PX || flicked)) {
-      slideOut(current.view, direction);
+    const commit = !cancelled && hasNeighbour(direction) && (Math.abs(dx) > COMMIT_PX || flicked);
+    if (commit && getScreen() === "recipe") {
+      if (direction > 0) {
+        slideOut(current.view, direction, () => recipeSwipe(direction));
+      } else {
+        // Adding keeps the recipe in view behind the notice.
+        springBack(current.view);
+        recipeSwipe(direction);
+      }
+    } else if (commit) {
+      slideOut(current.view, direction, () => stepTab(direction));
     } else {
       springBack(current.view);
     }

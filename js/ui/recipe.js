@@ -8,7 +8,9 @@ import { renderMarkdown } from "../lib/markdown.js";
 import { formatAmount, stepServings } from "../lib/scale.js";
 import { renderRating } from "./rating.js";
 import { renderJump } from "./recipeJump.js";
-import { go } from "./router.js";
+import { nextRecipeId } from "./recipeQueue.js";
+import { slideInNext } from "./tabs.js";
+import { go, goBack } from "./router.js";
 import { getMyName } from "./name.js";
 import { showToast } from "./toast.js";
 
@@ -26,6 +28,9 @@ const servingsUp = document.getElementById("servings-up");
 const servingsLabel = document.getElementById("servings-label");
 const servingsReset = document.getElementById("servings-reset");
 const addToListButton = document.getElementById("add-to-list");
+const addedDialog = document.getElementById("added-dialog");
+const addedTitle = document.getElementById("added-title");
+const addedText = document.getElementById("added-text");
 
 let currentId = null;
 // The servings shown. Without a known base it's a multiplier (1 = as written).
@@ -150,7 +155,58 @@ export function addCurrentToList() {
   }
 }
 
+// The next recipe in the list you came from. Replaces this one in the
+// phone's history, so Back returns to the list however far you swiped.
+export function showNextRecipe() {
+  const next = nextRecipeId(currentId);
+  if (!next) {
+    showToast("That was the last recipe");
+    goBack("#/");
+    return;
+  }
+  slideInNext();
+  go("#/r/" + encodeURIComponent(next), true);
+}
+
+function showAddedNotice(heading, text) {
+  addedTitle.textContent = heading;
+  addedText.textContent = text;
+  addedDialog.returnValue = "";
+  addedDialog.showModal();
+}
+
+// Adds the ingredients without asking; OK on the notice moves on. Already
+// on the list: nothing is added, so a repeat doesn't double the amounts.
+export function addAndContinue() {
+  const recipe = state.getRecipe(currentId);
+  if (!recipe) {
+    return;
+  }
+  if (ingredientLines(recipe.text).length === 0) {
+    showAddedNotice("Nothing added", "No ingredient list found in " + recipe.title + ".");
+  } else if (shopping.hasRecipe(recipe.id)) {
+    showAddedNotice("Already on the list", recipe.title + " is on the shopping list.");
+  } else {
+    shopping.addRecipes([recipe], "add", shownFactor(recipe));
+    showAddedNotice("Added to the shopping list", servingsLabel.textContent === "As written" ? recipe.title : recipe.title + ", " + servingsLabel.textContent);
+  }
+}
+
+// direction: +1 finger moved left (skip), -1 finger moved right (add).
+export function swipeRecipe(direction) {
+  if (direction > 0) {
+    showNextRecipe();
+  } else {
+    addAndContinue();
+  }
+}
+
 export function initRecipe() {
+  addedDialog.addEventListener("close", function () {
+    if (addedDialog.returnValue === "ok") {
+      showNextRecipe();
+    }
+  });
   cookedButton.addEventListener("click", function () {
     if (!currentId) {
       return;
