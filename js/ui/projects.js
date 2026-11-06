@@ -1,5 +1,6 @@
 // The projects list and the add/edit dialog.
 import { projects, createProject } from "../projectsState.js";
+import { ask } from "./ask.js";
 import { groupProjects, progress, materialsToBuy, EFFORT_LABELS } from "../lib/projects.js";
 import { allOwners } from "../lib/recipes.js";
 import * as state from "../state.js";
@@ -180,10 +181,15 @@ export function initProjects() {
 
   deleteButton.addEventListener("click", function () {
     const project = projects.get(editingId);
-    if (project && confirm("Delete \"" + project.title + "\"? This also removes it on the other phone.")) {
-      projects.remove(editingId);
-      dialog.close();
-      go("#/projects", true);
+    if (!project) {
+      return;
     }
+    ask("Delete \"" + project.title + "\"? This also removes it on the other phone.", "Delete", true).then(function (yes) {
+      if (yes) {
+        projects.remove(project.id);
+        dialog.close();
+        go("#/projects", true);
+      }
+    });
   });
 }

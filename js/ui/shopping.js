@@ -1,5 +1,6 @@
 // The shopping list screen: items by shop section, tick off as you shop.
 import * as shopping from "../shoppingState.js";
+import { ask } from "./ask.js";
 import { groupBySection, itemLabel, progress } from "../lib/shopping.js";
 import { showToast } from "./toast.js";
 
@@ -128,8 +129,10 @@ export function initShopping() {
     }
   });
   deleteButton.addEventListener("click", function () {
-    if (confirm("Clear the whole shopping list? This also clears it on the other phone.")) {
-      shopping.deleteCurrent();
-    }
+    ask("Clear the whole shopping list? This also clears it on the other phone.", "Start over", true).then(function (yes) {
+      if (yes) {
+        shopping.deleteCurrent();
+      }
+    });
   });
 }

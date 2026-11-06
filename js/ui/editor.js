@@ -1,5 +1,6 @@
 // The form for adding or editing a recipe.
 import * as state from "../state.js";
+import { ask } from "./ask.js";
 import { titleFromText, parseTags, canEdit, copyForEditing, kindOf } from "../lib/recipes.js";
 import { detectServings } from "../lib/scale.js";
 import { showToast } from "./toast.js";
@@ -148,11 +149,16 @@ export function initEditor() {
   cancelButton.addEventListener("click", cancelEditor);
 
   deleteButton.addEventListener("click", function () {
-    if (!editingId || !confirm("Delete \"" + titleInput.value + "\"? This also removes it from the other phone.")) {
+    if (!editingId) {
       return;
     }
-    state.deleteRecipe(editingId);
-    showToast("Recipe deleted");
-    go("#/", true);
+    const id = editingId;
+    ask("Delete \"" + titleInput.value + "\"? This also removes it from the other phone.", "Delete", true).then(function (yes) {
+      if (yes) {
+        state.deleteRecipe(id);
+        showToast("Recipe deleted");
+        go("#/", true);
+      }
+    });
   });
 }

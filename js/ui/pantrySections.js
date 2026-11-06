@@ -1,5 +1,6 @@
 // The "Pantry categories" dialog: add, rename, reorder and remove the
 // categories the pantry is grouped by. "Other" stays as the catch-all.
+import { ask } from "./ask.js";
 import {
   getSections, addSection, renameSection, removeSection, moveSection, itemsInSection,
 } from "../pantryState.js";
@@ -76,11 +77,13 @@ function removeRow(section) {
   const question = items
     ? "Remove " + section.title + "? " + items + (items === 1 ? " item moves" : " items move") + " to " + OTHER_SECTION + "."
     : "Remove " + section.title + "?";
-  if (confirm(question)) {
-    removeSection(section.id);
-    say("");
-    render();
-  }
+  ask(question, "Remove", true).then(function (yes) {
+    if (yes) {
+      removeSection(section.id);
+      say("");
+      render();
+    }
+  });
 }
 
 function render() {

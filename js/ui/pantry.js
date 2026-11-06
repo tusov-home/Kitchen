@@ -1,5 +1,6 @@
 // The pantry screen: what's at home, by section, with Have/Low/Out.
 import { pantry, addItem, cycleStatus, addStaples, sectionNames } from "../pantryState.js";
+import { ask } from "./ask.js";
 import * as shopping from "../shoppingState.js";
 import { groupPantry, lowOrOut, OTHER_SECTION, STATUS_LABELS } from "../lib/pantry.js";
 import { nameKey } from "../lib/shopping.js";
@@ -168,9 +169,14 @@ export function initPantry() {
 
   deleteButton.addEventListener("click", function () {
     const item = pantry.get(editingId);
-    if (item && confirm("Remove " + item.title + " from the pantry?")) {
-      pantry.remove(editingId);
-      dialog.close();
+    if (!item) {
+      return;
     }
+    ask("Remove " + item.title + " from the pantry?", "Remove", true).then(function (yes) {
+      if (yes) {
+        pantry.remove(item.id);
+        dialog.close();
+      }
+    });
   });
 }

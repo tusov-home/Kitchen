@@ -2249,3 +2249,14 @@ body.sheet-closing .recipe-backdrop {
 .suggestion[class*="flip-"] .suggestion-reason {
   animation: none;
 }
+
+/* The app's own "Are you sure?" */
+.ask-text {
+  margin: 0.25rem 0 0.5rem;
+  font-size: 1.05rem;
+  line-height: 1.5;
+}
+
+.ask-text:focus {
+  outline: none;
+}

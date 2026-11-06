@@ -1,5 +1,8 @@
 # Changelog
 
+## 2026-11-07 b
+- "Are you sure?" questions now appear in the app's own style, without the site address on top.
+
 ## 2026-11-07 a
 - Taking a meal out of the cooking plan asks first.
 

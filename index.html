@@ -412,6 +412,18 @@
     </form>
   </dialog>
 
+  <!-- "Are you sure?" in the app's style (js/ui/ask.js) -->
+  <dialog id="ask-dialog" class="dialog ask-dialog">
+    <form method="dialog" class="dialog-body">
+      <p id="ask-text" class="ask-text" tabindex="-1" autofocus></p>
+      <div class="actions">
+        <span class="spacer"></span>
+        <button class="button" value="cancel">Cancel</button>
+        <button id="ask-ok" class="primary" value="ok">OK</button>
+      </div>
+    </form>
+  </dialog>
+
   <!-- Edit one pantry item -->
   <dialog id="pantry-dialog" class="dialog">
     <form method="dialog" class="dialog-body" id="pantry-form">

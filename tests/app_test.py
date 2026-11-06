@@ -148,8 +148,8 @@ def test_phone(p, sheet):
     page.click("#plan-row")
     expect(page.locator("#view-plan")).to_be_visible()
     expect(page.locator("#plan-shop .plan-title")).to_have_text(["Miso Aubergine with Soba"])
-    page.once("dialog", lambda d: d.dismiss())  # × asks first
     page.click("#plan-shop .shop-remove")
+    page.click("#ask-dialog button[value=cancel]")
     expect(page.locator("#plan-shop .plan-title")).to_have_count(1)
     page.click("#plan-shop .step-button[aria-label='More servings']")
     expect(page.locator("#plan-shop .step-value")).to_have_text("3")
@@ -170,13 +170,13 @@ def test_phone(p, sheet):
     page.fill("#plan-review .plan-note input", "More chilli")
     page.keyboard.press("Enter")
     page.screenshot(path=SHOTS / "phone-plan-review.png")
-    page.once("dialog", lambda d: d.accept())
     page.click("#plan-finish")
+    page.click("#ask-dialog button[value=ok]")
     expect(page.locator("#plan-empty")).to_be_visible()
     # Clear the shopping list again, for the laptop's turn
     page.goto(BASE + "#/shopping")
-    page.once("dialog", lambda d: d.accept())
     page.click("#shop-delete")
+    page.click("#ask-dialog button[value=ok]")
     page.goto(BASE + "#/")
     expect(page.locator("#plan-head")).to_be_hidden()
     page.click("#meals-toggle")
@@ -255,11 +255,11 @@ def test_laptop_second_device(p, sheet):
     page.keyboard.press("p")
     expect(page.locator("#plan-toggle-label")).to_have_text("In plan")
     # Taking it out asks first: "Cancel" keeps it, "OK" takes it out
-    page.once("dialog", lambda d: d.dismiss())
     page.keyboard.press("p")
+    page.click("#ask-dialog button[value=cancel]")
     expect(page.locator("#plan-toggle-label")).to_have_text("In plan")
-    page.once("dialog", lambda d: d.accept())
     page.keyboard.press("p")
+    page.click("#ask-dialog button[value=ok]")
     expect(page.locator("#plan-toggle-label")).to_have_text("Add to plan")
     page.keyboard.press("+")
     expect(page.locator("#servings-label")).to_have_text("3")
@@ -283,11 +283,11 @@ def test_laptop_second_device(p, sheet):
     page.click("#plan-shop-all")
     page.locator("#plan-review .star").nth(4).click()
     expect(page.locator("#plan-review .star.filled")).to_have_count(5)
-    page.once("dialog", lambda d: d.accept())
     page.click("#plan-finish")
+    page.click("#ask-dialog button[value=ok]")
     page.goto(BASE + "#/shopping")
-    page.once("dialog", lambda d: d.accept())
     page.click("#shop-delete")
+    page.click("#ask-dialog button[value=ok]")
     page.goto(BASE + "#/")
     expect(page.locator(".card-stars")).to_have_text("★ 4.5")
     page.wait_for_timeout(2500)  # sync runs shortly after a change
@@ -523,8 +523,8 @@ def test_laptop_second_device(p, sheet):
     expect(page.locator("#recipe-title")).to_have_text("Beef Shakshuka")
     page.keyboard.press("e")
     expect(page.locator("#delete-recipe")).to_be_visible()
-    page.once("dialog", lambda d: d.accept())
     page.click("#delete-recipe")
+    page.click("#ask-dialog button[value=ok]")
     expect(page.locator(".recipe-card")).to_have_count(2)
     page.wait_for_timeout(2500)  # sync runs shortly after a change
     deleted = [r for r in sheet.recipes.values() if r["deleted"]]
@@ -630,8 +630,8 @@ def add_to_list(page, name):
     expect(page.locator("#view-recipe")).to_be_visible()
     expect(page.locator("#recipe-title")).to_have_text(name)
     if page.locator("#plan-toggle-label").inner_text() == "In plan":
-        page.once("dialog", lambda d: d.accept())
         page.click("#plan-toggle")  # from an earlier round: take it out first
+        page.click("#ask-dialog button[value=ok]")
         expect(page.locator("#plan-toggle-label")).to_have_text("Add to plan")
     page.keyboard.press("ArrowLeft")
     expect(page.locator("#added-dialog")).to_be_visible()
@@ -780,8 +780,8 @@ def test_pantry_tabs(p, sheet):
     page.click(".pantry-name:has-text('Oat milk')")
     expect(page.locator("#pantry-dialog")).to_be_visible()
     assert page.evaluate("document.activeElement.tagName") == "H2"
-    page.once("dialog", lambda d: d.accept())
     page.click("#pantry-delete")
+    page.click("#ask-dialog button[value=ok]")
     expect(page.locator(".pantry-name:has-text('Oat milk')")).to_have_count(0)
     page.screenshot(path=SHOTS / "phone-7-pantry.png", full_page=True)
 
@@ -799,8 +799,8 @@ def test_pantry_tabs(p, sheet):
     page.fill("#pantry-add-input", "White miso")
     page.keyboard.press("Enter")
     open_tab(page, "shopping")
-    page.once("dialog", lambda d: d.accept())
     page.click("#shop-delete")
+    page.click("#ask-dialog button[value=ok]")
     add_to_list(page, "Miso Aubergine with Soba")
     open_tab(page, "shopping")
     miso = page.locator(".shop-item", has_text="white miso")
@@ -1131,8 +1131,8 @@ def test_pantry_categories(p, sheet):
     expect(other.locator("#sections-dialog")).to_be_visible()
     expect(other.locator(".section-row input").nth(-2)).to_have_value("Top shelf")
     # Removing a category moves its items to Other
-    other.once("dialog", lambda d: d.accept())
     other.click(".section-row:has(input[aria-label='Name of Top shelf']) [data-action=remove]")
+    other.click("#ask-dialog button[value=ok]")
     expect(other.locator(".section-row input[aria-label='Name of Top shelf']")).to_have_count(0)
     other.click("#sections-form button[value=done]")
     expect(other.locator(".shop-section", has_text="Other")).to_contain_text("Soy sauce")

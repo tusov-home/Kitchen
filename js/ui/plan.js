@@ -2,6 +2,7 @@
 // meals to shop for (servings, remove, "Add to shopping list"), then, once
 // shopped, the review: cooked, your stars and a note, and "Finish plan".
 import * as state from "../state.js";
+import { ask } from "./ask.js";
 import * as storage from "../storage.js";
 import * as plan from "../planState.js";
 import { canEdit, cookedNote } from "../lib/recipes.js";
@@ -61,10 +62,12 @@ function iconButton(className, label, text, onClick) {
 
 // Taking a meal out always asks first: a mistaken tap would lose its place.
 export function confirmRemove(meal) {
-  if (confirm("Take " + meal.recipe.title + " out of the cooking plan?")) {
-    plan.removeMeal(meal.id);
-    showToast("Taken out of the plan");
-  }
+  ask("Take " + meal.recipe.title + " out of the cooking plan?", "Take out").then(function (yes) {
+    if (yes) {
+      plan.removeMeal(meal.id);
+      showToast("Taken out of the plan");
+    }
+  });
 }
 
 function shopRow(meal, meals) {
@@ -205,9 +208,11 @@ export function initPlan() {
     const question = left
       ? left + (left === 1 ? " meal isn't" : " meals aren't") + " ticked as cooked. Finish the plan anyway?"
       : "Finish this plan? It starts empty again.";
-    if (confirm(question)) {
-      plan.finishPlan();
-      showToast("Plan finished");
-    }
+    ask(question, "Finish plan").then(function (yes) {
+      if (yes) {
+        plan.finishPlan();
+        showToast("Plan finished");
+      }
+    });
   });
 }

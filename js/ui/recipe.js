@@ -1,6 +1,7 @@
 // Shows one recipe, ready to cook from: ratings, notes, a servings
 // stepper and the recipe text with amounts scaled to the servings.
 import * as state from "../state.js";
+import { ask } from "./ask.js";
 import * as plan from "../planState.js";
 import { bodyWithoutTitle, canEdit } from "../lib/recipes.js";
 import { renderMarkdown } from "../lib/markdown.js";
@@ -179,10 +180,12 @@ export function togglePlan() {
     return;
   }
   if (plan.hasMeal(recipe.id)) {
-    if (confirm("Take " + recipe.title + " out of the cooking plan?")) {
-      plan.removeMeal(recipe.id);
-      showToast("Taken out of the plan");
-    }
+    ask("Take " + recipe.title + " out of the cooking plan?", "Take out").then(function (yes) {
+      if (yes) {
+        plan.removeMeal(recipe.id);
+        showToast("Taken out of the plan");
+      }
+    });
   } else {
     plan.addMeal(recipe.id, shownFactor(recipe));
     showToast("Added to the cooking plan");

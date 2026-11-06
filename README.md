@@ -150,6 +150,7 @@ js/ui/router.js       which screen belongs to which address (#/r/…)
 js/ui/list.js         recipes page: search, filter panel, the list
 js/ui/suggestion.js   today's suggestion
 js/ui/recipe.js       one recipe, servings stepper
+js/ui/ask.js          "Are you sure?" questions in the app's style
 js/ui/haptics.js      the short vibration on a press
 js/ui/plan.js         the cooking plan page and its row on Recipes
 js/planState.js       the shared cooking plan

@@ -11,6 +11,7 @@ import { initPlan, renderPlan } from "./ui/plan.js";
 import { plans } from "./planState.js";
 import { initRecipeJump, jumpTo } from "./ui/recipeJump.js";
 import { initHaptics } from "./ui/haptics.js";
+import { initAsk } from "./ui/ask.js";
 import { initName } from "./ui/name.js";
 import { initEditor, openEditor, saveFromEditor, cancelEditor } from "./ui/editor.js";
 import { initSettings, setSettingsStatus } from "./ui/settings.js";
@@ -200,6 +201,7 @@ document.getElementById("add-recipe").addEventListener("click", function () {
 
 initList();
 initHaptics();
+initAsk();
 initRecipe();
 document.getElementById("recipe-backdrop").addEventListener("click", closeRecipeSheet);
 onRecipeSwipe(swipeRecipe);
