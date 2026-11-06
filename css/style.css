@@ -264,7 +264,9 @@ h3,
 
 .suggestion {
   position: relative;
-  overflow: hidden;
+  /* clip, not hidden: the ensō sticks out, and "hidden" would let the card
+     scroll inside itself when a button in it gets the focus */
+  overflow: clip;
   margin: 0 0 0.75rem;
   padding: 1.5rem 1.4rem 1.25rem;
   border-radius: var(--radius-lg);
@@ -1101,7 +1103,7 @@ kbd {
 }
 
 body.has-tabbar .toast {
-  bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom) + 0.75rem);
+  bottom: calc(var(--tabbar-h) + var(--dock-h, 0rem) + env(safe-area-inset-bottom) + 0.75rem);
 }
 
 .toast-action {
@@ -1552,7 +1554,7 @@ html {
 .suggestion {
   position: relative;
   isolation: isolate;
-  overflow: hidden;
+  overflow: clip;
   background:
     radial-gradient(120% 90% at 8% 0%, var(--window-light), transparent 62%),
     linear-gradient(var(--surface-glaze), var(--surface-glaze)),
@@ -1590,12 +1592,14 @@ body:has(#view-projects:not([hidden])) #projects-dock {
 }
 
 /* Makes room for it; also lifts pop-up messages above it */
+/* The recipe's own variable: changing --tabbar-h would change the page
+   under the sheet, which then visibly moves */
 body:has(#view-recipe:not([hidden])) {
-  --tabbar-h: 3.9rem;
+  --dock-h: 3.9rem;
 }
 
 body:has(#view-recipe:not([hidden])):has(#recipe-jump:not([hidden])) {
-  --tabbar-h: 6.5rem;
+  --dock-h: 6.5rem;
 }
 
 body:has(#view-shopping:not([hidden])),
@@ -1655,7 +1659,7 @@ html:has(#view-recipe:not([hidden])) {
   max-width: 46rem;
   overflow-y: auto;
   overscroll-behavior: contain;
-  padding: 0.5rem 1.25rem calc(var(--tabbar-h) + 1rem);
+  padding: 0.5rem 1.25rem calc(var(--dock-h, 0rem) + 1rem);
   border-radius: var(--radius-lg) var(--radius-lg) 0 0;
   /* A plain surface and its own layer from the start: moving it is then
      just sliding a picture, with no texture or soft shadow to redraw */
@@ -1691,6 +1695,16 @@ body:has(#view-recipe:not([hidden])) .recipe-backdrop {
 
 html:has(#view-recipe:not([hidden])) {
   overflow: hidden;
+}
+
+/* On the laptop, the scroll bar's space stays, so nothing shifts sideways */
+html {
+  scrollbar-gutter: stable;
+}
+
+/* Let go without moving back, once the sheet hides it */
+.suggestion.unpress {
+  transition: none;
 }
 
 /* The dock is part of the sheet */
@@ -2049,4 +2063,33 @@ body.sheet-closing .recipe-backdrop {
   body.sheet-opening .recipe-backdrop {
     animation: none;
   }
+}
+
+/* Another idea turns the card over, like a playing card: the next recipe is
+   on its back. Clockwise (next) turns it one way, back turns it the other. */
+#suggestion {
+  perspective: none;
+}
+
+@keyframes card-out-next { to { transform: perspective(900px) rotateY(-90deg); } }
+@keyframes card-in-next { from { transform: perspective(900px) rotateY(90deg); } }
+@keyframes card-out-back { to { transform: perspective(900px) rotateY(90deg); } }
+@keyframes card-in-back { from { transform: perspective(900px) rotateY(-90deg); } }
+
+.suggestion.flip-out-next { animation: card-out-next 0.13s ease-in forwards; }
+.suggestion.flip-in-next { animation: card-in-next 0.17s ease-out; }
+.suggestion.flip-out-back { animation: card-out-back 0.13s ease-in forwards; }
+.suggestion.flip-in-back { animation: card-in-back 0.17s ease-out; }
+
+.suggestion.flip-out-next,
+.suggestion.flip-in-next,
+.suggestion.flip-out-back,
+.suggestion.flip-in-back {
+  will-change: transform;
+}
+
+/* The turn replaces the soft fade */
+.suggestion[class*="flip-"] .suggestion-title,
+.suggestion[class*="flip-"] .suggestion-reason {
+  animation: none;
 }

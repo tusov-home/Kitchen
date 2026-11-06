@@ -1,5 +1,8 @@
 # Changelog
 
+## 2026-11-06 w
+- No vibration on swipes. The recipes page stays still behind an opening or closing recipe. The arrows turn the suggestion over like a playing card.
+
 ## 2026-11-06 v
 - A very short vibration when you press something or finish a swipe (Android).
 - The round arrows now have proper arrowheads, leading the way.

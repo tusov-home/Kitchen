@@ -140,11 +140,36 @@ function queueFromHere() {
 }
 
 // Steps through the day's list: +1 another idea, -1 back to the one before.
+let turning = false;
+
 function step(by) {
   const today = toDateString(new Date());
-  saveOffset(today, Math.max(loadOffset(today) + by, 0));
-  renderSuggestion(lastRecipes, true);
-  showChange();
+  const show = function () {
+    saveOffset(today, Math.max(loadOffset(today) + by, 0));
+    renderSuggestion(lastRecipes, true);
+  };
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    show();
+    showChange();
+    return;
+  }
+  if (turning) {
+    return;
+  }
+  // Turn the card away, put the next recipe on it, turn it back.
+  turning = true;
+  const way = by > 0 ? "next" : "back";
+  box.classList.remove("changed");
+  box.classList.add("flip-out-" + way);
+  box.addEventListener("animationend", function () {
+    show();
+    box.classList.remove("flip-out-" + way);
+    box.classList.add("flip-in-" + way);
+    box.addEventListener("animationend", function () {
+      box.classList.remove("flip-in-" + way);
+      turning = false;
+    }, { once: true });
+  }, { once: true });
 }
 
 // A quick tap still shows the card being pushed, then the recipe rises.
@@ -156,8 +181,14 @@ function openWithPress(event) {
   event.preventDefault();
   box.classList.add("pressed");
   setTimeout(function () {
-    box.classList.remove("pressed");
     location.hash = link.getAttribute("href");
+    // Stays pressed while the sheet rises, then lets go without moving.
+    setTimeout(function () {
+      box.classList.add("unpress");
+      box.classList.remove("pressed");
+      void box.offsetWidth;
+      box.classList.remove("unpress");
+    }, 400);
   }, 130);
 }
 

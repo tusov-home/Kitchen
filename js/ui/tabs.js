@@ -1,7 +1,6 @@
 // Page icons in the top bar: Recipes · Shopping · Pantry · Projects. Tap a tab, swipe
 // left/right anywhere on a page, or press ← / → on the laptop.
 import { go, goBack, closeToList } from "./router.js";
-import { buzz } from "./haptics.js";
 import * as storage from "../storage.js";
 
 export const TABS = [
@@ -341,7 +340,6 @@ function initSwipe() {
     hideHint();
     if (current.axis === "down") {
       if (!cancelled && current.dy > CLOSE_PX) {
-        buzz();
         closeRecipeSheet();
       } else {
         springBack(current.view);
@@ -356,9 +354,6 @@ function initSwipe() {
     const direction = dx < 0 ? 1 : -1;
     const flicked = Math.abs(dx) > FLICK_PX && Math.abs(current.speed) > FLICK_SPEED && Math.sign(current.speed) === Math.sign(dx);
     const commit = !cancelled && hasNeighbour(direction) && (Math.abs(dx) > COMMIT_PX || flicked);
-    if (commit) {
-      buzz();
-    }
     if (commit && getScreen() === "recipe") {
       if (direction > 0) {
         slideOut(current.view, direction, () => recipeSwipe(direction));
