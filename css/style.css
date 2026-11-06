@@ -1928,6 +1928,10 @@ html:has(#view-recipe:not([hidden])) {
   z-index: 2;
 }
 
+.suggestion-previous {
+  margin: 0 -0.75rem 0 -0.5rem;
+}
+
 /* Words stay under the stretched link, so tapping them opens the recipe too */
 .suggestion-head,
 .suggestion-label,

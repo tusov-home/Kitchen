@@ -1,5 +1,8 @@
 # Changelog
 
+## 2026-11-06 s
+- An undo arrow next to **Another idea** goes back to the previous suggestion.
+
 ## 2026-11-06 r
 - The ensō turns counterclockwise while syncing, following its brushstroke.
 

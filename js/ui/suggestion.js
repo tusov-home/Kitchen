@@ -13,6 +13,7 @@ const label = document.getElementById("suggestion-label");
 const link = document.getElementById("suggestion-link");
 const reason = document.getElementById("suggestion-reason");
 const nextButton = document.getElementById("suggestion-next");
+const previousButton = document.getElementById("suggestion-previous");
 const ownerButtons = document.getElementById("suggestion-owners");
 
 const KEY = "kitchen.suggestion.v1";
@@ -128,6 +129,7 @@ export function renderSuggestion(recipes, visible) {
   reason.textContent = pick.reason;
   reason.hidden = !pick.reason;
   nextButton.hidden = list.length < 2;
+  previousButton.hidden = list.length < 2 || loadOffset(today) === 0;
 }
 
 // Swiping on the recipe goes on through today's other ideas.
@@ -137,12 +139,16 @@ function queueFromHere() {
   setQueue([...ids.slice(start), ...ids.slice(0, start)]);
 }
 
+// Steps through the day's list: +1 another idea, -1 back to the one before.
+function step(by) {
+  const today = toDateString(new Date());
+  saveOffset(today, Math.max(loadOffset(today) + by, 0));
+  renderSuggestion(lastRecipes, true);
+  showChange();
+}
+
 export function initSuggestion() {
+  previousButton.addEventListener("click", () => step(-1));
   link.addEventListener("click", queueFromHere);
-  nextButton.addEventListener("click", function () {
-    const today = toDateString(new Date());
-    saveOffset(today, loadOffset(today) + 1);
-    renderSuggestion(lastRecipes, true);
-    showChange();
-  });
+  nextButton.addEventListener("click", () => step(1));
 }

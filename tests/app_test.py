@@ -1232,6 +1232,14 @@ def test_recipe_swipe(p):
     # From the suggestion, it goes on through the other ideas
     page.reload()
     shown = page.locator("#suggestion-link").inner_text()
+    # Undo goes back to the previous idea, and is gone at the first one
+    expect(page.locator("#suggestion-previous")).to_be_hidden()
+    page.click("#suggestion-next")
+    expect(page.locator("#suggestion-link")).not_to_have_text(shown)
+    page.click("#suggestion-previous")
+    expect(page.locator("#suggestion-link")).to_have_text(shown)
+    expect(page.locator("#suggestion-previous")).to_be_hidden()
+    page.wait_for_timeout(500)  # the soft fade finishes
     # Anywhere on the panel opens it, but "Another idea" is still its own button
     for part in ("#suggestion-label", "#suggestion-reason"):
         assert page.evaluate(f"""(() => {{
