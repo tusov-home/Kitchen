@@ -1,5 +1,8 @@
 # Changelog
 
+## 2026-11-06 b
+- Chores are gone. The Home tab is now **Projects** and holds only projects. Old chores stay untouched in the Google Sheet.
+
 ## 2026-11-06 a
 - New materials: timber top and tab bars, and stone for the walls and panels, lit from above for depth. They are drawn by code and work offline.
 - Main buttons are now deep leaf green.

@@ -1,7 +1,9 @@
-// The projects list (Home tab, second page) and the add/edit dialog.
+// The projects list and the add/edit dialog.
 import { projects, createProject } from "../projectsState.js";
 import { groupProjects, progress, materialsToBuy, EFFORT_LABELS } from "../lib/projects.js";
-import { knownNames } from "./chores.js";
+import { allOwners } from "../lib/recipes.js";
+import * as state from "../state.js";
+import { getMyName } from "./name.js";
 import { go } from "./router.js";
 import { showToast } from "./toast.js";
 import * as storage from "../storage.js";
@@ -10,6 +12,21 @@ const filterBar = document.getElementById("projects-filter");
 const groupsBox = document.getElementById("projects-groups");
 const empty = document.getElementById("projects-empty");
 const addButton = document.getElementById("project-add");
+
+// Everyone we know: this phone's name, recipe owners, people on projects.
+function knownNames() {
+  const names = new Set(allOwners(state.getRecipes()));
+  const mine = getMyName();
+  if (mine) {
+    names.add(mine);
+  }
+  for (const project of projects.getAll()) {
+    if (project.who) {
+      names.add(project.who);
+    }
+  }
+  return [...names].sort((a, b) => a.localeCompare(b));
+}
 
 const dialog = document.getElementById("project-dialog");
 const form = document.getElementById("project-form");

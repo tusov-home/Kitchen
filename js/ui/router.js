@@ -6,7 +6,6 @@
 //   #/copy/<id>   new recipe, starting as a copy of another one
 //   #/shopping    the shopping list
 //   #/pantry      what we have at home
-//   #/chores      household chores
 //   #/projects    home improvement projects
 //   #/project/<id> one project
 // Using the address means the phone's Back button works as expected.
@@ -18,7 +17,7 @@ let replacing = false;
 
 export function parseRoute(hash) {
   const path = (hash || "").replace(/^#/, "") || "/";
-  if (["/shopping", "/pantry", "/chores", "/projects"].includes(path)) {
+  if (["/shopping", "/pantry", "/projects"].includes(path)) {
     return { screen: path.slice(1), id: null };
   }
   const project = path.match(/^\/project\/([^/]+)$/);

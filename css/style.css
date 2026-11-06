@@ -1338,7 +1338,7 @@ body.has-tabbar.planning {
 #view-list,
 #view-shopping,
 #view-pantry,
-#view-chores {
+#view-projects {
   touch-action: pan-y pinch-zoom;
 }
 
@@ -1464,64 +1464,6 @@ body {
   margin-top: 0.5rem;
 }
 
-/* ---------- Chores ---------- */
-
-#chores-filter {
-  margin-top: 0.25rem;
-}
-
-.chore-check {
-  width: 1.4rem;
-  height: 1.4rem;
-  margin: 0 0 0 0.9rem;
-  flex-shrink: 0;
-  accent-color: var(--ok);
-}
-
-.chore-text {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.1rem;
-  min-height: 3.25rem;
-  padding: 0.5rem 0.9rem 0.5rem 0.75rem;
-  border: none;
-  background: transparent;
-  color: var(--text);
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
-}
-
-.shop-item.checked .chore-text .shop-name {
-  color: var(--muted);
-  text-decoration: line-through;
-}
-
-.due {
-  font-weight: 700;
-}
-
-.due.late {
-  color: var(--danger);
-}
-
-.due.today {
-  color: var(--accent);
-}
-
-.group-late h2 {
-  color: var(--danger);
-}
-
-.custom-repeat {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-top: 0.5rem;
-}
-
 .dialog select,
 .dialog input[type="date"],
 .dialog input[type="number"] {
@@ -1543,11 +1485,7 @@ body {
   width: 100%;
 }
 
-#chore-unit {
-  width: auto;
-}
-
-/* ---------- Home: Chores | Projects switch ---------- */
+/* ---------- Segmented switch ---------- */
 
 .segmented {
   display: flex;

@@ -1,4 +1,4 @@
-// A small reusable store for a list of items (pantry, chores): kept on
+// A small reusable store for a list of items (pantry, projects): kept on
 // the device, changed only through these functions, synced through its
 // own tab in the Sheet. Each item has an id, updatedAt and deleted.
 //

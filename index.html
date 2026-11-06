@@ -149,34 +149,8 @@
     <p id="pantry-none-low" class="empty" hidden>Nothing is low or out.</p>
   </main>
 
-  <!-- Household chores -->
-  <main id="view-chores" class="view" hidden>
-    <nav class="segmented" aria-label="Home">
-      <a href="#/chores" class="segment active" data-home="chores" aria-current="page">Chores</a>
-      <a href="#/projects" class="segment" data-home="projects">Projects</a>
-    </nav>
-    <div class="page-head">
-      <h1 class="page-title">Chores</h1>
-      <button id="chore-add" class="primary" type="button" title="Add chore (N)">+ Add chore</button>
-    </div>
-    <div id="chores-filter" class="owner-filter" role="group" aria-label="Show chores for"></div>
-    <div id="chores-groups"></div>
-    <div id="chores-empty" class="empty" hidden>
-      <p class="empty-title">No chores yet</p>
-      <p>Add repeating chores like <em>Vacuum, every week</em> or <em>Bins, every 2 weeks</em>. When you tick one off, it comes back on its next date.</p>
-    </div>
-    <div id="chores-footer" class="actions" hidden>
-      <span class="spacer"></span>
-      <button id="chores-clear-done" class="button" type="button">Clear done</button>
-    </div>
-  </main>
-
-  <!-- Home improvement projects (Home tab, second page) -->
+  <!-- Home improvement projects -->
   <main id="view-projects" class="view" hidden>
-    <nav class="segmented" aria-label="Home">
-      <a href="#/chores" class="segment" data-home="chores">Chores</a>
-      <a href="#/projects" class="segment active" data-home="projects" aria-current="page">Projects</a>
-    </nav>
     <div class="page-head">
       <h1 class="page-title">Projects</h1>
       <button id="project-add" class="primary" type="button" title="Add project (N)">+ Add project</button>
@@ -385,7 +359,7 @@
     <a href="#/" class="tab" data-tab="list" title="Recipes (←/→ to switch pages)"><span class="tab-icon"><svg class="line-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3.5 11.5h17a8.5 8.5 0 0 1-17 0z"/><path d="M9 20.5h6"/><path d="M9.5 8.5c-.8-1 .8-1.8 0-3"/><path d="M14 8.5c-.8-1 .8-1.8 0-3"/></svg></span><span class="tab-label">Recipes</span></a>
     <a href="#/shopping" class="tab" data-tab="shopping" title="Shopping list (L)"><span class="tab-icon"><svg class="line-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3.5 10h17l-1.7 8.4a2 2 0 0 1-2 1.6H7.2a2 2 0 0 1-2-1.6z"/><path d="M8 10l3.2-5.5"/><path d="M16 10l-3.2-5.5"/><path d="M9 13.5v3.5M12 13.5v3.5M15 13.5v3.5"/></svg></span><span class="tab-label">Shopping</span><span id="cart-count" class="tab-badge" hidden></span></a>
     <a href="#/pantry" class="tab" data-tab="pantry" title="Pantry"><span class="tab-icon"><svg class="line-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M8.5 3.5h7v3h-7z"/><path d="M7.5 6.5h9a1.5 1.5 0 0 1 1.5 1.5v10.5a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V8a1.5 1.5 0 0 1 1.5-1.5z"/><path d="M9.5 12.5h5"/></svg></span><span class="tab-label">Pantry</span><span id="pantry-count" class="tab-badge" hidden></span></a>
-    <a href="#/chores" class="tab" data-tab="home" title="Home: chores and projects"><span class="tab-icon"><svg class="line-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3.5 11.2 12 4.5l8.5 6.7"/><path d="M5.8 9.5v10.5h12.4V9.5"/><path d="M10 20v-5.5h4V20"/></svg></span><span class="tab-label">Home</span><span id="chores-count" class="tab-badge" hidden></span></a>
+    <a href="#/projects" class="tab" data-tab="projects" title="Projects"><span class="tab-icon"><svg class="line-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3.5 11.2 12 4.5l8.5 6.7"/><path d="M5.8 9.5v10.5h12.4V9.5"/><path d="M10 20v-5.5h4V20"/></svg></span><span class="tab-label">Projects</span></a>
   </nav>
 
   <!-- Edit one pantry item -->
@@ -405,44 +379,6 @@
     </form>
   </dialog>
 
-  <!-- Add or edit a chore -->
-  <dialog id="chore-dialog" class="dialog">
-    <form method="dialog" class="dialog-body" id="chore-form">
-      <h2 id="chore-dialog-title" tabindex="-1" autofocus class="dialog-title">Add chore</h2>
-      <label for="chore-title">What</label>
-      <input id="chore-title" type="text" required autocomplete="off" placeholder="e.g. Vacuum the flat">
-      <label for="chore-who">Who</label>
-      <select id="chore-who"></select>
-      <label for="chore-repeat">Repeat</label>
-      <select id="chore-repeat">
-        <option value="once">Once</option>
-        <option value="1-day">Every day</option>
-        <option value="1-week">Every week</option>
-        <option value="2-week">Every 2 weeks</option>
-        <option value="1-month">Every month</option>
-        <option value="3-month">Every 3 months</option>
-        <option value="custom">Other…</option>
-      </select>
-      <div id="chore-custom" class="custom-repeat" hidden>
-        <span>Every</span>
-        <input id="chore-every" class="short-input" type="number" min="1" max="365" value="10" inputmode="numeric" aria-label="Every how many">
-        <select id="chore-unit" aria-label="Unit">
-          <option value="day">days</option>
-          <option value="week">weeks</option>
-          <option value="month">months</option>
-        </select>
-      </div>
-      <label for="chore-due">Due <span id="chore-due-hint" class="hint"></span></label>
-      <input id="chore-due" type="date">
-      <p id="chore-last" class="hint" hidden></p>
-      <div class="actions">
-        <button id="chore-delete" class="button danger" type="button" hidden>Delete</button>
-        <span class="spacer"></span>
-        <button class="button" value="cancel" formnovalidate>Cancel</button>
-        <button class="primary" value="save">Save</button>
-      </div>
-    </form>
-  </dialog>
 
   <!-- Add or edit a project -->
   <dialog id="project-dialog" class="dialog">

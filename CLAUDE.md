@@ -6,7 +6,7 @@ explains the app itself (features, files, shortcuts, sync setup).
 ## The app and the people
 
 - Household app for Tõnis and his wife Kristiina: recipe book, shared
-  shopping list, pantry, chores and home improvement projects.
+  shopping list, pantry and home improvement projects.
 - Live at https://tusov-home.github.io/Kitchen/ (GitHub Pages, deployed
   from branch `main`, folder `/`). Installed as an app on both phones.
 - Devices: Tõnis has an Android phone (Chrome) and a Windows laptop
@@ -54,7 +54,8 @@ explains the app itself (features, files, shortcuts, sync setup).
   `apps-script/Code.gs`. Never rename storage keys or fields without a
   migration; old data must keep loading.
 - `Code.gs` is field-agnostic: one Sheet tab per collection (`Recipes`,
-  `shopping`, `pantry`, `chores`, `projects`), each item stored as JSON.
+  `shopping`, `pantry`, `projects`), each item stored as JSON. A `chores`
+  tab may remain from a removed feature; the app no longer reads it.
   New fields and new collections need **no script change**. If a change
   ever does need it, say so clearly — Tõnis has to paste it by hand.
 - Merging: the newest version of an item wins (`updatedAt`), but maps of

@@ -9,7 +9,7 @@
 // below means: always ask the site whether a file changed. Without it, a
 // phone can get a new page together with old code and styling.
 
-const CACHE = "kitchen-app-v11";
+const CACHE = "kitchen-app-v12";
 
 const APP_FILES = [
   "./",
@@ -30,7 +30,6 @@ const APP_FILES = [
   "js/shoppingState.js",
   "js/collection.js",
   "js/pantryState.js",
-  "js/choresState.js",
   "js/projectsState.js",
   "js/pwa.js",
   "js/lib/recipes.js",
@@ -39,7 +38,7 @@ const APP_FILES = [
   "js/lib/sections.js",
   "js/lib/shopping.js",
   "js/lib/pantry.js",
-  "js/lib/chores.js",
+  "js/lib/dates.js",
   "js/lib/projects.js",
   "js/lib/suggest.js",
   "js/ui/router.js",
@@ -52,7 +51,6 @@ const APP_FILES = [
   "js/ui/shopping.js",
   "js/ui/tabs.js",
   "js/ui/pantry.js",
-  "js/ui/chores.js",
   "js/ui/projects.js",
   "js/ui/project.js",
   "js/ui/editor.js",

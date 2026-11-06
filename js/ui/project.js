@@ -3,7 +3,7 @@ import { projects, setStatus, addEntry, toggleEntry, removeEntry } from "../proj
 import * as shopping from "../shoppingState.js";
 import { entryList, progress, materialsToBuy, STATUS_LABELS } from "../lib/projects.js";
 import { nameKey } from "../lib/shopping.js";
-import { dueLabel, toDateString } from "../lib/chores.js";
+import { dueLabel, toDateString } from "../lib/dates.js";
 import { projectSummary, openProjectDialog } from "./projects.js";
 import { goBack } from "./router.js";
 import { showToast } from "./toast.js";

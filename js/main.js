@@ -18,9 +18,7 @@ import { initPlan, isPlanning, setPlanning } from "./ui/plan.js";
 import { initShopping, renderShopping, renderCartCount } from "./ui/shopping.js";
 import { initTabs, renderTabs, goToTab, stepTab } from "./ui/tabs.js";
 import { pantry } from "./pantryState.js";
-import { chores } from "./choresState.js";
 import { initPantry, renderPantry, renderPantryBadge, focusPantryAdd } from "./ui/pantry.js";
-import { initChores, renderChores, renderChoresBadge, openChore } from "./ui/chores.js";
 import { projects } from "./projectsState.js";
 import { initProjects, renderProjects, openProjectDialog } from "./ui/projects.js";
 import { initProject, renderProject, editCurrentProject } from "./ui/project.js";
@@ -31,7 +29,6 @@ const views = {
   edit: document.getElementById("view-edit"),
   shopping: document.getElementById("view-shopping"),
   pantry: document.getElementById("view-pantry"),
-  chores: document.getElementById("view-chores"),
   projects: document.getElementById("view-projects"),
   project: document.getElementById("view-project"),
 };
@@ -79,9 +76,6 @@ function route() {
   } else if (current.screen === "pantry") {
     setPlanning(false);
     renderPantry();
-  } else if (current.screen === "chores") {
-    setPlanning(false);
-    renderChores();
   } else if (current.screen === "projects") {
     setPlanning(false);
     renderProjects();
@@ -118,19 +112,13 @@ shoppingState.onChange(function () {
   }
 });
 
-// Pantry and chores can change on the other phone too.
+// The pantry can change on the other phone too.
 pantry.onChange(function () {
   renderPantryBadge();
   if (current.screen === "pantry") {
     renderPantry();
   } else if (current.screen === "shopping") {
     renderShopping();
-  }
-});
-chores.onChange(function () {
-  renderChoresBadge();
-  if (current.screen === "chores") {
-    renderChores();
   }
 });
 projects.onChange(function () {
@@ -146,17 +134,6 @@ projects.onChange(function () {
 shoppingState.onChange(function () {
   if (current.screen === "project") {
     renderProject(current.id);
-  }
-});
-
-// Back on the app after a while (maybe a new day): chores' due dates
-// and the badge depend on today's date.
-document.addEventListener("visibilitychange", function () {
-  if (document.visibilityState === "visible") {
-    renderChoresBadge();
-    if (current.screen === "chores") {
-      renderChores();
-    }
   }
 });
 
@@ -179,13 +156,11 @@ initSettings();
 initPlan(renderList);
 initShopping();
 initPantry();
-initChores();
 initProjects();
 initProject();
 initTabs(() => current.screen);
 renderCartCount();
 renderPantryBadge();
-renderChoresBadge();
 
 initShortcuts(
   {
@@ -227,7 +202,6 @@ initShortcuts(
     previousTab: () => stepTab(-1),
     nextTab: () => stepTab(1),
     focusPantryAdd: focusPantryAdd,
-    addChore: () => openChore(null),
     addProject: () => openProjectDialog(null),
     editProject: editCurrentProject,
     togglePlanning: () => setPlanning(!isPlanning()),

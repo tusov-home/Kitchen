@@ -522,8 +522,8 @@ def swipe(page, from_x, to_x, y=400, steps=6, step_ms=16, lift=True):
     )
 
 
-def test_pantry_chores_tabs(p, sheet):
-    """Kadi's phone: tabs and swiping, pantry linked to shopping, chores."""
+def test_pantry_tabs(p, sheet):
+    """Kadi's phone: tabs and swiping, pantry linked to shopping."""
     errors = []
     ctx = p.chromium.launch().new_context(**p.devices["Pixel 7"])
     ctx.route(SHEET_URL, sheet.handle)
@@ -640,71 +640,18 @@ def test_pantry_chores_tabs(p, sheet):
     expect(page.locator(".shop-section", has_text="Check you have")).to_contain_text("white miso")
     expect(page.locator(".shop-section", has_text="Produce")).to_contain_text("aubergines")
 
-    # ---------- Chores ----------
-    page.click(".tab[data-tab=home]")
-    expect(page.locator("#chores-empty")).to_be_visible()
-    page.click("#chore-add")
-    expect(page.locator("#chore-dialog")).to_be_visible()
-    assert page.evaluate("document.activeElement.tagName") == "H2", "keyboard must stay closed"
-    page.fill("#chore-title", "Vacuum")
-    expect(page.locator("#chore-repeat")).to_have_value("1-week")
-    page.click("#chore-form button[value=save]")
-    expect(page.locator(".chore-group.group-today")).to_contain_text("Vacuum")
-    expect(page.locator("#chores-count")).to_have_text("1")
-
-    # One-off with no date, for Kadi
-    page.click("#chore-add")
-    page.fill("#chore-title", "Fix shelf")
-    page.select_option("#chore-repeat", "once")
-    page.fill("#chore-due", "")
-    page.select_option("#chore-who", "Kadi")
-    page.click("#chore-form button[value=save]")
-    expect(page.locator(".chore-group.group-any-time")).to_contain_text("Fix shelf")
-
-    # Custom repeat
-    page.click("#chore-add")
-    page.fill("#chore-title", "Water plants")
-    page.select_option("#chore-repeat", "custom")
-    expect(page.locator("#chore-custom")).to_be_visible()
-    page.fill("#chore-every", "3")
-    page.select_option("#chore-unit", "day")
-    page.click("#chore-form button[value=save]")
-    expect(page.locator(".chore", has_text="Water plants")).to_contain_text("every 3 days")
-
-    # Tick a repeating chore: it moves on a week; Undo brings it back
-    page.click(".chore:has-text('Vacuum') .chore-check")
-    expect(page.locator("#toast")).to_contain_text("Done! Next:")
-    expect(page.locator(".chore-group.group-later")).to_contain_text("Vacuum")
-    page.click(".toast-action")
-    expect(page.locator(".chore-group.group-today")).to_contain_text("Vacuum")
-    page.click(".chore:has-text('Vacuum') .chore-check")
-    expect(page.locator(".chore-group.group-later")).to_contain_text("Vacuum")
-
-    # Tick the one-off: Done; Clear done removes it
-    page.click(".chore:has-text('Fix shelf') .chore-check")
-    expect(page.locator(".chore-group.group-done")).to_contain_text("Fix shelf")
-    page.screenshot(path=SHOTS / "phone-8-chores.png", full_page=True)
-    page.click("#chores-clear-done")
-    expect(page.locator(".chore", has_text="Fix shelf")).to_have_count(0)
-
-    # Edit shows when it was last done
-    page.click(".chore:has-text('Vacuum') .chore-text")
-    expect(page.locator("#chore-last")).to_have_text("Last done today by Kadi")
-    page.click("#chore-form button[value=cancel]")
-
     # Narrow phones: nothing sticks out sideways
     for width in (340, 360):
         page.set_viewport_size({"width": width, "height": 800})
-        for tab in ("list", "shopping", "pantry", "home"):
+        for tab in ("list", "shopping", "pantry", "projects"):
             page.click(f".tab[data-tab={tab}]")
             assert not page.evaluate("document.documentElement.scrollWidth > window.innerWidth"), (tab, width)
 
     page.wait_for_timeout(2500)  # sync
-    chores_in_sheet = sorted(c["title"] for c in sheet.stores["chores"].values() if not c.get("deleted"))
-    assert chores_in_sheet == ["Vacuum", "Water plants"], chores_in_sheet
+    assert "chores" not in sheet.stores  # chores no longer sync
     assert len([i for i in sheet.stores["pantry"].values() if not i.get("deleted")]) == 30
 
-    # The laptop sees the same chores and pantry
+    # The laptop sees the same pantry
     laptop = p.chromium.launch().new_context(viewport={"width": 1366, "height": 768})
     laptop.route(SHEET_URL, sheet.handle)
     laptop.add_init_script(
@@ -712,8 +659,8 @@ def test_pantry_chores_tabs(p, sheet):
     )
     other = laptop.new_page()
     watch_errors(other, errors)
-    other.goto(BASE + "#/chores")
-    expect(other.locator(".chore")).to_have_count(2)
+    other.goto(BASE + "#/projects")
+    expect(other.locator("#view-projects")).to_be_visible()
     # Keyboard: → to Pantry... ← back to Shopping
     other.keyboard.press("ArrowLeft")
     expect(other.locator("#view-pantry")).to_be_visible()
@@ -723,7 +670,7 @@ def test_pantry_chores_tabs(p, sheet):
     other.screenshot(path=SHOTS / "laptop-5-pantry.png")
 
     assert not errors, errors
-    print("pantry, chores, tabs: ok")
+    print("pantry, tabs: ok")
 
 
 def test_projects(p, sheet):
@@ -743,12 +690,10 @@ def test_projects(p, sheet):
         return page
 
     page = device("Kadi", **p.devices["Pixel 7"])
-    # Home tab opens Chores; the switch goes to Projects
-    page.click(".tab[data-tab=home]")
-    expect(page.locator("#view-chores")).to_be_visible()
-    page.click("#view-chores .segment[data-home=projects]")
+    # The last tab opens Projects, with no chores in sight
+    page.click(".tab[data-tab=projects]")
     expect(page.locator("#view-projects")).to_be_visible()
-    expect(page.locator(".tab.active")).to_have_attribute("data-tab", "home")
+    expect(page.locator(".tab.active .tab-label")).to_have_text("Projects")
     expect(page.locator("#projects-empty")).to_be_visible()
 
     # New project → opens straight away
@@ -790,7 +735,7 @@ def test_projects(p, sheet):
     page.click("#view-shopping .shop-item:has-text('wall plugs') .shop-check")
 
     # Back to Home: it remembers Projects
-    page.click(".tab[data-tab=home]")
+    page.click(".tab[data-tab=projects]")
     expect(page.locator("#view-projects")).to_be_visible()
     card = page.locator(".project-card", has_text="Hang hallway shelf")
     expect(card).to_contain_text("1 of 3 steps · 1 to buy")
@@ -1004,7 +949,7 @@ def main():
             test_phone(p, sheet)
             test_laptop_second_device(p, sheet)
             test_shopping_shared(p, sheet)
-            test_pantry_chores_tabs(p, sheet)
+            test_pantry_tabs(p, sheet)
             test_projects(p, sheet)
             test_installable_and_offline(p)
             test_add_from_recipe(p)

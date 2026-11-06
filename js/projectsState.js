@@ -4,7 +4,7 @@
 import { createCollection } from "./collection.js";
 import { newId } from "./lib/recipes.js";
 import { normaliseProject, mergeProject, newEntry } from "./lib/projects.js";
-import { toDateString } from "./lib/chores.js";
+import { toDateString } from "./lib/dates.js";
 
 export const projects = createCollection("projects", normaliseProject, mergeProject);
 

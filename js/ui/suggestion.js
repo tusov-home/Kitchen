@@ -4,7 +4,7 @@
 import * as storage from "../storage.js";
 import { dailySuggestions, activeOwners, toggleOwner, recipesOfOwners, initial } from "../lib/suggest.js";
 import { allOwners } from "../lib/recipes.js";
-import { toDateString } from "../lib/chores.js";
+import { toDateString } from "../lib/dates.js";
 import { getMyName } from "./name.js";
 
 const box = document.getElementById("suggestion");
