@@ -70,6 +70,10 @@ explains the app itself (features, files, shortcuts, sync setup).
   sumi ink, moss, hinoki wood; dark = charred wood + rice paper). No
   cream + orange, no emoji, thin line SVG icons, titles in Zen Old
   Mincho, text in Zen Kaku Gothic New (self-hosted in `fonts/`, OFL).
+- Materials give the depth: timber top and tab bars, stone walls and panels
+  lit from above, deep leaf green on main buttons. Textures come from
+  `tools/make_textures.py` and live in `textures/` (light + dark). We tried
+  a plant in the suggestion; it took too much attention, so no pictures.
 - The brushed ensō (`icons/enso-mark.png`, used as a CSS mask) is the one
   signature element. Keep everything else quiet: no all-caps labels,
   generous spacing, soft rectangles rather than pills.

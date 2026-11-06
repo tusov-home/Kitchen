@@ -12,7 +12,7 @@
   --accent-text: #f7f7f3;
   --accent-soft: #dde2d3;
   --wood: #a88b66;        /* hinoki */
-  --primary-bg: #2b2c29;  /* main buttons: ink on paper */
+  --primary-bg: #2f5039;  /* main buttons: deep leaf green */
   --primary-text: #f2f1ec;
   --danger: #9c4a3a;
   --ok: #56654a;
@@ -20,6 +20,7 @@
   --focus: #4f6a8a;       /* aizome indigo */
   --star: #a88b66;
   --grain: 0.05;
+  --surface-glaze: rgb(250 250 246 / 0.72);
   --radius-sm: 10px;
   --radius: 12px;
   --radius-lg: 16px;
@@ -40,14 +41,15 @@
     --accent-text: #1c1e1b;
     --accent-soft: #323a2b;
     --wood: #c4a67e;
-    --primary-bg: #dcd8cb;
-    --primary-text: #1c1e1b;
+    --primary-bg: #2f5039;
+    --primary-text: #eeebe0;
     --danger: #d08a76;
     --ok: #a3b38c;
     --warn: #d2b06a;
     --focus: #8fa9c9;
     --star: #c4a67e;
     --grain: 0.07;
+    --surface-glaze: rgb(50 54 49 / 0.55);
   }
 }
 
@@ -1642,4 +1644,91 @@ body {
   .actions {
     display: none;
   }
+}
+
+/* ---------- Materials ----------
+   Timber frames the screen, stone carries the content, and deep leaf
+   green marks the main action. Textures are drawn by
+   tools/make_textures.py; each has a light and a dark version. */
+
+:root {
+  --stone: url("../textures/stone-light.webp");
+  --timber: url("../textures/timber-light.webp");
+  --timber-shade: rgb(255 248 235 / 0.28);
+  --lit-edge: rgb(255 255 255 / 0.7);
+  --drop: rgb(52 48 38 / 0.2);
+  --niche: rgb(52 48 38 / 0.16);
+  --window-light: rgb(255 255 255 / 0.5);
+  --wall-glaze: rgb(236 237 231 / 0.45);
+  --on-timber: #4a4235;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --stone: url("../textures/stone-dark.webp");
+    --timber: url("../textures/timber-dark.webp");
+    --timber-shade: rgb(16 12 9 / 0.25);
+    --lit-edge: rgb(255 255 255 / 0.06);
+    --drop: rgb(0 0 0 / 0.55);
+    --niche: rgb(0 0 0 / 0.5);
+    --window-light: rgb(226 224 205 / 0.075);
+    --wall-glaze: rgb(28 30 27 / 0.45);
+    --on-timber: #b3ad9f;
+  }
+}
+
+html {
+  background:
+    linear-gradient(var(--wall-glaze), var(--wall-glaze)),
+    var(--bg) var(--stone) center top / 320px;
+}
+
+/* Timber: the top bar and the tab bar */
+.topbar,
+.tabbar {
+  background:
+    linear-gradient(var(--timber-shade), var(--timber-shade)),
+    var(--timber) center / 512px 128px;
+  border-color: transparent;
+}
+
+.topbar {
+  box-shadow: 0 1px 0 var(--lit-edge) inset, 0 8px 18px -8px var(--drop);
+}
+
+.tabbar {
+  box-shadow: 0 1px 0 var(--lit-edge) inset, 0 -8px 18px -8px var(--drop);
+}
+
+/* Stone: raised slabs, lit from above */
+.search-box,
+.all-toggle,
+.recipe-card {
+  background:
+    linear-gradient(var(--surface-glaze), var(--surface-glaze)),
+    var(--stone) center / 320px;
+  box-shadow: inset 0 1px 0 var(--lit-edge), 0 6px 12px -7px var(--drop);
+}
+
+/* The suggestion is a niche in the wall: set back, with daylight falling
+   in from the side. */
+.suggestion {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background:
+    radial-gradient(120% 90% at 8% 0%, var(--window-light), transparent 62%),
+    linear-gradient(var(--surface-glaze), var(--surface-glaze)),
+    var(--stone) center / 320px;
+  box-shadow: inset 0 10px 18px -8px var(--niche), inset 0 0 0 1px var(--border), 0 1px 0 var(--lit-edge);
+}
+
+/* Initials keep their own solid ground on the textured panel */
+.owner-initial {
+  background: var(--surface);
+}
+
+/* Words on timber */
+.tabbar .tab:not(.active) {
+  color: var(--on-timber);
 }
