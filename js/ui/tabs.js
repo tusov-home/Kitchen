@@ -78,7 +78,8 @@ export function goToTab(tabId) {
   if (tabId === "list" || (!isTabScreen(from) && tabOf(from) === tabId)) {
     // Back to Recipes, or from a project page back to its list.
     goBack(target.hash());
-  } else if (isTabScreen(from) && from !== "list") {
+  } else if (from === "recipe" || (isTabScreen(from) && from !== "list")) {
+    // Leaving a recipe closes it: Back and swiping lead to Recipes, not to it.
     go(target.hash(), true);
   } else {
     go(target.hash());

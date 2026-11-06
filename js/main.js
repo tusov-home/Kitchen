@@ -33,7 +33,8 @@ const views = {
   projects: document.getElementById("view-projects"),
   project: document.getElementById("view-project"),
 };
-const syncStatus = document.getElementById("sync-status");
+const brand = document.getElementById("brand");
+const brandMark = document.getElementById("brand-mark");
 
 let current = { screen: "list", id: null };
 
@@ -155,9 +156,9 @@ shoppingState.onChange(function () {
 });
 
 sync.onStatus(function (status) {
-  syncStatus.dataset.state = status.state;
-  syncStatus.title = status.message;
-  syncStatus.textContent = status.state === "syncing" ? "↻" : "";
+  // The ensō shows it: turning while syncing, green when up to date.
+  brandMark.dataset.state = status.state;
+  brand.title = status.message;
   setSettingsStatus(status.message);
 });
 

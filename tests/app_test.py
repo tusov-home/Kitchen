@@ -170,6 +170,7 @@ def test_phone(p, sheet):
     page.fill("#sync-url", SHEET_URL)
     page.click("#sync-save")
     expect(page.locator("#settings-sync-status")).to_contain_text("Synced")
+    expect(page.locator("#brand-mark")).to_have_attribute("data-state", "ok")
     page.screenshot(path=SHOTS / "phone-4-settings.png")
     page.keyboard.press("Escape")
     assert len(sheet.recipes) == 1, "recipe reached the Sheet"
@@ -203,7 +204,7 @@ def test_laptop_second_device(p, sheet):
 
     # The recipe from the phone arrives through the Sheet
     expect(page.locator(".recipe-card")).to_have_count(1)
-    expect(page.locator("#sync-status")).to_have_attribute("data-state", "ok")
+    expect(page.locator("#brand-mark")).to_have_attribute("data-state", "ok")
 
     # Tõnis rates the same recipe with the keyboard; both ratings are kept
     page.click("#meals-toggle")
@@ -309,7 +310,7 @@ def test_laptop_second_device(p, sheet):
     page.evaluate("document.activeElement.blur()")  # leave the text box
     # Open the suggested recipe
     picked = page.locator("#suggestion-link").inner_text()
-    page.click("#suggestion-open")
+    page.click("#suggestion")
     expect(page.locator("#view-recipe")).to_be_visible()  # wait for the page itself
     expect(page.locator("#recipe-title")).to_have_text(picked)
     page.keyboard.press("Escape")
@@ -509,7 +510,7 @@ def test_shopping_shared(p, sheet):
     page = ctx.new_page()
     watch_errors(page, errors)
     page.goto(BASE)
-    expect(page.locator("#sync-status")).to_have_attribute("data-state", "ok")
+    expect(page.locator("#brand-mark")).to_have_attribute("data-state", "ok")
     open_tab(page, "shopping")
     expect(page.locator(".shop-item.checked .shop-name")).to_have_text(["300 g beef mince"])
     page.click(".shop-item:has-text('toilet paper') .shop-check")
@@ -621,7 +622,7 @@ def test_pantry_tabs(p, sheet):
     page = ctx.new_page()
     watch_errors(page, errors)
     page.goto(BASE)
-    expect(page.locator("#sync-status")).to_have_attribute("data-state", "ok")
+    expect(page.locator("#brand-mark")).to_have_attribute("data-state", "ok")
     expect(page.locator(".tab.active")).to_have_attribute("data-tab", "list")
 
     # Swipe left twice: Recipes → Shopping → Pantry; right goes back
@@ -775,7 +776,7 @@ def test_projects(p, sheet):
         page = ctx.new_page()
         watch_errors(page, errors)
         page.goto(BASE)
-        expect(page.locator("#sync-status")).to_have_attribute("data-state", "ok")
+        expect(page.locator("#brand-mark")).to_have_attribute("data-state", "ok")
         return page
 
     page = device("Kadi", **p.devices["Pixel 7"])
@@ -903,7 +904,12 @@ def test_add_from_recipe(p):
     page.click("#to-shopping")
     expect(page.locator("#view-shopping")).to_be_visible()
     expect(page.locator("#cart-count")).to_be_hidden()
-    page.go_back()
+    # That closed the recipe: swiping back leads to Recipes
+    page.wait_for_timeout(300)
+    swipe(page, 60, 300)
+    expect(page.locator("#view-list")).to_be_visible()
+    expect(page.locator("#view-recipe")).to_be_hidden()
+    page.locator(".recipe-card").first.click() if page.locator(".recipe-card").first.is_visible() else page.click("#suggestion")
     expect(page.locator("#view-recipe")).to_be_visible()
     page.keyboard.press("ArrowLeft")
     page.click("#added-dialog button[value=ok]")
@@ -1226,7 +1232,17 @@ def test_recipe_swipe(p):
     # From the suggestion, it goes on through the other ideas
     page.reload()
     shown = page.locator("#suggestion-link").inner_text()
-    page.click("#suggestion-open")
+    # Anywhere on the panel opens it, but "Another idea" is still its own button
+    for part in ("#suggestion-label", "#suggestion-reason"):
+        assert page.evaluate(f"""(() => {{
+            const r = document.querySelector('{part}').getBoundingClientRect();
+            return document.elementFromPoint(r.x + 5, r.y + r.height / 2).id;
+        }})()""") == "suggestion-link", part
+    assert page.evaluate("""(() => {
+        const r = document.getElementById('suggestion-next').getBoundingClientRect();
+        return document.elementFromPoint(r.x + 5, r.y + r.height / 2).id;
+    })()""") == "suggestion-next"
+    page.click("#suggestion")
     expect(title).to_have_text(shown)
     page.wait_for_timeout(400)
     swipe(page, 330, 120)

@@ -1,5 +1,8 @@
 # Changelog
 
+## 2026-11-06 q
+- Going from a recipe to the shopping list closes the recipe, so swiping back leads to Recipes. Tapping anywhere on the suggestion opens it. The ensō now shows the sync: it turns while syncing and goes green when up to date.
+
 ## 2026-11-06 p
 - A recipe now opens as a sheet on top of the recipes page; tap above it or pull it down to close.
 - The recipe title runs under the edit and copy buttons.

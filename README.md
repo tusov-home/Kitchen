@@ -102,7 +102,7 @@ Recipes are always saved on the device first, so the app works offline. With syn
    - *Who has access:* **Anyone**
 4. Press **Deploy**, allow access with your Google account (Google shows a warning because it's your own unverified script: *Advanced → Go to … (unsafe)* is expected here).
 5. Copy the **Web app URL** (ends with `/exec`).
-6. In the Kitchen app: **⚙ → Web app link**, paste it, press **Save and sync**. A green dot in the top bar means synced.
+6. In the Kitchen app: **⚙ → Web app link**, paste it, press **Save and sync**. The ensō turning green in the top bar means synced.
 7. Send the same link to the other phone (e.g. in a private message) and paste it there too.
 
 **`Code.gs` should rarely change:** it stores whole recipes without needing to know their fields. If an update ever does change it (the CHANGELOG says so), paste the new code over the old one, save, then: Deploy → Manage deployments → ✏ Edit → Version: *New version* → Deploy. The link stays the same.

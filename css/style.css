@@ -404,8 +404,6 @@ button.owner-initial {
 }
 
 .suggestion-actions {
-  position: relative;
-  z-index: 1;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -1899,22 +1897,42 @@ html:has(#view-recipe:not([hidden])) {
   text-align: left;
 }
 
-/* The sync dot sits in the middle of the ensō */
-.sync-status {
-  position: absolute;
-  top: 50%;
-  left: 1.55rem;
-  width: 1.2rem;
-  height: 1.2rem;
-  margin: 0;
-  font-size: 0.75rem;
-  line-height: 1.2rem;
-  text-align: center;
-  transform: translate(-50%, -50%);
-  pointer-events: none;
+/* The ensō tells the sync state: it turns while syncing, and its line is
+   green when up to date, amber offline, red on an error */
+.brand-mark[data-state="ok"] { background: var(--ok); }
+.brand-mark[data-state="offline"] { background: var(--warn); }
+.brand-mark[data-state="error"] { background: var(--danger); }
+.brand-mark[data-state="syncing"] { animation: enso-turn 1.2s linear infinite; }
+
+@keyframes enso-turn {
+  to { transform: rotate(360deg); }
 }
 
-.sync-status::before {
-  width: 0.5rem;
-  height: 0.5rem;
+@media (prefers-reduced-motion: reduce) {
+  .brand-mark[data-state="syncing"] { animation: none; opacity: 0.6; }
+}
+
+/* The whole suggestion opens the recipe: the title's link is stretched over
+   the panel, and the buttons stay above it */
+.suggestion a.suggestion-title::before {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  border-radius: var(--radius-lg);
+}
+
+.suggestion-owners,
+.suggestion-actions {
+  position: relative;
+  z-index: 2;
+}
+
+/* Words stay under the stretched link, so tapping them opens the recipe too */
+.suggestion-head,
+.suggestion-label,
+.suggestion-title,
+.suggestion-reason {
+  position: static;
+  z-index: auto; /* the panel can be a flexbox, where z-index works even without a position */
 }

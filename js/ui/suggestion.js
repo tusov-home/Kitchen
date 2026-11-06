@@ -12,7 +12,6 @@ const box = document.getElementById("suggestion");
 const label = document.getElementById("suggestion-label");
 const link = document.getElementById("suggestion-link");
 const reason = document.getElementById("suggestion-reason");
-const openButton = document.getElementById("suggestion-open");
 const nextButton = document.getElementById("suggestion-next");
 const ownerButtons = document.getElementById("suggestion-owners");
 
@@ -126,7 +125,6 @@ export function renderSuggestion(recipes, visible) {
   label.textContent = "Suggestion for " + now.toLocaleDateString("en-GB", { weekday: "long" });
   link.textContent = pick.recipe.title;
   link.href = href;
-  openButton.href = href;
   reason.textContent = pick.reason;
   reason.hidden = !pick.reason;
   nextButton.hidden = list.length < 2;
@@ -141,7 +139,6 @@ function queueFromHere() {
 
 export function initSuggestion() {
   link.addEventListener("click", queueFromHere);
-  openButton.addEventListener("click", queueFromHere);
   nextButton.addEventListener("click", function () {
     const today = toDateString(new Date());
     saveOffset(today, loadOffset(today) + 1);

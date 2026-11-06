@@ -9,7 +9,7 @@ import { formatAmount, stepServings } from "../lib/scale.js";
 import { renderRating } from "./rating.js";
 import { renderJump } from "./recipeJump.js";
 import { nextRecipeId } from "./recipeQueue.js";
-import { slideInNext } from "./tabs.js";
+import { slideInNext, goToTab } from "./tabs.js";
 import { go, goBack } from "./router.js";
 import { getMyName } from "./name.js";
 import { showToast } from "./toast.js";
@@ -186,6 +186,10 @@ export function swipeRecipe(direction) {
 }
 
 export function initRecipe() {
+  document.getElementById("to-shopping").addEventListener("click", function (event) {
+    event.preventDefault();
+    goToTab("shopping");
+  });
   addedDialog.addEventListener("close", function () {
     if (addedDialog.returnValue === "ok") {
       showNextRecipe();
