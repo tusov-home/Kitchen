@@ -29,7 +29,7 @@ function markCurrent() {
   // The last part that has reached the upper part of the screen; at the
   // very bottom, the last part, as it can't scroll any higher.
   const line = window.innerHeight * 0.4;
-  const atEnd = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 2;
+  const atEnd = view.clientHeight + view.scrollTop >= view.scrollHeight - 2;
   let current = -1;
   jumps.forEach(function (jump, index) {
     if (jump.target.getBoundingClientRect().top <= line) {
@@ -86,7 +86,8 @@ export function jumpTo(label) {
 }
 
 export function initRecipeJump() {
-  window.addEventListener("scroll", markCurrent, { passive: true });
+  // The recipe scrolls inside its sheet, not the page.
+  view.addEventListener("scroll", markCurrent, { passive: true });
   window.addEventListener("touchmove", scrolledByHand, { passive: true });
   window.addEventListener("wheel", scrolledByHand, { passive: true });
 }

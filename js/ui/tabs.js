@@ -1,6 +1,6 @@
 // Page icons in the top bar: Recipes · Shopping · Pantry · Projects. Tap a tab, swipe
 // left/right anywhere on a page, or press ← / → on the laptop.
-import { go, goBack } from "./router.js";
+import { go, goBack, closeToList } from "./router.js";
 import * as storage from "../storage.js";
 
 export const TABS = [
@@ -134,7 +134,7 @@ export function setBadge(id, count) {
 // Where a swipe must not switch pages.
 function blocksSwipe(target) {
   return Boolean(
-    target.closest("input, textarea, select, .table-wrap, dialog, [contenteditable], .page-dock")
+    target.closest("input, textarea, select, .table-wrap, dialog, [contenteditable], .page-dock, .recipe-backdrop")
   );
 }
 
@@ -163,7 +163,7 @@ function dragDown(view, dy) {
 }
 
 function closeRecipe(view) {
-  const finish = () => goToTab("list");
+  const finish = closeToList;
   if (reduceMotion.matches) {
     finish();
     return;
@@ -234,7 +234,7 @@ function initSwipe() {
       return;
     }
     const now = Date.now();
-    const atTop = getScreen() === "recipe" && window.scrollY <= 0;
+    const atTop = getScreen() === "recipe" && currentView().scrollTop <= 0;
     drag = { x: touch.clientX, y: touch.clientY, axis: null, view: currentView(), lastX: touch.clientX, lastTime: now, speed: 0, atTop: atTop };
   }, { passive: true });
 

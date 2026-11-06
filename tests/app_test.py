@@ -162,6 +162,7 @@ def test_phone(p, sheet):
     # Phone Back button goes to the list, not back to the form
     page.go_back()
     expect(page.locator("#view-list")).to_be_visible()
+    expect(page.locator("#view-recipe")).to_be_hidden()
     expect(page.locator(".recipe-card")).to_have_count(1)
 
     # Set up sync
@@ -250,7 +251,7 @@ def test_laptop_second_device(p, sheet):
     expect(page.locator("#all-ratings")).to_be_hidden()  # a copy starts unrated
     expect(page.locator("#recipe-body")).not_to_contain_text("Miso Aubergine with Soba")
     page.screenshot(path=SHOTS / "laptop-0-copy.png")
-    page.click(".brand")
+    go_home(page)
     expect(page.locator(".recipe-card")).to_have_count(2)
     expect(page.locator(".card-owner")).to_have_count(2)
 
@@ -288,6 +289,7 @@ def test_laptop_second_device(p, sheet):
 
     page.keyboard.press("Escape")
     expect(page.locator("#view-list")).to_be_visible()
+    expect(page.locator("#view-recipe")).to_be_hidden()
     expect(page.locator(".recipe-card")).to_have_count(3)
 
     # Today's suggestion is the first thing on the page
@@ -312,6 +314,7 @@ def test_laptop_second_device(p, sheet):
     expect(page.locator("#recipe-title")).to_have_text(picked)
     page.keyboard.press("Escape")
     expect(page.locator("#view-list")).to_be_visible()
+    expect(page.locator("#view-recipe")).to_be_hidden()
 
     # Filters are folded away until asked for (F or the Filter button)
     expect(page.locator("#filter-panel")).to_be_hidden()
@@ -404,7 +407,7 @@ def test_laptop_second_device(p, sheet):
     expect(page.locator("#plan-start")).to_have_count(0)
     add_to_list(page, "Miso Aubergine with Soba")
     add_to_list(page, "Beef Shakshuka")
-    page.click(".tab[data-tab=shopping]")
+    open_tab(page, "shopping")
     expect(page.locator("#view-shopping")).to_be_visible()
     expect(page.locator("#shop-recipes")).to_contain_text("Miso Aubergine with Soba (2)")
     sections = page.locator(".shop-section h2")
@@ -427,14 +430,23 @@ def test_laptop_second_device(p, sheet):
 
     # Shortcuts work right after ticking a checkbox
     page.click(".shop-item:has-text('aubergines') .shop-check")
-    page.click(".shop-item:has-text('aubergines') .shop-check")
     page.keyboard.press("ArrowRight")
     expect(page.locator("#view-pantry")).to_be_visible()
+    # Ticked things fold away, and can be unticked from there
+    page.keyboard.press("ArrowLeft")
+    expect(page.locator("#view-shopping")).to_be_visible()
+    expect(page.locator("#shop-ticked-label")).to_have_text("Ticked (2)")
+    expect(page.locator("#shop-sections .shop-item:has-text('aubergines')")).to_have_count(0)
+    expect(page.locator("#shop-ticked .shop-item:has-text('aubergines')")).to_be_hidden()
+    page.click("#shop-ticked-label")
+    page.click("#shop-ticked .shop-item:has-text('aubergines') .shop-check")
+    expect(page.locator("#shop-sections .shop-item:has-text('aubergines')")).to_have_count(1)
+    expect(page.locator("#shop-ticked-label")).to_have_text("Ticked (1)")
     # Another recipe joins the same list
     add_to_list(page, "Spicy Miso Aubergine")
-    page.click(".tab[data-tab=shopping]")
+    open_tab(page, "shopping")
     expect(page.locator(".shop-name").filter(has_text="aubergines")).to_have_text("4 aubergines")
-    page.click(".brand")
+    go_home(page)
 
     # Delete syncs as well
     page.click(".recipe-card:has-text('Beef Shakshuka')")
@@ -498,7 +510,7 @@ def test_shopping_shared(p, sheet):
     watch_errors(page, errors)
     page.goto(BASE)
     expect(page.locator("#sync-status")).to_have_attribute("data-state", "ok")
-    page.click(".tab[data-tab=shopping]")
+    open_tab(page, "shopping")
     expect(page.locator(".shop-item.checked .shop-name")).to_have_text(["300 g beef mince"])
     page.click(".shop-item:has-text('toilet paper') .shop-check")
     expect(page.locator("#shop-progress-text")).to_contain_text("2 of")
@@ -514,10 +526,35 @@ def test_shopping_shared(p, sheet):
     print("shopping shared: ok")
 
 
+def close_recipe(page):
+    """Tap above the recipe sheet."""
+    page.locator("#recipe-backdrop").click(position={"x": 5, "y": 3})
+    expect(page.locator("#view-recipe")).to_be_hidden()
+
+
+def open_tab(page, name):
+    """Tap a page icon, closing a recipe first: it covers the top bar."""
+    page.wait_for_timeout(250)  # a screen change may still be under way
+    if page.locator("#view-recipe").is_visible():
+        close_recipe(page)
+    page.locator(f".tab[data-tab={name}]").click()
+
+
+def go_home(page):
+    page.wait_for_timeout(250)  # a screen change may still be under way
+    if page.locator("#view-recipe").is_visible():
+        close_recipe(page)  # that's home already
+    else:
+        page.locator(".brand").click()
+    expect(page.locator("#view-list")).to_be_visible()
+    expect(page.locator("#view-recipe")).to_be_hidden()
+
+
 def add_to_list(page, name):
     """Open a recipe and add it to the shopping list, like a swipe right."""
     page.goto(BASE + "#/")
     expect(page.locator("#view-list")).to_be_visible()
+    expect(page.locator("#view-recipe")).to_be_hidden()
     if page.locator("#all-panel").is_hidden():
         page.click("#meals-toggle")
     page.locator(".recipe-card", has_text=name).first.click()
@@ -629,6 +666,7 @@ def test_pantry_tabs(p, sheet):
     # Phone Back from a tab returns to Recipes
     page.go_back()
     expect(page.locator("#view-list")).to_be_visible()
+    expect(page.locator("#view-recipe")).to_be_hidden()
     # First page: swiping right only stretches a little, then springs back
     swipe(page, 100, 300, lift=False)
     stretched = page.evaluate("document.getElementById('view-list').style.transform")
@@ -639,9 +677,10 @@ def test_pantry_tabs(p, sheet):
     }""")
     page.wait_for_timeout(400)
     expect(page.locator("#view-list")).to_be_visible()
+    expect(page.locator("#view-recipe")).to_be_hidden()
 
     # ---------- Pantry ----------
-    page.click(".tab[data-tab=pantry]")
+    open_tab(page, "pantry")
     expect(page.locator("#pantry-empty")).to_be_visible()
     page.click("#pantry-staples")
     expect(page.locator(".pantry-item")).to_have_count(29)
@@ -671,20 +710,20 @@ def test_pantry_tabs(p, sheet):
     expect(page.locator("#pantry-restock")).to_contain_text("1 low or out")
     page.click("#pantry-to-shopping")
     expect(page.locator("#pantry-restock")).to_be_hidden()
-    page.click(".tab[data-tab=shopping]")
+    open_tab(page, "shopping")
     page.click(".shop-item:has-text('Rice') .shop-check")
-    page.click(".tab[data-tab=pantry]")
+    open_tab(page, "pantry")
     expect(page.locator(".pantry-item", has_text="Rice").locator(".status-pill")).to_have_text("Have")
     expect(page.locator("#pantry-count")).to_be_hidden()
 
     # A recipe shopping list moves what you have to "Check you have"
     page.fill("#pantry-add-input", "White miso")
     page.keyboard.press("Enter")
-    page.click(".tab[data-tab=shopping]")
+    open_tab(page, "shopping")
     page.once("dialog", lambda d: d.accept())
     page.click("#shop-delete")
     add_to_list(page, "Miso Aubergine with Soba")
-    page.click(".tab[data-tab=shopping]")
+    open_tab(page, "shopping")
     miso = page.locator(".shop-item", has_text="white miso")
     expect(miso).to_contain_text("In your pantry")
     expect(page.locator(".shop-section", has_text="Check you have")).to_contain_text("white miso")
@@ -741,7 +780,7 @@ def test_projects(p, sheet):
 
     page = device("Kadi", **p.devices["Pixel 7"])
     # The last tab opens Projects, with no chores in sight
-    page.click(".tab[data-tab=projects]")
+    open_tab(page, "projects")
     expect(page.locator("#view-projects")).to_be_visible()
     expect(page.locator(".tab.active .tab-label")).to_have_text("Projects")
     expect(page.locator("#projects-empty")).to_be_visible()
@@ -780,12 +819,12 @@ def test_projects(p, sheet):
     page.locator("#project-title").click()
     page.screenshot(path=SHOTS / "phone-9-project.png", full_page=True)
 
-    page.click(".tab[data-tab=shopping]")
+    open_tab(page, "shopping")
     expect(page.locator("#view-shopping .shop-item", has_text="wall plugs")).to_contain_text("Hang hallway shelf")
     page.click("#view-shopping .shop-item:has-text('wall plugs') .shop-check")
 
     # Back to Home: it remembers Projects
-    page.click(".tab[data-tab=projects]")
+    open_tab(page, "projects")
     expect(page.locator("#view-projects")).to_be_visible()
     card = page.locator(".project-card", has_text="Hang hallway shelf")
     expect(card).to_contain_text("1 of 3 steps · 1 to buy")
@@ -869,7 +908,7 @@ def test_add_from_recipe(p):
     page.keyboard.press("ArrowLeft")
     page.click("#added-dialog button[value=ok]")
     expect(page.locator("#cart-count")).to_have_text("3")
-    page.click(".tab[data-tab=shopping]")
+    open_tab(page, "shopping")
     expect(page.locator(".shop-name").filter(has_text="aubergines")).to_have_text("4 aubergines")
     assert not errors, errors
     print("add from recipe: ok")
@@ -1040,27 +1079,29 @@ def test_recipe_layout(p):
     page.click(".jump-button:has-text('Method')")
     page.wait_for_timeout(900)
     top = page.evaluate("[...document.querySelectorAll('#recipe-body h1, #recipe-body h2, #recipe-body h3')].find((h) => h.textContent === 'Method').getBoundingClientRect().top")
-    bar = page.evaluate("document.querySelector('.topbar').getBoundingClientRect().bottom")
+    bar = page.evaluate("document.getElementById('view-recipe').getBoundingClientRect().top")
     assert bar <= top < bar + 40, (bar, top)
+    expect(page.locator("#view-list")).to_be_visible()  # the page stays underneath
     expect(page.locator(".jump-button.active")).to_have_text("Method")
     page.click(".jump-button:has-text('Ingredients')")
     page.wait_for_timeout(900)
     expect(page.locator(".jump-button.active")).to_have_text("Ingredients")
     # The text can scroll clear of the dock
-    page.evaluate("window.scrollTo(0, document.documentElement.scrollHeight)")
+    page.evaluate("document.getElementById('view-recipe').scrollTo(0, 1e6)")
     page.wait_for_timeout(200)
     last = page.evaluate("document.getElementById('recipe-body').getBoundingClientRect().bottom")
-    assert last <= page.evaluate("document.getElementById('recipe-dock').getBoundingClientRect().top"), last
+    assert last <= page.evaluate("document.getElementById('recipe-dock').getBoundingClientRect().top") + 1, last
     # Further down the recipe, pulling down is an ordinary scroll
     swipe_down(page, 200, 500)
     page.wait_for_timeout(300)
     expect(page.locator("#view-recipe")).to_be_visible()
     # Changing the servings keeps the bar working
-    page.evaluate("window.scrollTo(0, 0)")
+    page.evaluate("document.getElementById('view-recipe').scrollTo(0, 0)")
     page.click("#servings-up")
     expect(page.locator(".jump-button")).to_have_count(3)
     page.go_back()
     expect(page.locator("#view-list")).to_be_visible()
+    expect(page.locator("#view-recipe")).to_be_hidden()
     expect(dock).to_be_hidden()
     # A recipe without headings has no bar
     page.click("#add-recipe")
@@ -1090,8 +1131,9 @@ def test_recipe_swipe(p):
         page.fill("#edit-text", f"{name}\n\nServes 2\n\n## Ingredients\n- 2 {name.split()[0].lower()}s\n\n## Method\n1. Cook it.")
         page.click("#edit-form button[type=submit]")
         expect(page.locator("#view-recipe")).to_be_visible()
-        page.click(".brand")
+        go_home(page)
         expect(page.locator("#view-list")).to_be_visible()
+    expect(page.locator("#view-recipe")).to_be_hidden()
     title = page.locator("#recipe-title")
     page.click("#meals-toggle")
     cards = page.locator(".recipe-card-title").all_inner_texts()
@@ -1139,6 +1181,7 @@ def test_recipe_swipe(p):
     # Back returns to the list, not through the swiped recipes
     page.go_back()
     expect(page.locator("#view-list")).to_be_visible()
+    expect(page.locator("#view-recipe")).to_be_hidden()
     # Already on the list: not added twice
     page.locator(".recipe-card", has_text=cards[1]).click()
     expect(title).to_have_text(cards[1])
@@ -1171,12 +1214,14 @@ def test_recipe_swipe(p):
     expect(page.locator("#view-recipe")).to_be_visible()
     swipe_down(page, 200, 500)
     expect(page.locator("#view-list")).to_be_visible()
+    expect(page.locator("#view-recipe")).to_be_hidden()
     page.locator(".recipe-card", has_text=cards[2]).click()
     expect(title).to_have_text(cards[2])
     page.wait_for_timeout(400)
     # After the last one: back to the list, with a message
     swipe(page, 330, 120)
     expect(page.locator("#view-list")).to_be_visible()
+    expect(page.locator("#view-recipe")).to_be_hidden()
     expect(page.locator("#toast")).to_contain_text("That was the last recipe")
     # From the suggestion, it goes on through the other ideas
     page.reload()

@@ -2,7 +2,7 @@
 import { APP_VERSION } from "./version.js";
 import * as state from "./state.js";
 import * as sync from "./sync.js";
-import { parseRoute, trackHistory, go, goBack } from "./ui/router.js";
+import { parseRoute, trackHistory, go, goBack, closeToList, stillClosing } from "./ui/router.js";
 import { toggleSuggestionOwner } from "./ui/suggestion.js";
 import { initList, renderList, focusSearch, toggleKind, toggleFilters } from "./ui/list.js";
 import { initRecipe, renderRecipe, changeServings, canEditCurrent, swipeRecipe, showNextRecipe, addAndContinue } from "./ui/recipe.js";
@@ -41,12 +41,20 @@ function showView(screen) {
   for (const name in views) {
     views[name].hidden = name !== screen;
   }
+  // A recipe is a sheet on top of the recipes page, which stays underneath.
+  if (screen === "recipe") {
+    views.list.hidden = false;
+  }
 }
 
 // Shows the screen that matches the address.
 function route() {
   trackHistory();
+  const cameFrom = current.screen;
   current = parseRoute(location.hash);
+  if (stillClosing(current.screen)) {
+    return;
+  }
   // Leave the previous screen's text box, so shortcuts work again.
   if (document.activeElement && document.activeElement !== document.body) {
     document.activeElement.blur();
@@ -59,6 +67,8 @@ function route() {
       go("#/", true); // recipe no longer exists
       return;
     }
+    renderList();
+    views.recipe.scrollTop = 0;
   } else if (current.screen === "edit") {
     const result = openEditor(current.id, current.copyFrom);
     if (result === "locked") {
@@ -87,7 +97,10 @@ function route() {
     renderList();
   }
   renderTabs(current.screen, views[current.screen]);
-  window.scrollTo(0, 0);
+  // The page under a recipe stays where you left it.
+  if (current.screen !== "recipe" && !(current.screen === "list" && cameFrom === "recipe")) {
+    window.scrollTo(0, 0);
+  }
 }
 
 // When recipes change (also from the other phone), refresh what's shown.
@@ -96,6 +109,7 @@ state.onChange(function () {
   if (current.screen === "list") {
     renderList();
   } else if (current.screen === "recipe") {
+    renderList();
     if (!renderRecipe(current.id)) {
       go("#/", true);
     }
@@ -153,6 +167,7 @@ document.getElementById("add-recipe").addEventListener("click", function () {
 
 initList();
 initRecipe();
+document.getElementById("recipe-backdrop").addEventListener("click", closeToList);
 onRecipeSwipe(swipeRecipe);
 initRating();
 initRecipeJump();
@@ -203,6 +218,8 @@ initShortcuts(
         cancelEditor();
       } else if (current.screen === "project") {
         document.getElementById("project-back").click();
+      } else if (current.screen === "recipe") {
+        closeToList();
       } else if (current.screen !== "list") {
         goBack("#/");
       }

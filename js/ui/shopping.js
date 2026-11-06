@@ -12,6 +12,9 @@ const addInput = document.getElementById("shop-add-input");
 const sections = document.getElementById("shop-sections");
 const empty = document.getElementById("shop-empty");
 const footer = document.getElementById("shop-footer");
+const tickedBox = document.getElementById("shop-ticked");
+const tickedLabel = document.getElementById("shop-ticked-label");
+const tickedItems = document.getElementById("shop-ticked-items");
 const removeTickedButton = document.getElementById("shop-remove-ticked");
 const deleteButton = document.getElementById("shop-delete");
 const cartCount = document.getElementById("cart-count");
@@ -79,20 +82,31 @@ export function renderShopping() {
   progressText.textContent = p.done + " of " + p.total + " ticked";
   progressFill.style.width = (p.total ? Math.round((p.done / p.total) * 100) : 0) + "%";
 
+  // Only what's left to buy stays in view; ticked things fold away below.
   sections.replaceChildren();
+  tickedItems.replaceChildren();
   for (const group of groups) {
+    for (const entry of group.entries.filter((item) => item.item.checked)) {
+      tickedItems.appendChild(itemRow(entry.key, entry.item));
+    }
+    const left = group.entries.filter((item) => !item.item.checked);
+    if (left.length === 0) {
+      continue;
+    }
     const section = document.createElement("section");
     section.className = "shop-section";
     const heading = document.createElement("h2");
     heading.textContent = group.section;
     const items = document.createElement("ul");
     items.className = "shop-items";
-    for (const entry of group.entries) {
+    for (const entry of left) {
       items.appendChild(itemRow(entry.key, entry.item));
     }
     section.append(heading, items);
     sections.appendChild(section);
   }
+  tickedBox.hidden = p.done === 0;
+  tickedLabel.textContent = "Ticked (" + p.done + ")";
 
   empty.hidden = p.total > 0;
   footer.hidden = p.total === 0;

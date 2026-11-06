@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-11-06 p
+- A recipe now opens as a sheet on top of the recipes page; tap above it or pull it down to close.
+- The recipe title runs under the edit and copy buttons.
+- Ticked shopping items fold away into **Ticked**, so only what's left to buy is visible.
+- Categories looks like the buttons next to it, and the sync dot sits inside the ensō.
+
 ## 2026-11-06 o
 - Recipe: pull down from the top to close it. The bottom buttons are now servings, Rate, Cooked and Shopping, which opens the list; adding is done by swiping right. Edit and copy moved next to the title.
 - Plan shopping is gone: recipes are added by swiping.

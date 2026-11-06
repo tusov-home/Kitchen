@@ -103,11 +103,13 @@ above. If a look-only change turns out bigger than expected, say so.
 - Main actions live in a bar at the bottom of every page (`.page-dock`).
   Keep the `interactive-widget=resizes-content` viewport setting: it lifts
   the bars above the phone keyboard.
-- Recipe page: bottom dock with servings, Rate, Cooked and Shopping, and a
+- Recipe page: a sheet on top of the recipes page, scrolling by itself
+  (`#view-recipe`, not `window`); bottom dock with servings, Rate, Cooked and Shopping, and a
   jump bar above it; edit and copy sit by the title. Stars live behind Rate.
   Pull down from the top closes the recipe. Swipe left = next
   recipe, swipe right = add to shopping list, then OK = next, Cancel = undo.
-  Servings live in the dock; no Back button there (phone Back or tab icons).
+  Servings live in the dock; no Back button there (phone Back, or tap above
+  the sheet).
 - Dialogs and the recipe form must not pop up the phone keyboard on open:
   the heading takes the focus (`tabindex="-1"`), never a text box.
 - Every frequent action gets a keyboard shortcut in `js/ui/shortcuts.js`

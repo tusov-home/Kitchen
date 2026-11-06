@@ -108,6 +108,10 @@
     </div>
 
     <div id="shop-sections"></div>
+    <details id="shop-ticked" class="shop-ticked" hidden>
+      <summary id="shop-ticked-label"></summary>
+      <ul id="shop-ticked-items" class="shop-items"></ul>
+    </details>
 
     <div id="shop-empty" class="empty" hidden>
       <p class="empty-title">No shopping list yet</p>
@@ -123,7 +127,7 @@
     <div id="pantry-filter" class="owner-filter" role="group" aria-label="Show">
       <button type="button" class="tag selected" data-filter="all" aria-pressed="true">Everything</button>
       <button type="button" class="tag" data-filter="low" aria-pressed="false">Low &amp; out</button>
-      <button id="sections-open" type="button" class="text-button sections-open" title="Add, rename or reorder categories (C)">Categories</button>
+      <button id="sections-open" type="button" class="tag sections-open" title="Add, rename or reorder categories (C)">Categories</button>
     </div>
 
     <div id="pantry-sections"></div>
@@ -192,11 +196,11 @@
   <main id="view-recipe" class="view" hidden>
     <article class="recipe">
       <div class="recipe-head">
-        <h1 id="recipe-title"></h1>
         <div class="recipe-tools">
           <a id="edit-link" class="icon-button" title="Edit (E)" aria-label="Edit"><svg class="line-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4.5 19.5l1-4.2L16.3 4.5a1.7 1.7 0 0 1 2.4 0l.8.8a1.7 1.7 0 0 1 0 2.4L8.7 18.5z"/></svg></a>
           <a id="copy-link" class="icon-button" title="Make your own copy to adjust (C)" aria-label="Make my copy"><svg class="line-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="9" y="9" width="11" height="11" rx="1.5"/><path d="M15 9V5.5A1.5 1.5 0 0 0 13.5 4h-8A1.5 1.5 0 0 0 4 5.5v8A1.5 1.5 0 0 0 5.5 15H9"/></svg></a>
         </div>
+        <h1 id="recipe-title"></h1>
       </div>
       <p id="recipe-owner" class="owner-line"></p>
       <div id="recipe-tags" class="tags"></div>
@@ -340,6 +344,9 @@
   <div id="projects-dock" class="page-dock">
     <button id="project-add" class="primary" type="button" title="Add project (N)">Add project</button>
   </div>
+
+  <!-- Behind the recipe sheet: dims the page, and a tap closes the recipe -->
+  <button id="recipe-backdrop" class="recipe-backdrop" type="button" aria-label="Close recipe" tabindex="-1"></button>
 
   <!-- The recipe's buttons, all in thumb reach. Shown with the recipe. -->
   <nav id="recipe-dock" class="page-dock" aria-label="Recipe">

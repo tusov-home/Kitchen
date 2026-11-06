@@ -76,3 +76,31 @@ export function goBack(fallback) {
     go(fallback || "#/", true);
   }
 }
+
+// Closing a recipe goes straight to the recipes page, even if the history
+// holds other recipes or the edit form in between: it jumps to where the
+// app started, which is the recipes page unless a link opened something else.
+let closing = false;
+
+export function closeToList() {
+  if (depth > 0) {
+    closing = true;
+    history.go(-depth);
+  } else {
+    go("#/", true);
+  }
+}
+
+// After that jump, if it didn't land on the recipes page: go there.
+// True if the screen needs no drawing.
+export function stillClosing(screen) {
+  if (!closing) {
+    return false;
+  }
+  closing = false;
+  if (screen === "list") {
+    return false;
+  }
+  go("#/", true);
+  return true;
+}
