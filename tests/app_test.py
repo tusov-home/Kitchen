@@ -358,7 +358,7 @@ def test_laptop_second_device(p, sheet):
     expect(panel).to_be_hidden()
     page.screenshot(path=SHOTS / "laptop-6-folded.png")
     # Folded, the three panels fill the height down to the tab bar
-    gap = page.evaluate("document.getElementById('tabbar').getBoundingClientRect().top - document.getElementById('sauces-toggle').getBoundingClientRect().bottom")
+    gap = page.evaluate("window.innerHeight - document.getElementById('sauces-toggle').getBoundingClientRect().bottom")
     assert 0 < gap < 32, gap
     assert page.evaluate("document.documentElement.scrollHeight <= window.innerHeight")
     # Suggestion initials: starts with this phone's owner (Tõnis)

@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-06 k
+- The page icons moved from the bottom into the top bar, and the Kitchen name is gone: the ensō and version letter are enough.
+- A smaller suggestion title that stops after three lines, so long names no longer push Meals and Sauces & condiments off the screen.
+
 ## 2026-11-06 j
 - Removed the yellow line from the "low or out" panel on the Pantry page.
 

@@ -1,4 +1,4 @@
-// Bottom tab bar: Recipes · Shopping · Pantry · Projects. Tap a tab, swipe
+// Page icons in the top bar: Recipes · Shopping · Pantry · Projects. Tap a tab, swipe
 // left/right anywhere on a page, or press ← / → on the laptop.
 import { go, goBack } from "./router.js";
 import * as storage from "../storage.js";

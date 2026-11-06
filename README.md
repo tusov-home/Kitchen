@@ -18,7 +18,7 @@ Kitchen lives in the `tusov-home` organization so it has its own web address. Pa
 - **Cook it:** open the recipe. **✓ Cooked today** adds the date to the notes; **Edit** lets you change anything and add notes ("less chilli next time").
 - **Servings:** use **− / +** on a recipe to cook for more or fewer people. Ingredient amounts change (highlighted); the method stays as written. The base number comes from "Serves 2" in the text, or set it in **Edit → Servings**. Without it, the stepper multiplies (×½, ×1½, ×2 …).
 - **Owners:** whoever adds a recipe owns it, and only they can edit or delete it. The other person can view and rate it, or tap **Make my copy** to adjust it as their own recipe; the copy links back to the original. This is a household convenience, not real security: it trusts the name each phone is set to, so keep your name the same.
-- **Pages:** the tab bar at the bottom switches between **Recipes**, **Shopping**, **Pantry** and **Projects**. Swipe left or right to move between them: the page follows your finger, and a short swipe or quick flick is enough (start a little away from the screen edge, which Android uses for Back). The small numbers show what needs attention.
+- **Pages:** the icons in the top bar switch between **Recipes**, **Shopping**, **Pantry** and **Projects**. Swipe left or right to move between them: the page follows your finger, and a short swipe or quick flick is enough (start a little away from the screen edge, which Android uses for Back). The small numbers show what needs attention.
 - **Pantry categories:** tap **Categories** on the Pantry page (or press C) to add, rename, reorder and remove them; they sync between phones. Removing one moves its items to **Other**, which always stays. To move an item, tap its name.
 - **Pantry:** what you have at home. Tap **Have** to mark something **Low**, again for **Out**. **Add to shopping list** puts everything low or out on the list, and ticking it off while shopping marks it as **Have** again. Shopping lists made from recipes put things you have under **Check you have** (the pantry doesn't know amounts, so they're not removed). Tap a name to rename it, move it to another section or delete it.
 - **Projects:** home improvements with no deadline. **+ Add project**, then add **steps** (tick them off as you go) and **things to buy** (**Add to shopping list** puts them on the shared list; ticking them off there marks them bought). Set the status with 💡 Idea / 🔨 Doing / ✅ Done, and keep measurements or links in **Notes**, which save by themselves. You can both work on the same project at once.
@@ -152,7 +152,7 @@ js/ui/rating.js       star ratings
 js/ui/name.js         whose phone this is (asked once)
 js/ui/plan.js         Plan shopping: picking recipes for a list
 js/ui/shopping.js     the shopping list screen
-js/ui/tabs.js         bottom tab bar and swiping between pages
+js/ui/tabs.js         the page icons and swiping between pages
 js/ui/pantry.js       the pantry screen
 js/ui/pantrySections.js  the Pantry categories dialog
 js/ui/projects.js     the projects list and add/edit dialog

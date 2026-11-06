@@ -24,7 +24,7 @@
   --radius-sm: 10px;
   --radius: 12px;
   --radius-lg: 16px;
-  --tabbar-h: 4.25rem;
+  --tabbar-h: 0rem; /* the page tabs live in the top bar */
   --font-body: "Zen Kaku Gothic New", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --font-title: "Zen Old Mincho", Georgia, "Times New Roman", serif;
 }
@@ -123,7 +123,7 @@ h3,
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.6rem 1.25rem;
+  padding: 0.4rem 0.75rem;
   background: var(--bg);
   border-bottom: 1px solid var(--border);
 }
@@ -337,12 +337,21 @@ body:has(#view-list:not([hidden]) #all-panel[hidden]) {
 /* Title in the middle of the free space, buttons at the bottom */
 #view-list:has(#all-panel[hidden]) .suggestion-title {
   margin-top: auto;
-  font-size: 2.3rem;
+  font-size: clamp(1.55rem, 6.4vw, 1.9rem);
 }
 
 #view-list:has(#all-panel[hidden]) .suggestion-actions {
   margin-top: auto;
   padding-top: 1.25rem;
+}
+
+/* Very long names stop after three lines, so the rows below stay on screen */
+a.suggestion-title {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  text-wrap: balance;
 }
 
 .suggestion-head {
@@ -1274,22 +1283,25 @@ body.has-tabbar.planning {
 }
 
 .tabbar {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 30;
   display: flex;
-  justify-content: center;
-  height: calc(var(--tabbar-h) + env(safe-area-inset-bottom));
-  padding-bottom: env(safe-area-inset-bottom);
-  border-top: 1px solid var(--border);
-  background: var(--bg);
+  flex: 1;
+  justify-content: space-evenly;
+  min-width: 0;
+}
+
+/* Words stay for screen readers; the icons do the talking */
+.tab-label,
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 .tab {
   position: relative;
-  flex: 1;
   max-width: 9rem;
   display: flex;
   flex-direction: column;
@@ -1684,9 +1696,8 @@ html {
     var(--bg) var(--stone) center top / 320px;
 }
 
-/* The top bar and tab bar are the same stone as the wall, with a thin line */
-.topbar,
-.tabbar {
+/* The top bar is the same stone as the wall, with a thin line */
+.topbar {
   background:
     linear-gradient(var(--wall-glaze), var(--wall-glaze)),
     var(--bg) var(--stone) center top / 320px;

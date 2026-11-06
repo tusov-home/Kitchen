@@ -16,7 +16,14 @@
 </head>
 <body>
   <header class="topbar">
-    <a href="#/" class="brand"><span class="brand-mark" aria-hidden="true"></span>Kitchen<sup id="brand-version" class="brand-version"></sup></a>
+    <a href="#/" class="brand"><span class="brand-mark" aria-hidden="true"></span><span class="visually-hidden">Kitchen</span><sup id="brand-version" class="brand-version"></sup></a>
+    <!-- The pages. Swipe left/right to move between them. -->
+    <nav id="tabbar" class="tabbar" aria-label="Pages">
+      <a href="#/" class="tab" data-tab="list" title="Recipes (←/→ to switch pages)"><span class="tab-icon"><svg class="line-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3.5 11.5h17a8.5 8.5 0 0 1-17 0z"/><path d="M9 20.5h6"/><path d="M9.5 8.5c-.8-1 .8-1.8 0-3"/><path d="M14 8.5c-.8-1 .8-1.8 0-3"/></svg></span><span class="tab-label">Recipes</span></a>
+      <a href="#/shopping" class="tab" data-tab="shopping" title="Shopping list (L)"><span class="tab-icon"><svg class="line-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3.5 10h17l-1.7 8.4a2 2 0 0 1-2 1.6H7.2a2 2 0 0 1-2-1.6z"/><path d="M8 10l3.2-5.5"/><path d="M16 10l-3.2-5.5"/><path d="M9 13.5v3.5M12 13.5v3.5M15 13.5v3.5"/></svg></span><span class="tab-label">Shopping</span><span id="cart-count" class="tab-badge" hidden></span></a>
+      <a href="#/pantry" class="tab" data-tab="pantry" title="Pantry"><span class="tab-icon"><svg class="line-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M8.5 3.5h7v3h-7z"/><path d="M7.5 6.5h9a1.5 1.5 0 0 1 1.5 1.5v10.5a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V8a1.5 1.5 0 0 1 1.5-1.5z"/><path d="M9.5 12.5h5"/></svg></span><span class="tab-label">Pantry</span><span id="pantry-count" class="tab-badge" hidden></span></a>
+      <a href="#/projects" class="tab" data-tab="projects" title="Projects"><span class="tab-icon"><svg class="line-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3.5 11.2 12 4.5l8.5 6.7"/><path d="M5.8 9.5v10.5h12.4V9.5"/><path d="M10 20v-5.5h4V20"/></svg></span><span class="tab-label">Projects</span></a>
+    </nav>
     <button id="install-app" class="button small" type="button" title="Install Kitchen as an app" hidden>Install app</button>
     <span id="sync-status" class="sync-status" data-state="off" title="Sync status"></span>
     <button id="open-settings" class="icon-button" type="button" title="Settings and sync" aria-label="Settings and sync"><svg class="line-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 7.5h9M19 7.5h1M4 16.5h3M13 16.5h7"/><circle cx="16" cy="7.5" r="2.2"/><circle cx="10" cy="16.5" r="2.2"/></svg></button>
@@ -370,14 +377,6 @@
       </div>
     </form>
   </dialog>
-
-  <!-- Bottom tab bar. Swipe left/right to move between pages. -->
-  <nav id="tabbar" class="tabbar" aria-label="Pages">
-    <a href="#/" class="tab" data-tab="list" title="Recipes (←/→ to switch pages)"><span class="tab-icon"><svg class="line-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3.5 11.5h17a8.5 8.5 0 0 1-17 0z"/><path d="M9 20.5h6"/><path d="M9.5 8.5c-.8-1 .8-1.8 0-3"/><path d="M14 8.5c-.8-1 .8-1.8 0-3"/></svg></span><span class="tab-label">Recipes</span></a>
-    <a href="#/shopping" class="tab" data-tab="shopping" title="Shopping list (L)"><span class="tab-icon"><svg class="line-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3.5 10h17l-1.7 8.4a2 2 0 0 1-2 1.6H7.2a2 2 0 0 1-2-1.6z"/><path d="M8 10l3.2-5.5"/><path d="M16 10l-3.2-5.5"/><path d="M9 13.5v3.5M12 13.5v3.5M15 13.5v3.5"/></svg></span><span class="tab-label">Shopping</span><span id="cart-count" class="tab-badge" hidden></span></a>
-    <a href="#/pantry" class="tab" data-tab="pantry" title="Pantry"><span class="tab-icon"><svg class="line-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M8.5 3.5h7v3h-7z"/><path d="M7.5 6.5h9a1.5 1.5 0 0 1 1.5 1.5v10.5a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V8a1.5 1.5 0 0 1 1.5-1.5z"/><path d="M9.5 12.5h5"/></svg></span><span class="tab-label">Pantry</span><span id="pantry-count" class="tab-badge" hidden></span></a>
-    <a href="#/projects" class="tab" data-tab="projects" title="Projects"><span class="tab-icon"><svg class="line-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3.5 11.2 12 4.5l8.5 6.7"/><path d="M5.8 9.5v10.5h12.4V9.5"/><path d="M10 20v-5.5h4V20"/></svg></span><span class="tab-label">Projects</span></a>
-  </nav>
 
   <!-- Edit one pantry item -->
   <dialog id="pantry-dialog" class="dialog">
