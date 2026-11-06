@@ -11,7 +11,7 @@ export const TABS = [
 ];
 
 // Pages opened from a tab still light up its tab.
-const BELONGS_TO = { recipe: "list", project: "projects" };
+const BELONGS_TO = { recipe: "list", project: "projects", plan: "list" };
 
 const tabbar = document.getElementById("tabbar");
 const swipeHint = document.getElementById("swipe-hint");
@@ -154,7 +154,7 @@ function showHint(dx) {
   const side = dx < 0 ? "left" : "right";
   if (side !== hintSide) {
     hintSide = side;
-    swipeHint.textContent = dx < 0 ? "Next recipe" : "Add to shopping list";
+    swipeHint.textContent = dx < 0 ? "Next recipe" : "Add to plan";
     swipeHint.classList.toggle("from-left", dx > 0);
     swipeHint.hidden = false;
   }

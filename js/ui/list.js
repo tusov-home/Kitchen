@@ -6,6 +6,7 @@ import * as storage from "../storage.js";
 import { visibleRecipes, allTags, allOwners, averageRating, kindOf } from "../lib/recipes.js";
 import { renderSuggestion, initSuggestion } from "./suggestion.js";
 import { setQueue } from "./recipeQueue.js";
+import { renderPlanRow } from "./plan.js";
 
 const searchInput = document.getElementById("search");
 const tagFilter = document.getElementById("tag-filter");
@@ -169,6 +170,7 @@ export function renderList() {
   filterToggle.setAttribute("aria-expanded", filterPanel.hidden ? "false" : "true");
 
   // The rows, and the panel under the open one.
+  renderPlanRow(everything);
   mealsHead.hidden = everything;
   saucesHead.hidden = everything;
   allPanel.hidden = !(openKind || everything);

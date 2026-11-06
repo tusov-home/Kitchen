@@ -5,9 +5,10 @@ import * as sync from "./sync.js";
 import { parseRoute, trackHistory, go, goBack, stillClosing } from "./ui/router.js";
 import { toggleSuggestionOwner } from "./ui/suggestion.js";
 import { initList, renderList, focusSearch, toggleKind, toggleFilters } from "./ui/list.js";
-import { initRecipe, renderRecipe, changeServings, canEditCurrent, swipeRecipe, showNextRecipe, addAndContinue } from "./ui/recipe.js";
+import { initRecipe, renderRecipe, changeServings, canEditCurrent, swipeRecipe, showNextRecipe, addAndContinue, togglePlan, renderPlanToggle } from "./ui/recipe.js";
 import { showToast } from "./ui/toast.js";
-import { rate, initRating, openRating } from "./ui/rating.js";
+import { initPlan, renderPlan } from "./ui/plan.js";
+import { plans } from "./planState.js";
 import { initRecipeJump, jumpTo } from "./ui/recipeJump.js";
 import { initHaptics } from "./ui/haptics.js";
 import { initName } from "./ui/name.js";
@@ -33,6 +34,7 @@ const views = {
   pantry: document.getElementById("view-pantry"),
   projects: document.getElementById("view-projects"),
   project: document.getElementById("view-project"),
+  plan: document.getElementById("view-plan"),
 };
 const brand = document.getElementById("brand");
 const brandMark = document.getElementById("brand-mark");
@@ -89,6 +91,8 @@ function route() {
       go("#/", true);
       return;
     }
+  } else if (current.screen === "plan") {
+    renderPlan();
   } else if (current.screen === "shopping") {
     renderShopping();
   } else if (current.screen === "pantry") {
@@ -122,7 +126,9 @@ function playSheetOpening() {
 // When recipes change (also from the other phone), refresh what's shown.
 // The edit form is left alone, so nobody loses what they're typing.
 state.onChange(function () {
-  if (current.screen === "list") {
+  if (current.screen === "plan") {
+    renderPlan();
+  } else if (current.screen === "list") {
     renderList();
   } else if (current.screen === "recipe") {
     renderList();
@@ -147,6 +153,17 @@ pantry.onChange(function () {
     renderPantry();
   } else if (current.screen === "shopping") {
     renderShopping();
+  }
+});
+// The plan can change on the other phone too.
+plans.onChange(function () {
+  if (current.screen === "plan") {
+    renderPlan();
+  } else if (current.screen === "list") {
+    renderList();
+  } else if (current.screen === "recipe") {
+    renderPlanToggle();
+    renderList(); // the page under the sheet shows the plan row
   }
 });
 pantrySections.onChange(function () {
@@ -186,7 +203,7 @@ initHaptics();
 initRecipe();
 document.getElementById("recipe-backdrop").addEventListener("click", closeRecipeSheet);
 onRecipeSwipe(swipeRecipe);
-initRating();
+initPlan();
 initRecipeJump();
 initName();
 initEditor();
@@ -217,16 +234,12 @@ initShortcuts(
       }
     },
     copyRecipe: () => go("#/copy/" + encodeURIComponent(current.id)),
-    openRating: openRating,
     jumpIngredients: () => jumpTo("Ingredients"),
     jumpMethod: () => jumpTo("Method"),
-    rate1: () => rate(1),
-    rate2: () => rate(2),
-    rate3: () => rate(3),
-    rate4: () => rate(4),
-    rate5: () => rate(5),
     nextRecipe: showNextRecipe,
     addAndNext: addAndContinue,
+    togglePlan: togglePlan,
+    openPlan: () => go("#/plan"),
     moreServings: () => changeServings(1),
     fewerServings: () => changeServings(-1),
     save: saveFromEditor,

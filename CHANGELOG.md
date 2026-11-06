@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-06 y
+- **Cooking plan**: swipe a recipe right (or tap **Add to plan**) to plan it. A **Cooking plan** row appears above Meals. There you set servings, add every recipe to the shopping list in one go, and after eating tick what you cooked, rate it and add notes, then **Finish plan**. Shared between both phones.
+- Recipe page: the bottom bar is now servings and **Add to plan**; rating moved into the plan's review. Tags fold behind one line, and only the title's first line runs beside the edit and copy buttons.
+
 ## 2026-11-06 x
 - The suggestion's bottom corners belong to the arrows only, so a tap near them never opens the recipe.
 

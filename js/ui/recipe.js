@@ -1,15 +1,13 @@
 // Shows one recipe, ready to cook from: ratings, notes, a servings
 // stepper and the recipe text with amounts scaled to the servings.
 import * as state from "../state.js";
-import * as shopping from "../shoppingState.js";
-import { ingredientLines } from "../lib/sections.js";
-import { bodyWithoutTitle, cookedNote, canEdit } from "../lib/recipes.js";
+import * as plan from "../planState.js";
+import { bodyWithoutTitle, canEdit } from "../lib/recipes.js";
 import { renderMarkdown } from "../lib/markdown.js";
 import { formatAmount, stepServings } from "../lib/scale.js";
-import { renderRating } from "./rating.js";
 import { renderJump } from "./recipeJump.js";
 import { nextRecipeId } from "./recipeQueue.js";
-import { slideInNext, goToTab } from "./tabs.js";
+import { slideInNext } from "./tabs.js";
 import { go, goBack } from "./router.js";
 import { getMyName } from "./name.js";
 import { showToast } from "./toast.js";
@@ -22,7 +20,10 @@ const body = document.getElementById("recipe-body");
 const editLink = document.getElementById("edit-link");
 const copyLink = document.getElementById("copy-link");
 const ownerLine = document.getElementById("recipe-owner");
-const cookedButton = document.getElementById("cooked-today");
+const planToggle = document.getElementById("plan-toggle");
+const planToggleLabel = document.getElementById("plan-toggle-label");
+const tagsFold = document.getElementById("recipe-tags-fold");
+const tagsLabel = document.getElementById("recipe-tags-label");
 const servingsDown = document.getElementById("servings-down");
 const servingsUp = document.getElementById("servings-up");
 const servingsLabel = document.getElementById("servings-label");
@@ -36,8 +37,8 @@ let currentId = null;
 // The servings shown. Without a known base it's a multiplier (1 = as written).
 let shownServings = 1;
 let shownBase = null;
-// What Cancel on the notice puts back: { before: the list, or null }, or
-// null when the notice didn't add anything.
+// What Cancel on the notice takes back: the recipe id added to the plan,
+// or null when the notice didn't add anything.
 let undo = null;
 
 // How much the shown servings differ from the recipe as written.
@@ -83,7 +84,10 @@ export function renderRecipe(id) {
     tags.appendChild(chip);
   }
 
-  renderRating(recipe);
+  // Tags fold away behind one small line.
+  tagsFold.hidden = recipe.tags.length === 0;
+  tagsLabel.textContent = recipe.tags.length === 1 ? "1 tag" : recipe.tags.length + " tags";
+  renderPlanToggle();
 
   notesBox.hidden = !recipe.notes;
   notes.textContent = recipe.notes;
@@ -115,7 +119,6 @@ function renderOwner(recipe) {
 
   const mine = canEdit(recipe, getMyName());
   editLink.hidden = !mine;
-  cookedButton.hidden = !mine;
   editLink.href = "#/r/" + encodeURIComponent(recipe.id) + "/edit";
   copyLink.href = "#/copy/" + encodeURIComponent(recipe.id);
 }
@@ -157,22 +160,44 @@ function showAddedNotice(heading, text, undoThis) {
   addedDialog.showModal();
 }
 
-// Adds the ingredients without asking; OK on the notice moves on. Already
-// on the list: nothing is added, so a repeat doesn't double the amounts.
+export function renderPlanToggle() {
+  const planned = plan.hasMeal(currentId);
+  planToggle.classList.toggle("planned", planned);
+  planToggle.setAttribute("aria-pressed", planned ? "true" : "false");
+  planToggleLabel.textContent = planned ? "In plan" : "Add to plan";
+  planToggle.title = planned ? "In the cooking plan: tap to take it out (P)" : "Add to the cooking plan (P)";
+}
+
+function servingsWords(recipe) {
+  return shownFactor(recipe) === 1 && !recipe.servings ? "" : ", " + servingsLabel.textContent + " " + servingsCaption.textContent;
+}
+
+// The Add to plan button: in, or out again.
+export function togglePlan() {
+  const recipe = state.getRecipe(currentId);
+  if (!recipe) {
+    return;
+  }
+  if (plan.hasMeal(recipe.id)) {
+    plan.removeMeal(recipe.id);
+    showToast("Taken out of the plan");
+  } else {
+    plan.addMeal(recipe.id, shownFactor(recipe));
+    showToast("Added to the cooking plan");
+  }
+}
+
+// Swiping right: adds it at the servings shown; OK on the notice moves on.
 export function addAndContinue() {
   const recipe = state.getRecipe(currentId);
   if (!recipe) {
     return;
   }
-  if (ingredientLines(recipe.text).length === 0) {
-    showAddedNotice("Nothing added", "No ingredient list found in " + recipe.title + ".");
-  } else if (shopping.hasRecipe(recipe.id)) {
-    showAddedNotice("Already on the list", recipe.title + " is on the shopping list.");
+  if (plan.hasMeal(recipe.id)) {
+    showAddedNotice("Already in the plan", recipe.title + " is in the cooking plan.");
   } else {
-    const before = shopping.getCurrent();
-    shopping.addRecipes([recipe], "add", shownFactor(recipe));
-    const amount = shownFactor(recipe) === 1 && !recipe.servings ? "" : ", " + servingsLabel.textContent + " " + servingsCaption.textContent;
-    showAddedNotice("Added to the shopping list", recipe.title + amount, { before: before });
+    plan.addMeal(recipe.id, shownFactor(recipe));
+    showAddedNotice("Added to the cooking plan", recipe.title + servingsWords(recipe), recipe.id);
   }
 }
 
@@ -186,29 +211,16 @@ export function swipeRecipe(direction) {
 }
 
 export function initRecipe() {
-  document.getElementById("to-shopping").addEventListener("click", function (event) {
-    event.preventDefault();
-    goToTab("shopping");
-  });
+  planToggle.addEventListener("click", togglePlan);
   addedDialog.addEventListener("close", function () {
     if (addedDialog.returnValue === "ok") {
       showNextRecipe();
     } else if (undo) {
       // Cancel or Esc: a swipe by accident, so it's as if it never happened.
-      shopping.undoAdd(undo.before);
-      showToast("Removed from the shopping list");
+      plan.removeMeal(undo);
+      showToast("Taken out of the plan");
     }
   });
-  cookedButton.addEventListener("click", function () {
-    if (!currentId) {
-      return;
-    }
-    const note = cookedNote(new Date());
-    state.addNote(currentId, note);
-    renderRecipe(currentId);
-    showToast("Added to notes: " + note);
-  });
-
   servingsUp.addEventListener("click", () => changeServings(1));
   servingsDown.addEventListener("click", () => changeServings(-1));
   servingsLabel.addEventListener("click", function () {

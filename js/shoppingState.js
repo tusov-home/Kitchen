@@ -41,7 +41,8 @@ function update(list, changes) {
 
 // recipes: [{ id, title, text, servings }]. mode "new" starts a fresh
 // list (the old one is deleted); "add" adds to the current list.
-// factor scales the amounts (2 = double); it's 1 if left out.
+// factor scales the amounts (2 = double); it's 1 if left out. It can also
+// be a function giving each recipe its own factor.
 export function addRecipes(recipes, mode, factor) {
   const now = Date.now();
   let list = mode === "add" ? getCurrent() : null;
@@ -56,8 +57,10 @@ export function addRecipes(recipes, mode, factor) {
   let items = list.items;
   const listRecipes = Object.assign({}, list.recipes);
   for (const recipe of recipes) {
-    items = addRecipeItems(items, recipe, factor || 1, now);
-    listRecipes[recipe.id] = { title: recipe.title, servings: recipe.servings || null, at: now };
+    const scale = (typeof factor === "function" ? factor(recipe) : factor) || 1;
+    items = addRecipeItems(items, recipe, scale, now);
+    const servings = recipe.servings ? Math.round(recipe.servings * scale * 10) / 10 : null;
+    listRecipes[recipe.id] = { title: recipe.title, servings: servings, at: now };
   }
   // What the pantry says you have goes to "Check you have" instead of
   // being bought again. (Not removed: the pantry doesn't know amounts.)

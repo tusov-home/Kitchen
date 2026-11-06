@@ -71,8 +71,9 @@ above. If a look-only change turns out bigger than expected, say so.
   `apps-script/Code.gs`. Never rename storage keys or fields without a
   migration; old data must keep loading.
 - `Code.gs` is field-agnostic: one Sheet tab per collection (`Recipes`,
-  `shopping`, `pantry`, `pantry-sections`, `projects`), each item stored as
-  JSON. A `chores`
+  `shopping`, `pantry`, `pantry-sections`, `plan`, `projects`), each item
+  stored as JSON. The plan is one item (id `current`) whose meals merge
+  entry by entry. A `chores`
   tab may remain from a removed feature; the app no longer reads it.
   New fields and new collections need **no script change**. If a change
   ever does need it, say so clearly — Tõnis has to paste it by hand.
@@ -98,16 +99,19 @@ above. If a look-only change turns out bigger than expected, say so.
   signature element. Keep everything else quiet: no all-caps labels,
   generous spacing, soft rectangles rather than pills.
 - Recipes page order: today's suggestion → search with + on the right →
-  framed "Meals" and "Sauces & condiments" rows, filling the phone's height
+  framed "Cooking plan" (only with planned meals), "Meals" and "Sauces &
+  condiments" rows, filling the phone's height
   while folded. List and Filter fold behind the open row.
 - Main actions live in a bar at the bottom of every page (`.page-dock`).
   Keep the `interactive-widget=resizes-content` viewport setting: it lifts
   the bars above the phone keyboard.
 - Recipe page: a sheet on top of the recipes page, scrolling by itself
-  (`#view-recipe`, not `window`); bottom dock with servings, Rate, Cooked and Shopping, and a
-  jump bar above it; edit and copy sit by the title. Stars live behind Rate.
+  (`#view-recipe`, not `window`); bottom dock with servings and Add to plan, and a jump bar above
+  it; edit and copy sit by the title, which wraps beside them for one line
+  only. Tags fold away. Rating, "cooked" and notes happen in the plan's
+  review; shopping happens from the plan.
   Pull down from the top closes the recipe. Swipe left = next
-  recipe, swipe right = add to shopping list, then OK = next, Cancel = undo.
+  recipe, swipe right = add to the cooking plan, then OK = next, Cancel = undo.
   Servings live in the dock; no Back button there (phone Back, or tap above
   the sheet).
 - Dialogs and the recipe form must not pop up the phone keyboard on open:

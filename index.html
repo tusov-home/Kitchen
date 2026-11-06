@@ -54,6 +54,12 @@
     </div>
 
     <!-- Everything else stays folded until asked for -->
+    <h2 id="plan-head" class="list-title" hidden>
+      <a id="plan-row" href="#/plan" class="all-toggle plan-row" title="Open the cooking plan (P)">
+        <span>Cooking plan <span id="plan-count" class="hint"></span></span>
+        <svg class="line-icon all-chevron" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9.5 6l6 6-6 6"/></svg>
+      </a>
+    </h2>
     <h2 id="meals-head" class="list-title">
       <button id="meals-toggle" class="all-toggle" type="button" aria-expanded="false" aria-controls="all-panel" title="Show meals (A)">
         <span>Meals <span id="recipe-count" class="hint"></span></span>
@@ -119,6 +125,22 @@
   </main>
 
   <!-- Pantry: what we have at home -->
+  <main id="view-plan" class="view" hidden>
+    <h1 class="page-title">Cooking plan</h1>
+    <div id="plan-empty" class="empty" hidden>
+      <p class="empty-title">No meals planned</p>
+      <p>Open a recipe and swipe it right, or tap <strong>Add to plan</strong>.</p>
+    </div>
+    <section id="plan-shop-section" class="plan-section" hidden>
+      <h2 class="plan-heading">To shop for</h2>
+      <ul id="plan-shop" class="plan-list"></ul>
+    </section>
+    <section id="plan-review-section" class="plan-section" hidden>
+      <h2 class="plan-heading">After cooking</h2>
+      <p class="hint">Tick what you cooked, rate it, and add a note for next time.</p>
+      <ul id="plan-review" class="plan-list"></ul>
+    </section>
+  </main>
   <main id="view-pantry" class="view" hidden>
     <h1 class="page-title">Pantry</h1>
     <p class="hint page-hint">What you have at home. Tap <strong>Have</strong> to mark something Low or Out.</p>
@@ -202,7 +224,10 @@
         <h1 id="recipe-title"></h1>
       </div>
       <p id="recipe-owner" class="owner-line"></p>
-      <div id="recipe-tags" class="tags"></div>
+      <details id="recipe-tags-fold" class="recipe-tags-fold" hidden>
+        <summary id="recipe-tags-label"></summary>
+        <div id="recipe-tags" class="tags"></div>
+      </details>
 
       <section id="recipe-notes-box" class="notes" hidden>
         <h2>Notes</h2>
@@ -329,6 +354,11 @@
     </form>
   </div>
 
+  <div id="plan-dock" class="page-dock">
+    <button id="plan-shop-all" class="primary dock-wide" type="button" hidden></button>
+    <button id="plan-finish" class="primary dock-wide" type="button" hidden>Finish plan</button>
+  </div>
+
   <div id="pantry-dock" class="page-dock">
     <div id="pantry-restock" class="dock-row" hidden>
       <span id="pantry-restock-text" class="dock-note"></span>
@@ -359,16 +389,14 @@
         </div>
         <span id="servings-caption"></span>
       </div>
-      <button id="rate-open" class="dock-button" type="button" title="Rate this recipe (R)"><svg class="line-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 4l2.5 5.2 5.7.8-4.1 4 1 5.7L12 17.2 6.9 19.7l1-5.7-4.1-4 5.7-.8z"/></svg><span id="rate-open-label">Rate</span></button>
-      <button id="cooked-today" class="dock-button" type="button" title="Add today's date to the notes"><svg class="line-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span>Cooked</span></button>
-      <a id="to-shopping" href="#/shopping" class="dock-button" title="Shopping list (L)"><svg class="line-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3.5 10h17l-1.7 8.4a2 2 0 0 1-2 1.6H7.2a2 2 0 0 1-2-1.6z"/><path d="M8 10l3.2-5.5"/><path d="M16 10l-3.2-5.5"/></svg><span>Shopping</span></a>
+      <button id="plan-toggle" class="dock-button dock-plan" type="button" title="Add to the cooking plan (P)"><svg class="line-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="4.5" y="5" width="15" height="15" rx="2"/><path d="M8 3v4M16 3v4M4.5 10h15"/><path id="plan-toggle-mark" d="M12 12.5v5M9.5 15h5"/></svg><span id="plan-toggle-label">Add to plan</span></button>
     </div>
   </nav>
 
   <!-- Shows what letting go of a swipe on a recipe will do -->
   <div id="swipe-hint" class="swipe-hint" aria-hidden="true" hidden></div>
 
-  <!-- Confirms a swipe to the shopping list: OK brings the next recipe, Cancel takes it back -->
+  <!-- Confirms a swipe to the plan: OK brings the next recipe, Cancel takes it back -->
   <dialog id="added-dialog" class="dialog">
     <form method="dialog" class="dialog-body">
       <h2 id="added-title" tabindex="-1" autofocus class="dialog-title"></h2>
@@ -377,19 +405,6 @@
         <span class="spacer"></span>
         <button id="added-cancel" class="button" value="cancel">Cancel</button>
         <button class="primary" value="ok">OK</button>
-      </div>
-    </form>
-  </dialog>
-
-  <!-- Your rating, and everyone's -->
-  <dialog id="rate-dialog" class="dialog">
-    <form method="dialog" class="dialog-body">
-      <h2 id="my-rating-label" tabindex="-1" autofocus class="dialog-title">Your rating</h2>
-      <div id="my-stars" class="stars" role="group" aria-label="Your rating"></div>
-      <p id="all-ratings" class="all-ratings"></p>
-      <div class="actions">
-        <span class="spacer"></span>
-        <button class="button" value="close">Close</button>
       </div>
     </form>
   </dialog>

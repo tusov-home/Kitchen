@@ -17,7 +17,7 @@ let replacing = false;
 
 export function parseRoute(hash) {
   const path = (hash || "").replace(/^#/, "") || "/";
-  if (["/shopping", "/pantry", "/projects"].includes(path)) {
+  if (["/shopping", "/pantry", "/projects", "/plan"].includes(path)) {
     return { screen: path.slice(1), id: null };
   }
   const project = path.match(/^\/project\/([^/]+)$/);
