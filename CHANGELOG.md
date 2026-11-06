@@ -1,5 +1,8 @@
 # Changelog
 
+## 2026-11-06 d
+- Removed the timber from the top bar and tab bar. They are now the same stone as the wall, with a thin line.
+
 ## 2026-11-06 c
 - Pop-up messages are now the same deep leaf green as the main buttons.
 

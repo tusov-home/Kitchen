@@ -1,4 +1,4 @@
-"""Draws the app's material textures with code, so no stock photos or licences are needed."""
+"""Draws the app's stone texture with code, so no stock photos or licences are needed."""
 import sys
 from pathlib import Path
 import numpy as np
@@ -22,36 +22,6 @@ def colour(t, stops):
 
 def save(arr, name, q=72):
     Image.fromarray(np.clip(arr, 0, 255).astype("uint8")).save(OUT / name, quality=q, method=6)
-
-# ---- Timber: long grain, gently wandering, with growth rings ----
-def timber(h, w, stops, plank_h):
-    out = np.zeros((h, w))
-    rows = h // plank_h
-    for r in range(rows):
-        warp = gaussian_filter(rng.standard_normal((plank_h, w)), (14, 90), mode="wrap")
-        warp = warp / warp.std() * 16
-        y = np.arange(plank_h)[:, None] + warp
-        phase = rng.uniform(0, 6)
-        rings = 0.5 + 0.5 * np.sin(y * rng.uniform(0.32, 0.5) + phase + 2.5 * np.sin(y * 0.05 + phase))
-        rings = rings ** 2.2
-        fibre = gaussian_filter(rng.standard_normal((plank_h, w)), (0.55, 34), mode="wrap")
-        fibre = fibre / fibre.std()
-        fine = gaussian_filter(rng.standard_normal((plank_h, w)), (0.4, 8), mode="wrap")
-        fine = fine / fine.std()
-        p = 0.48 + rng.uniform(-0.05, 0.05) + 0.17 * rings + 0.13 * fibre + 0.06 * fine
-        out[r * plank_h:(r + 1) * plank_h] = p
-    img = colour(out, stops)
-    # dark gap and a lit edge between planks
-    for r in range(1, rows):
-        y = r * plank_h
-        img[y - 1:y + 1] *= 0.42
-        img[y + 1:y + 2] *= 1.14
-    return img
-
-CHAR = [(0, (17, 14, 12)), (0.45, (38, 30, 24)), (0.75, (58, 45, 34)), (1, (86, 67, 49))]
-HINOKI = [(0, (150, 116, 80)), (0.45, (190, 156, 116)), (0.75, (209, 179, 139)), (1, (228, 205, 170))]
-save(timber(256, 1024, CHAR, 64), "timber-dark.webp")
-save(timber(256, 1024, HINOKI, 64), "timber-light.webp")
 
 # ---- Stone: soft mottling with fine pits ----
 def stone(stops):

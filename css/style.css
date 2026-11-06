@@ -1585,33 +1585,27 @@ body {
 }
 
 /* ---------- Materials ----------
-   Timber frames the screen, stone carries the content, and deep leaf
-   green marks the main action. Textures are drawn by
+   Stone carries the content and deep leaf green marks the main action.
+   The texture is drawn by
    tools/make_textures.py; each has a light and a dark version. */
 
 :root {
   --stone: url("../textures/stone-light.webp");
-  --timber: url("../textures/timber-light.webp");
-  --timber-shade: rgb(255 248 235 / 0.28);
   --lit-edge: rgb(255 255 255 / 0.7);
   --drop: rgb(52 48 38 / 0.2);
   --niche: rgb(52 48 38 / 0.16);
   --window-light: rgb(255 255 255 / 0.5);
   --wall-glaze: rgb(236 237 231 / 0.45);
-  --on-timber: #4a4235;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     --stone: url("../textures/stone-dark.webp");
-    --timber: url("../textures/timber-dark.webp");
-    --timber-shade: rgb(16 12 9 / 0.25);
     --lit-edge: rgb(255 255 255 / 0.06);
     --drop: rgb(0 0 0 / 0.55);
     --niche: rgb(0 0 0 / 0.5);
     --window-light: rgb(226 224 205 / 0.075);
     --wall-glaze: rgb(28 30 27 / 0.45);
-    --on-timber: #b3ad9f;
   }
 }
 
@@ -1621,21 +1615,12 @@ html {
     var(--bg) var(--stone) center top / 320px;
 }
 
-/* Timber: the top bar and the tab bar */
+/* The top bar and tab bar are the same stone as the wall, with a thin line */
 .topbar,
 .tabbar {
   background:
-    linear-gradient(var(--timber-shade), var(--timber-shade)),
-    var(--timber) center / 512px 128px;
-  border-color: transparent;
-}
-
-.topbar {
-  box-shadow: 0 1px 0 var(--lit-edge) inset, 0 8px 18px -8px var(--drop);
-}
-
-.tabbar {
-  box-shadow: 0 1px 0 var(--lit-edge) inset, 0 -8px 18px -8px var(--drop);
+    linear-gradient(var(--wall-glaze), var(--wall-glaze)),
+    var(--bg) var(--stone) center top / 320px;
 }
 
 /* Stone: raised slabs, lit from above */
@@ -1664,9 +1649,4 @@ html {
 /* Initials keep their own solid ground on the textured panel */
 .owner-initial {
   background: var(--surface);
-}
-
-/* Words on timber */
-.tabbar .tab:not(.active) {
-  color: var(--on-timber);
 }

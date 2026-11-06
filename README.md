@@ -118,8 +118,8 @@ index.html            page structure (all screens and dialogs)
 manifest.webmanifest  app name, icons and colours for installing
 sw.js                 service worker: keeps a copy of the app for offline use
 icons/                app icons (Android, Windows, iPhone, browser tab)
-textures/             timber and stone images, light and dark
-tools/make_textures.py  draws those images with code (needs Python, not used by the app)
+textures/             stone image, light and dark
+tools/make_textures.py  draws that image with code (needs Python, not used by the app)
 js/pwa.js             registers the service worker, shows the Install button
 css/style.css         the look (colour tokens, light + dark)
 js/main.js            starts the app, wires modules together, shows the right screen
@@ -169,7 +169,7 @@ python tests/app_test.py         # browser: Android phone + laptop with keyboard
 
 ## Credits
 
-- Timber and stone textures are drawn by `tools/make_textures.py`, made for this app.
+- The stone texture is drawn by `tools/make_textures.py`, made for this app.
 - Fonts: [Zen Old Mincho](https://github.com/googlefonts/zen-oldmincho) and [Zen Kaku Gothic New](https://github.com/googlefonts/zen-kakugothic) by Yoshimichi Ohira, SIL Open Font License 1.1 (licence files in `fonts/`). Self-hosted: no requests to Google.
 - Icons and the ensō mark: drawn for this app.
 
