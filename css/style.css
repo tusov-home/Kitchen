@@ -1221,8 +1221,8 @@ kbd {
   max-width: calc(100vw - 2rem);
   padding: 0.7rem 1.15rem;
   border-radius: var(--radius);
-  background: var(--text);
-  color: var(--bg);
+  background: var(--primary-bg);
+  color: var(--primary-text);
   font-size: 0.9rem;
   box-shadow: 0 6px 24px rgb(0 0 0 / 0.18);
 }
@@ -1237,7 +1237,7 @@ body.has-tabbar .toast {
   border: none;
   border-radius: 6px;
   background: transparent;
-  color: var(--bg);
+  color: var(--primary-text);
   font: inherit;
   font-weight: 700;
   text-decoration: underline;

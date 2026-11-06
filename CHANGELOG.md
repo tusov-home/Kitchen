@@ -1,5 +1,8 @@
 # Changelog
 
+## 2026-11-06 c
+- Pop-up messages are now the same deep leaf green as the main buttons.
+
 ## 2026-11-06 b
 - Chores are gone. The Home tab is now **Projects** and holds only projects. Old chores stay untouched in the Google Sheet.
 
