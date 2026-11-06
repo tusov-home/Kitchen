@@ -6,7 +6,7 @@ import { normalisePlan, mergePlan, planMeals, stepFactor } from "../js/lib/plan.
 test("a plan from the Sheet is cleaned up", () => {
   assert.equal(normalisePlan({ meals: {} }), null);
   const plan = normalisePlan({ id: "current", meals: { a: { factor: "2", at: 5 }, b: "nonsense" } });
-  assert.deepEqual(plan.meals, { a: { factor: 2, shopped: false, cooked: false, removed: false, at: 5 } });
+  assert.deepEqual(plan.meals, { a: { factor: 2, shopped: false, cooked: false, removed: false, added: 5, at: 5 } });
 });
 
 test("meals merge one by one, the newest version of each winning", () => {
@@ -29,4 +29,9 @@ test("servings step one at a time, or by halves without a number", () => {
   assert.equal(stepFactor(0.25, 4, -1), 0.25);
   assert.equal(stepFactor(1, null, 1), 1.5);
   assert.equal(stepFactor(0.5, null, -1), 0.5);
+});
+
+test("ticking or rating a meal doesn't move it: the order is when it was added", () => {
+  const plan = { meals: { a: { added: 1, at: 50 }, b: { added: 2, at: 3 } } };
+  assert.deepEqual(planMeals(plan).map((m) => m.id), ["a", "b"]);
 });

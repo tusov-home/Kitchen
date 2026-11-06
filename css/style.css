@@ -1825,6 +1825,25 @@ html {
   flex-shrink: 0;
 }
 
+/* A fixed box for the number, so 2 and 12 sit the same between − and + */
+.plan-servings {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.25rem;
+}
+
+.plan-heading-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.plan-heading-row .tag {
+  margin-top: 1rem;
+}
+
 .plan-stepper .step-button {
   background: var(--bg);
 }

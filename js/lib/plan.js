@@ -2,7 +2,8 @@
 // for, then to review once eaten. Pure helpers, no DOM.
 //
 // One shared plan (id "current") with a map of meals by recipe id:
-// { factor, shopped, cooked, removed, at }. Meals are timestamped
+// { factor, shopped, cooked, removed, added, at }. `added` keeps the
+// order: ticking or rating a meal must not move it. Meals are timestamped
 // entries, so both phones can change different meals at the same time.
 // Finishing a plan marks every meal removed; the plan itself stays.
 
@@ -18,6 +19,7 @@ function normaliseMeal(raw) {
     shopped: raw.shopped === true,
     cooked: raw.cooked === true,
     removed: raw.removed === true,
+    added: Number(raw.added) || Number(raw.at) || 0,
     at: Number(raw.at) || 0,
   };
 }
@@ -56,7 +58,7 @@ export function planMeals(plan) {
   return Object.entries(plan.meals)
     .filter(([, meal]) => !meal.removed)
     .map(([id, meal]) => Object.assign({ id: id }, meal))
-    .sort((a, b) => a.at - b.at);
+    .sort((a, b) => (a.added || a.at) - (b.added || b.at));
 }
 
 // One step more (+1) or fewer (-1) servings. With a known number of

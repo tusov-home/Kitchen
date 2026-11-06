@@ -30,7 +30,7 @@ export function hasMeal(id) {
 
 // factor: the servings as shown when adding (2 = double the recipe).
 export function addMeal(id, factor) {
-  setMeal(id, { factor: factor || 1, shopped: false, cooked: false, removed: false });
+  setMeal(id, { factor: factor || 1, shopped: false, cooked: false, removed: false, added: Date.now() });
 }
 
 export function removeMeal(id) {

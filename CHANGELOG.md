@@ -1,5 +1,8 @@
 # Changelog
 
+## 2026-11-06 z
+- Plan: servings numbers no longer overlap the − button. Shopped meals can be taken out (×). Meals keep their place when ticked or rated, and **Hide cooked** folds away the ticked ones.
+
 ## 2026-11-06 y
 - **Cooking plan**: swipe a recipe right (or tap **Add to plan**) to plan it. A **Cooking plan** row appears above Meals. There you set servings, add every recipe to the shopping list in one go, and after eating tick what you cooked, rate it and add notes, then **Finish plan**. Shared between both phones.
 - Recipe page: the bottom bar is now servings and **Add to plan**; rating moved into the plan's review. Tags fold behind one line, and only the title's first line runs beside the edit and copy buttons.

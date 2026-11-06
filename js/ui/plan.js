@@ -2,6 +2,7 @@
 // meals to shop for (servings, remove, "Add to shopping list"), then, once
 // shopped, the review: cooked, your stars and a note, and "Finish plan".
 import * as state from "../state.js";
+import * as storage from "../storage.js";
 import * as plan from "../planState.js";
 import { canEdit, cookedNote } from "../lib/recipes.js";
 import { formatAmount } from "../lib/scale.js";
@@ -18,6 +19,12 @@ const reviewSection = document.getElementById("plan-review-section");
 const reviewList = document.getElementById("plan-review");
 const shopAllButton = document.getElementById("plan-shop-all");
 const finishButton = document.getElementById("plan-finish");
+const hideCookedButton = document.getElementById("plan-hide-cooked");
+
+// Hiding cooked meals is remembered on this phone.
+function hidingCooked() {
+  return storage.loadSettings().planHideCooked === true;
+}
 
 // The row above Meals, shown once the plan has a meal. hide: while searching.
 export function renderPlanRow(hide) {
@@ -58,7 +65,7 @@ function shopRow(meal, meals) {
   const stepper = document.createElement("div");
   stepper.className = "dock-stepper plan-stepper";
   const value = document.createElement("span");
-  value.className = "step-value";
+  value.className = "step-value plan-servings";
   value.textContent = servingsText(meal);
   stepper.append(
     iconButton("step-button", "Fewer servings", "−", () => plan.stepServings(meal.id, -1)),
@@ -140,7 +147,12 @@ function reviewRow(meal, meals) {
     }
   });
   cooked.append(box);
-  top.append(cooked, recipeLink(meal, meals));
+  // Shopped but never cooked: it can still leave the plan.
+  const remove = iconButton("shop-remove", "Take " + meal.recipe.title + " out of the plan", "×", function () {
+    plan.removeMeal(meal.id);
+    showToast("Taken out of the plan");
+  });
+  top.append(cooked, recipeLink(meal, meals), remove);
   row.append(top, stars(meal));
   if (canEdit(meal.recipe, getMyName())) {
     row.append(noteBox(meal));
@@ -157,9 +169,15 @@ export function renderPlan() {
   const typing = reviewList.contains(document.activeElement) && document.activeElement.tagName === "INPUT";
 
   shopList.replaceChildren(...toShop.map((meal) => shopRow(meal, meals)));
+  const hide = hidingCooked();
+  const cookedCount = toReview.filter((meal) => meal.cooked).length;
   if (!typing) {
-    reviewList.replaceChildren(...toReview.map((meal) => reviewRow(meal, meals)));
+    const shown = hide ? toReview.filter((meal) => !meal.cooked) : toReview;
+    reviewList.replaceChildren(...shown.map((meal) => reviewRow(meal, meals)));
   }
+  hideCookedButton.hidden = cookedCount === 0;
+  hideCookedButton.textContent = hide ? "Show cooked (" + cookedCount + ")" : "Hide cooked";
+  hideCookedButton.setAttribute("aria-pressed", hide ? "true" : "false");
   shopSection.hidden = toShop.length === 0;
   reviewSection.hidden = toReview.length === 0;
   empty.hidden = meals.length > 0;
@@ -170,6 +188,10 @@ export function renderPlan() {
 }
 
 export function initPlan() {
+  hideCookedButton.addEventListener("click", function () {
+    storage.saveSettings(Object.assign(storage.loadSettings(), { planHideCooked: !hidingCooked() }));
+    renderPlan();
+  });
   shopAllButton.addEventListener("click", function () {
     const added = plan.shopAll();
     if (added) {
