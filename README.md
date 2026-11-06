@@ -14,7 +14,8 @@ Kitchen lives in the `tusov-home` organization so it has its own web address. Pa
 
 - **Meals and sauces:** every recipe is a **Meal** or a **Sauce or condiment**; choose in the recipe form. The daily suggestion only picks meals; search covers both. Recipes from before this count as meals, and the owner can change the type.
 - **Add a recipe:** copy the recipe from Claude, tap **+** next to the search box, tap the text box and paste. On the laptop, N then Ctrl+V is enough. The first line becomes the title (you can change it). Add tags like `quick, weekend, chicken`.
-- **Find it again:** search by name, tag or ingredient, or tap a tag to filter.
+- **Find it again:** type in the search bar at the bottom of the recipes page (name, tag or ingredient); the results open in a sheet on top while you type. Empty the box, or close the sheet, to go back.
+- **Everything opens the same way:** Meals, Sauces & condiments, search results, the cooking plan and a recipe all open as sheets on top of the recipes page. Close any of them by pulling down from the top, tapping above it, phone Back, or Esc on the laptop. A recipe opened from a list or the plan closes back to that list or plan.
 - **Cook it:** open the recipe. Ticking it as cooked in the plan's review adds the date to the notes; **Edit** lets you change anything and add notes ("less chilli next time").
 - **Servings:** use **− / +** on a recipe to cook for more or fewer people. Ingredient amounts change (highlighted); the method stays as written. The base number comes from "Serves 2" in the text, or set it in **Edit → Servings**. Without it, the stepper multiplies (×½, ×1½, ×2 …).
 - **Owners:** whoever adds a recipe owns it, and only they can edit or delete it. The other person can view and rate it, or tap **Make my copy** to adjust it as their own recipe; the copy links back to the original. This is a household convenience, not real security: it trusts the name each phone is set to, so keep your name the same.
@@ -22,8 +23,8 @@ Kitchen lives in the `tusov-home` organization so it has its own web address. Pa
 - **Pantry categories:** tap **Categories** on the Pantry page (or press C) to add, rename, reorder and remove them; they sync between phones. Removing one moves its items to **Other**, which always stays. To move an item, tap its name.
 - **Pantry:** what you have at home. Tap **Have** to mark something **Low**, again for **Out**. **Add to shopping list** puts everything low or out on the list, and ticking it off while shopping marks it as **Have** again. Shopping lists made from recipes put things you have under **Check you have** (the pantry doesn't know amounts, so they're not removed). Tap a name to rename it, move it to another section or delete it.
 - **Projects:** home improvements with no deadline. **+ Add project**, then add **steps** (tick them off as you go) and **things to buy** (**Add to shopping list** puts them on the shared list; ticking them off there marks them bought). Set the status with 💡 Idea / 🔨 Doing / ✅ Done, and keep measurements or links in **Notes**, which save by themselves. You can both work on the same project at once.
-- **Today's suggestion:** the recipes page opens with one dish to cook today and why it was picked. Below it are the search and two folded rows, **Meals** and **Sauces & condiments**; tap one for its list (or press A or S on the laptop). It changes daily, favours well-rated dishes you haven't cooked lately (it reads the "Cooked …" dates in the notes) and weekend dishes on weekends. The clockwise arrow in its corner shows another idea, and the counterclockwise arrow goes back. The initials in its corner (**T**, **K**) choose whose recipes it picks from: both on means all recipes, and one always stays on. Each phone starts with its own person and remembers your choice, so the two phones can show different dishes.
-- **Owner, tags and sorting:** unfold a row and tap **Filter** (or press F). Tap a name to see only that person's recipes, a tag to narrow down, and **Sort** for Newest, A–Z or Best rated. Each phone remembers its sort order.
+- **Today's suggestion:** the recipes page opens with one dish to cook today and why it was picked. Below it are the rows **Meals** and **Sauces & condiments**; tap one to open its list (or press A or S on the laptop). Search and **+** sit in the bar at the bottom. It changes daily, favours well-rated dishes you haven't cooked lately (it reads the "Cooked …" dates in the notes) and weekend dishes on weekends. The clockwise arrow in its corner shows another idea, and the counterclockwise arrow goes back. The initials in its corner (**T**, **K**) choose whose recipes it picks from: both on means all recipes, and one always stays on. Each phone starts with its own person and remembers your choice, so the two phones can show different dishes.
+- **Owner, tags and sorting:** open a list and tap **Filter** at its top (or press F). Tap a name to see only that person's recipes, a tag to narrow down, and **Sort** for Newest, A–Z or Best rated. Each phone remembers its sort order.
 - **Shopping list:** recipes come from the cooking plan, each at its planned servings. The list groups everything by shop section; tick things off as you buy them, and they fold away under **Ticked**. **Remove ticked** and **Start over** are at the bottom, with the box for adding anything else.
 - **Swipe through recipes:** on an open recipe, swipe left for the next one, or right to add it to the cooking plan; OK on the notice brings the next, and **Cancel** takes it out again. The order follows the list you came from, or today's ideas if you opened the suggestion. Pull down from the top, tap above it, or use Back to return to the list. On the laptop: → and ←.
 - **Cooking plan:** swipe a recipe right, or press P on the laptop. A **Cooking plan** row appears above Meals (P opens it); the plan opens as a sheet over the recipes, and closes like a recipe (pull down, tap above it, Back or Esc). There you set the servings for each meal and tap **Add … to shopping list**. After eating, tick what you cooked, rate it with stars and add a note, then **Finish plan**. The plan is shared between both phones.
@@ -70,9 +71,9 @@ Then in Kitchen: **⚙ → Import from file** and pick `kitchen-recipes.json`. T
 |---|---|---|
 | `N` | Add recipe | list, recipe |
 | `/` | Search | list |
-| `A` | Show / hide meals | list |
-| `S` | Show / hide sauces & condiments | list |
-| `F` | Show / hide filters | list |
+| `A` | Open / close meals | list |
+| `S` | Open / close sauces & condiments | list |
+| `F` | Show / hide filters (opens meals first) | list |
 | `T` / `K` | Suggestions: whose recipes | list |
 | `E` | Edit recipe (your own) | recipe |
 | `C` | Make my copy | recipe |
@@ -146,7 +147,7 @@ js/lib/dates.js       pure helpers: dates and date labels
 js/lib/projects.js    pure helpers: steps and materials, merging, progress, grouping
 js/lib/suggest.js     pure helpers: today's suggestion and why
 js/ui/router.js       which screen belongs to which address (#/r/…)
-js/ui/list.js         recipes page: search, filter panel, the list
+js/ui/list.js         recipes page rows; the meals/sauces/search sheet with filters
 js/ui/suggestion.js   today's suggestion
 js/ui/recipe.js       one recipe, at the planned servings
 js/ui/ask.js          "Are you sure?" questions in the app's style

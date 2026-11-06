@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-11-07 e
+- Recipes page: search and + moved to a bar at the bottom.
+- Meals, Sauces & condiments and search results open as a sheet on top, like the cooking plan and recipes; Filter sits at the top of that sheet.
+- A recipe opened from a list or the plan closes back to that list or plan.
+- Fixed: pressing a key right after Esc could close the next screen too.
+
 ## 2026-11-07 d
 - The cooking plan opens as a sheet over the recipes page, like a recipe: pull it down, tap above it, or press Back or Esc to close it.
 

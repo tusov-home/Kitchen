@@ -1,5 +1,7 @@
 // Which screen is shown is decided by the address after "#":
-//   #/            recipe list
+//   #/            recipes page
+//   #/meals       meals, in a sheet on top (also #/sauces, #/search)
+//   #/plan        the cooking plan, in a sheet on top
 //   #/new         add recipe
 //   #/r/<id>      one recipe
 //   #/r/<id>/edit edit recipe
@@ -19,6 +21,10 @@ export function parseRoute(hash) {
   const path = (hash || "").replace(/^#/, "") || "/";
   if (["/shopping", "/pantry", "/projects", "/plan"].includes(path)) {
     return { screen: path.slice(1), id: null };
+  }
+  const browse = { "/meals": "meal", "/sauces": "sauce", "/search": "search" }[path];
+  if (browse) {
+    return { screen: "browse", id: browse };
   }
   const project = path.match(/^\/project\/([^/]+)$/);
   if (project) {
@@ -77,30 +83,40 @@ export function goBack(fallback) {
   }
 }
 
-// Closing a recipe goes straight to the recipes page, even if the history
-// holds other recipes or the edit form in between: it jumps to where the
-// app started, which is the recipes page unless a link opened something else.
-let closing = false;
+export function getDepth() {
+  return depth;
+}
 
-export function closeToList() {
-  if (depth > 0) {
-    closing = true;
-    history.go(-depth);
+// Closing a sheet jumps back over everything opened on top of it (other
+// recipes, the edit form) in one go: to the recipes page (depth 0, where
+// the app started), or to the sheet under a recipe.
+// closing: null, or { depth, screen, hash } of where the jump should land.
+let closing = null;
+
+export function closeTo(targetDepth, screen, hash) {
+  if (depth > targetDepth) {
+    closing = { screen: screen, hash: hash };
+    history.go(targetDepth - depth);
   } else {
-    go("#/", true);
+    go(hash, true);
   }
 }
 
-// After that jump, if it didn't land on the recipes page: go there.
-// True if the screen needs no drawing.
+export function closeToList() {
+  closeTo(0, "list", "#/");
+}
+
+// After that jump, if it didn't land where it should (a link opened the app
+// somewhere else): go there. True if the screen needs no drawing.
 export function stillClosing(screen) {
   if (!closing) {
     return false;
   }
-  closing = false;
-  if (screen === "list") {
+  const target = closing;
+  closing = null;
+  if (screen === target.screen) {
     return false;
   }
-  go("#/", true);
+  go(target.hash, true);
   return true;
 }

@@ -1,6 +1,6 @@
 // Page icons in the top bar: Recipes · Shopping · Pantry · Projects. Tap a tab, swipe
 // left/right anywhere on a page, or press ← / → on the laptop.
-import { go, goBack, closeToList } from "./router.js";
+import { go, goBack } from "./router.js";
 import * as storage from "../storage.js";
 
 export const TABS = [
@@ -11,7 +11,13 @@ export const TABS = [
 ];
 
 // Pages opened from a tab still light up its tab.
-const BELONGS_TO = { recipe: "list", project: "projects", plan: "list" };
+const BELONGS_TO = { recipe: "list", project: "projects", plan: "list", browse: "list" };
+
+// Sheets lie on top of the recipes page: a list (meals, sauces, search),
+// the cooking plan, and a recipe (which may lie on one of the others).
+export function isSheet(screen) {
+  return screen === "recipe" || screen === "plan" || screen === "browse";
+}
 
 const tabbar = document.getElementById("tabbar");
 const swipeHint = document.getElementById("swipe-hint");
@@ -35,6 +41,11 @@ let getScreen = () => "list";
 let swipeDirection = 0; // -1: came from the left, +1: from the right
 // On a recipe, a swipe doesn't change tabs: this decides what it does.
 let recipeSwipe = () => {};
+// Set by main.js: close() closes the top sheet; landsHome() says whether
+// that shows the recipes page (true) or another sheet still lies under it.
+let sheets = { close: () => {}, landsHome: () => true };
+let closeTimer = null;
+window.addEventListener("hashchange", () => clearTimeout(closeTimer));
 
 export function onRecipeSwipe(handler) {
   recipeSwipe = handler;
@@ -78,7 +89,7 @@ export function goToTab(tabId) {
   if (tabId === "list" || (!isTabScreen(from) && tabOf(from) === tabId)) {
     // Back to Recipes, or from a project page back to its list.
     goBack(target.hash());
-  } else if (from === "recipe" || from === "plan" || (isTabScreen(from) && from !== "list")) {
+  } else if (isSheet(from) || (isTabScreen(from) && from !== "list")) {
     // Leaving a recipe closes it: Back and swiping lead to Recipes, not to it.
     go(target.hash(), true);
   } else {
@@ -108,13 +119,14 @@ export function renderTabs(screen, view) {
       tab.removeAttribute("aria-current");
     }
   }
-  document.body.classList.remove("sheet-closing");
+  document.body.classList.remove("shade-out");
   // Undo any finger-drag position left on the pages.
   for (const page of document.querySelectorAll(".view")) {
     page.style.willChange = "";
     page.style.transform = "";
     page.style.opacity = "";
     page.style.transition = "";
+    page.classList.remove("sheet-closing");
     // A leftover slide class would replay whenever the page reappears.
     page.classList.remove("slide-from-right", "slide-from-left");
   }
@@ -142,7 +154,7 @@ function blocksSwipe(target) {
 }
 
 function canSwipe(screen) {
-  return isTabScreen(screen) || screen === "recipe" || screen === "plan";
+  return isTabScreen(screen) || isSheet(screen);
 }
 
 // While dragging a recipe: what letting go will do.
@@ -172,17 +184,23 @@ function dragDown(view, dy) {
   view.style.transform = "translate3d(0, " + dy * 0.6 + "px, 0)";
 }
 
-// The sheet (a recipe or the cooking plan) sinks away, then it closes.
+// The top sheet sinks away, then it closes. The shade behind it only fades
+// when the recipes page comes back.
 export function closeRecipeSheet() {
   if (reduceMotion.matches) {
-    closeToList();
+    sheets.close();
     return;
   }
   const view = currentView();
   view.style.transform = "";
   view.style.transition = "";
-  document.body.classList.add("sheet-closing");
-  setTimeout(closeToList, 200);
+  view.classList.add("sheet-closing");
+  if (sheets.landsHome()) {
+    document.body.classList.add("shade-out");
+  }
+  // Any screen change meanwhile (a quick key press, say) cancels it.
+  clearTimeout(closeTimer);
+  closeTimer = setTimeout(sheets.close, 200);
 }
 
 function currentView() {
@@ -272,8 +290,7 @@ function initSwipe() {
       return;
     }
     const now = Date.now();
-    const sheet = getScreen() === "recipe" || getScreen() === "plan";
-    const atTop = sheet && currentView().scrollTop <= 0;
+    const atTop = isSheet(getScreen()) && currentView().scrollTop <= 0;
     drag = { x: touch.clientX, y: touch.clientY, axis: null, view: currentView(), lastX: touch.clientX, lastTime: now, speed: 0, atTop: atTop };
   }, { passive: true });
 
@@ -291,8 +308,8 @@ function initSwipe() {
       // Mostly sideways: a page swipe. Down from the top of a recipe: close
       // it. Otherwise: an ordinary scroll.
       if (Math.abs(dx) > Math.abs(dy) * 1.2) {
-        // The plan has no neighbours to swipe to.
-        drag.axis = getScreen() === "plan" ? "none" : "x";
+        // Only recipes and tab pages have neighbours to swipe to.
+        drag.axis = getScreen() === "plan" || getScreen() === "browse" ? "none" : "x";
       } else {
         drag.axis = drag.atTop && dy > 0 ? "down" : "y";
       }
@@ -376,8 +393,10 @@ function initSwipe() {
 }
 
 // screenGetter: returns the current screen name.
-export function initTabs(screenGetter) {
+// sheetControl: { close, landsHome } (see "sheets" above).
+export function initTabs(screenGetter, sheetControl) {
   getScreen = screenGetter;
+  sheets = sheetControl;
   for (const tab of tabbar.querySelectorAll(".tab")) {
     tab.addEventListener("click", function (event) {
       event.preventDefault();

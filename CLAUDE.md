@@ -98,14 +98,17 @@ above. If a look-only change turns out bigger than expected, say so.
 - The brushed ensō (`icons/enso-mark.png`, used as a CSS mask) is the one
   signature element. Keep everything else quiet: no all-caps labels,
   generous spacing, soft rectangles rather than pills.
-- Recipes page order: today's suggestion → search with + on the right →
-  framed "Cooking plan" (only with planned meals), "Meals" and "Sauces &
-  condiments" rows, filling the phone's height
-  while folded. List and Filter fold behind the open row.
+- Recipes page order: today's suggestion → "Cooking plan" row (only with
+  planned meals) → "Meals" and "Sauces & condiments" rows, filling the
+  phone's height; search and + in the bottom bar (`#list-dock`).
+- Everything opens the same way, as a sheet on top of the recipes page:
+  Meals, Sauces and search results (one sheet, `#view-browse`, addresses
+  `#/meals`, `#/sauces`, `#/search`, Filter at its top), the plan, a recipe.
+  A recipe lies on the sheet it came from and closes back to it (`under` in
+  `main.js`). Closing: pull down, tap above, Back, Esc.
 - Main actions live in a bar at the bottom of every page (`.page-dock`).
   Keep the `interactive-widget=resizes-content` viewport setting: it lifts
   the bars above the phone keyboard.
-- The cooking plan is a sheet on top of the recipes page too (same look, pull down to close, no sideways swipe).
 - Recipe page: a sheet on top of the recipes page, scrolling by itself
   (`#view-recipe`, not `window`); bottom bar with only the jump bar (hidden when it has nothing); edit and copy sit by the title, which wraps beside them for one line
   only. Tags fold away. Rating, "cooked" and notes happen in the plan's

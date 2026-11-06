@@ -2,11 +2,11 @@
 // "where" says on which screen a shortcut works: list, recipe, edit or any.
 // "whileTyping: true" means it also works inside text boxes.
 const SHORTCUTS = [
-  { keys: "n", label: "N", action: "addRecipe", where: ["list", "recipe"], text: "Add recipe" },
-  { keys: "/", label: "/", action: "focusSearch", where: ["list"], text: "Search" },
-  { keys: "a", label: "A", action: "toggleMeals", where: ["list"], text: "Show / hide meals" },
-  { keys: "s", label: "S", action: "toggleSauces", where: ["list"], text: "Show / hide sauces & condiments" },
-  { keys: "f", label: "F", action: "toggleFilters", where: ["list"], text: "Show / hide filters" },
+  { keys: "n", label: "N", action: "addRecipe", where: ["list", "browse", "recipe"], text: "Add recipe" },
+  { keys: "/", label: "/", action: "focusSearch", where: ["list", "browse"], text: "Search" },
+  { keys: "a", label: "A", action: "toggleMeals", where: ["list", "browse"], text: "Open / close meals" },
+  { keys: "s", label: "S", action: "toggleSauces", where: ["list", "browse"], text: "Open / close sauces & condiments" },
+  { keys: "f", label: "F", action: "toggleFilters", where: ["list", "browse"], text: "Show / hide filters" },
   { keys: "t", label: "T / K", action: "suggestT", where: ["list"], text: "Suggestions: whose recipes" },
   { keys: "k", action: "suggestK", where: ["list"] },
   { keys: "e", label: "E", action: "editRecipe", where: ["recipe"], text: "Edit recipe (your own)" },
@@ -14,18 +14,18 @@ const SHORTCUTS = [
   { keys: "arrowright", label: "→", action: "nextRecipe", where: ["recipe"], text: "Next recipe" },
   { keys: "arrowleft", label: "←", action: "addAndNext", where: ["recipe"], text: "Add to the plan, then next" },
   { keys: "p", label: "P", action: "togglePlan", where: ["recipe"], text: "Add to / take out of the plan" },
-  { keys: "p", action: "openPlan", where: ["list"] },
+  { keys: "p", action: "openPlan", where: ["list", "browse"] },
   { keys: "i", label: "I", action: "jumpIngredients", where: ["recipe"], text: "Jump to ingredients" },
   { keys: "m", label: "M", action: "jumpMethod", where: ["recipe"], text: "Jump to method" },
   { keys: "ctrl+s", label: "Ctrl+S", action: "save", where: ["edit"], whileTyping: true, text: "Save recipe" },
-  { keys: "escape", label: "Esc", action: "back", where: ["list", "recipe", "plan", "edit", "shopping", "pantry", "projects", "project"], whileTyping: true, text: "Back / cancel" },
+  { keys: "escape", label: "Esc", action: "back", where: ["list", "browse", "recipe", "plan", "edit", "shopping", "pantry", "projects", "project"], whileTyping: true, text: "Back / cancel" },
   { keys: "arrowleft", label: "← / →", action: "previousTab", where: ["list", "shopping", "pantry", "projects"], text: "Previous / next page" },
   { keys: "arrowright", action: "nextTab", where: ["list", "shopping", "pantry", "projects"] },
   { keys: "n", label: "N", action: "focusPantryAdd", where: ["pantry"], text: "Pantry: add an item" },
   { keys: "c", label: "C", action: "openSections", where: ["pantry"], text: "Pantry: edit categories" },
   { keys: "n", label: "N", action: "addProject", where: ["projects"], text: "Projects: add a project" },
   { keys: "e", label: "E", action: "editProject", where: ["project"], text: "Project: edit" },
-  { keys: "l", label: "L", action: "openShopping", where: ["list", "recipe"], text: "Open shopping list" },
+  { keys: "l", label: "L", action: "openShopping", where: ["list", "browse", "recipe"], text: "Open shopping list" },
   { keys: "?", label: "?", action: "showHelp", where: ["any"], text: "Show this list" },
 ];
 

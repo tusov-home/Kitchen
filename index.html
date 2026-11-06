@@ -44,16 +44,13 @@
       </div>
     </section>
 
-    <!-- Second: search, and adding a recipe -->
-    <div class="search-row">
-      <label class="search-box">
-        <svg class="line-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg>
-        <input id="search" class="search" type="search" placeholder="Recipe or ingredient" aria-label="Search recipes" title="Search (/)">
-      </label>
-      <button id="add-recipe" class="icon-button add-button" type="button" title="Add recipe (N)" aria-label="Add recipe"><svg class="line-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 5v14M5 12h14"/></svg></button>
+    <!-- A new recipe book: how to add the first recipe -->
+    <div id="welcome" class="empty" hidden>
+      <p class="empty-title">No recipes yet</p>
+      <p>When a recipe in Claude is just how you want it, copy it and tap <strong>+</strong> next to the search box below.</p>
     </div>
 
-    <!-- Everything else stays folded until asked for -->
+    <!-- Everything else opens as a sheet on top -->
     <h2 id="plan-head" class="list-title" hidden>
       <a id="plan-row" href="#/plan" class="all-toggle plan-row" title="Open the cooking plan (P)">
         <span>Cooking plan <span id="plan-count" class="hint"></span></span>
@@ -61,23 +58,26 @@
       </a>
     </h2>
     <h2 id="meals-head" class="list-title">
-      <button id="meals-toggle" class="all-toggle" type="button" aria-expanded="false" aria-controls="all-panel" title="Show meals (A)">
+      <a id="meals-toggle" href="#/meals" class="all-toggle" title="Open meals (A)">
         <span>Meals <span id="recipe-count" class="hint"></span></span>
-        <svg class="line-icon all-chevron" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 9.5l6 6 6-6"/></svg>
-      </button>
+        <svg class="line-icon all-chevron" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9.5 6l6 6-6 6"/></svg>
+      </a>
     </h2>
     <h2 id="sauces-head" class="list-title">
-      <button id="sauces-toggle" class="all-toggle" type="button" aria-expanded="false" aria-controls="all-panel" title="Show sauces and condiments (S)">
+      <a id="sauces-toggle" href="#/sauces" class="all-toggle" title="Open sauces and condiments (S)">
         <span>Sauces &amp; condiments <span id="sauce-count" class="hint"></span></span>
-        <svg class="line-icon all-chevron" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 9.5l6 6 6-6"/></svg>
-      </button>
+        <svg class="line-icon all-chevron" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9.5 6l6 6-6 6"/></svg>
+      </a>
     </h2>
+  </main>
 
-    <div id="all-panel" hidden>
-    <div class="list-tools">
+  <!-- Meals, sauces or search results: a sheet on top of the recipes page -->
+  <main id="view-browse" class="view" hidden>
+    <div class="browse-head">
+      <h1 id="browse-title" class="page-title">Meals</h1>
       <button id="filter-toggle" class="text-button" type="button" aria-expanded="false" aria-controls="filter-panel" title="Filter and sort (F)">Filter</button>
     </div>
-
+    <div id="all-panel">
     <div id="filter-panel" class="filter-panel" hidden>
       <div class="view-tools">
         <div id="owner-filter" class="owner-filter" role="group" aria-label="Show recipes by"></div>
@@ -98,8 +98,6 @@
     </div>
     <p id="no-results" class="empty" hidden>No recipes match your search.</p>
     </div>
-
-    <!-- Shown while picking recipes for the shopping list -->
   </main>
 
   <!-- Shopping list -->
@@ -347,6 +345,17 @@
   </dialog>
 
   <!-- Each page's actions, in thumb reach -->
+  <!-- The recipes page: search and adding a recipe, in thumb reach -->
+  <div id="list-dock" class="page-dock">
+    <div class="search-row">
+      <label class="search-box">
+        <svg class="line-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg>
+        <input id="search" class="search" type="search" placeholder="Recipe or ingredient" aria-label="Search recipes" title="Search (/)" enterkeyhint="search">
+      </label>
+      <button id="add-recipe" class="icon-button add-button" type="button" title="Add recipe (N)" aria-label="Add recipe"><svg class="line-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 5v14M5 12h14"/></svg></button>
+    </div>
+  </div>
+
   <div id="shop-dock" class="page-dock">
     <div id="shop-footer" class="dock-row">
       <button id="shop-remove-ticked" class="button" type="button">Remove ticked</button>

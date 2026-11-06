@@ -1,6 +1,7 @@
-// The recipes page: today's suggestion, search, and two folded rows,
-// Meals and Sauces & condiments. One panel holds the list and its filters,
-// and sits under whichever row is open.
+// The recipes page: today's suggestion and the rows Cooking plan, Meals and
+// Sauces & condiments, with search and + in the bottom bar. Meals, sauces
+// and search results open in one sheet on top (#view-browse), which holds
+// the list and its filters.
 import * as state from "../state.js";
 import * as storage from "../storage.js";
 import { visibleRecipes, allTags, allOwners, averageRating, kindOf } from "../lib/recipes.js";
@@ -20,15 +21,13 @@ const filterToggle = document.getElementById("filter-toggle");
 const filterPanel = document.getElementById("filter-panel");
 const recipeCount = document.getElementById("recipe-count");
 const sauceCount = document.getElementById("sauce-count");
+const browseTitle = document.getElementById("browse-title");
+const welcome = document.getElementById("welcome");
 const mealsHead = document.getElementById("meals-head");
 const saucesHead = document.getElementById("sauces-head");
-const mealsToggle = document.getElementById("meals-toggle");
-const saucesToggle = document.getElementById("sauces-toggle");
-const allPanel = document.getElementById("all-panel");
 
-// Which row is open: "meal", "sauce" or "" for neither. Folded on every
-// app start, so the page opens on today's suggestion.
-let openKind = "";
+// What the sheet shows: "meal", "sauce" or "search". Set by the address.
+let openKind = "meal";
 let filterOpen = false;
 
 let activeTag = "";
@@ -71,10 +70,10 @@ function tagChip(tag, selected, onClick) {
 export function renderList() {
   const all = state.getRecipes();
   const meals = all.filter((recipe) => kindOf(recipe) === "meal");
-  // Searching looks through everything, so do without the rows.
-  // With no recipes at all, the panel explains how to add the first one.
-  const everything = Boolean(searchInput.value.trim()) || all.length === 0;
-  const pool = everything ? all : all.filter((recipe) => kindOf(recipe) === (openKind || "meal"));
+  // Searching looks through everything, meals and sauces.
+  const searching = Boolean(searchInput.value.trim()) || openKind === "search";
+  const everything = searching || all.length === 0;
+  const pool = everything ? all : all.filter((recipe) => kindOf(recipe) === openKind);
   const tags = allTags(pool);
   if (!tags.includes(activeTag)) {
     activeTag = "";
@@ -155,11 +154,11 @@ export function renderList() {
   noResults.hidden = all.length === 0 || shown.length > 0;
   noResults.textContent = pool.length === 0 ? "No sauces or condiments yet. Tap + to add one." : "No recipes match your search.";
 
-  // How many in each row; the open one can show e.g. "4 of 21".
+  // How many in each row.
   const sauces = all.length - meals.length;
-  const filtered = openKind && shown.length < pool.length ? shown.length + " of " : "";
-  recipeCount.textContent = (openKind !== "sauce" ? filtered : "") + meals.length;
-  sauceCount.textContent = (openKind === "sauce" ? filtered : "") + sauces;
+  recipeCount.textContent = String(meals.length);
+  sauceCount.textContent = String(sauces);
+  browseTitle.textContent = searching ? "Search" : openKind === "sauce" ? "Sauces & condiments" : "Meals";
 
   // Filter panel: open on request; it also stays open while a filter is
   // active, so a hidden filter never makes recipes seem to disappear.
@@ -169,47 +168,42 @@ export function renderList() {
   filterToggle.textContent = activeFilters ? "Filter (" + activeFilters + ")" : "Filter";
   filterToggle.setAttribute("aria-expanded", filterPanel.hidden ? "false" : "true");
 
-  // The rows, and the panel under the open one.
-  renderPlanRow(everything);
-  mealsHead.hidden = everything;
-  saucesHead.hidden = everything;
-  allPanel.hidden = !(openKind || everything);
-  const anchor = openKind === "meal" && !everything ? mealsHead : saucesHead;
-  if (anchor.nextElementSibling !== allPanel) {
-    anchor.after(allPanel);
-  }
-  renderRow(mealsToggle, "meal", "meals", "A");
-  renderRow(saucesToggle, "sauce", "sauces and condiments", "S");
-
-  // The suggestion steps aside while you search.
-  renderSuggestion(meals, !searchInput.value.trim());
+  // A new recipe book: no rows yet, just how to add the first recipe.
+  welcome.hidden = all.length > 0;
+  mealsHead.hidden = all.length === 0;
+  saucesHead.hidden = all.length === 0;
+  renderPlanRow(false);
+  renderSuggestion(meals, true);
 }
 
-function renderRow(toggle, kind, words, key) {
-  const open = openKind === kind;
-  toggle.setAttribute("aria-expanded", open ? "true" : "false");
-  toggle.title = (open ? "Hide " : "Show ") + words + " (" + key + ")";
+// The address decides what the sheet shows: "meal", "sauce" or "search".
+export function setBrowse(kind) {
+  openKind = kind;
 }
 
-// Opens one row, or folds it if it's already open.
-export function toggleKind(kind) {
-  openKind = openKind === kind ? "" : kind;
-  renderList();
-}
-
-// Which row is open, so + can start a recipe of that type.
-export function getOpenKind() {
+export function getBrowse() {
   return openKind;
 }
 
+// + starts a recipe of the type being looked at (meal unless in sauces).
+export function getOpenKind() {
+  return openKind === "sauce" ? "sauce" : "meal";
+}
+
+export function getSearch() {
+  return searchInput.value.trim();
+}
+
+export function clearSearch() {
+  searchInput.value = "";
+}
+
+// F on the recipes page: the filters show when the sheet opens.
+export function openFilters() {
+  filterOpen = true;
+}
+
 export function toggleFilters() {
-  // F while folded: unfold first, so the filters can be seen.
-  if (allPanel.hidden) {
-    openKind = "meal";
-    filterOpen = true;
-    renderList();
-    return;
-  }
   filterOpen = filterPanel.hidden;
   if (!filterOpen) {
     // Closing also clears the filters, so nothing stays hidden.
@@ -225,11 +219,19 @@ export function focusSearch() {
   searchInput.select();
 }
 
-export function initList() {
+// onSearch: called on every change of the search text, after the redraw.
+export function initList(onSearch) {
   initSuggestion();
-  searchInput.addEventListener("input", renderList);
-  mealsToggle.addEventListener("click", () => toggleKind("meal"));
-  saucesToggle.addEventListener("click", () => toggleKind("sauce"));
+  searchInput.addEventListener("input", function () {
+    renderList();
+    onSearch(searchInput.value.trim());
+  });
+  // Enter closes the phone keyboard, so the results can be seen.
+  searchInput.addEventListener("keydown", function (event) {
+    if (event.key === "Enter") {
+      searchInput.blur();
+    }
+  });
   filterToggle.addEventListener("click", toggleFilters);
   sortSelect.addEventListener("change", function () {
     sortOrder = sortSelect.value;

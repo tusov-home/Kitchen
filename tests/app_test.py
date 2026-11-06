@@ -107,7 +107,7 @@ def test_phone(p, sheet):
     watch_errors(page, errors)
     page.goto(BASE)
 
-    expect(page.locator("#empty-list")).to_be_visible()
+    expect(page.locator("#welcome")).to_be_visible()
     page.screenshot(path=SHOTS / "phone-1-empty.png")
 
     # Add a recipe by pasting
@@ -210,11 +210,14 @@ def test_phone(p, sheet):
     expect(page.locator("#recipe-scale")).to_be_hidden()
     expect(page.locator("#recipe-body")).to_contain_text("2 aubergines")
 
-    # Phone Back button goes to the list, not back to the form
+    # Phone Back button goes to the meals it was opened from, then home
     page.go_back()
-    expect(page.locator("#view-list")).to_be_visible()
+    expect(page.locator("#view-browse")).to_be_visible()
     expect(page.locator("#view-recipe")).to_be_hidden()
     expect(page.locator(".recipe-card")).to_have_count(1)
+    page.go_back()
+    expect(page.locator("#view-browse")).to_be_hidden()
+    expect(page.locator("#view-list")).to_be_visible()
 
     # Set up sync
     page.click("#open-settings")
@@ -274,6 +277,7 @@ def test_laptop_second_device(p, sheet):
     page.click("#ask-dialog button[value=ok]")
     expect(page.locator("#toast")).to_contain_text("Taken out of the plan")
     page.keyboard.press("Escape")
+    expect(page.locator("#view-recipe")).to_be_hidden()  # back on the meals
     expect(page.locator(".card-stars")).to_have_text("★ 4")
     # Tõnis rates it too, in the plan's review: both ratings are kept
     page.locator(".recipe-card").first.click()
@@ -303,6 +307,7 @@ def test_laptop_second_device(p, sheet):
     assert set(synced) == {"Kadi", "Tõnis"}, synced
 
     # Kadi's recipe is view-only for Tõnis: no Edit, but "Make my copy"
+    show_meals(page)
     page.click(".recipe-card")
     expect(page.locator("#view-recipe")).to_be_visible()
     expect(page.locator("#recipe-owner")).to_have_text("Added by Kadi")
@@ -335,8 +340,10 @@ def test_laptop_second_device(p, sheet):
     # Keyboard: / search, N new, Ctrl+S save, Esc back, E edit, ? help
     page.keyboard.press("/")
     page.keyboard.type("zzz")
+    expect(page.locator("#view-browse")).to_be_visible()  # results open in a sheet
     expect(page.locator("#no-results")).to_be_visible()
     page.fill("#search", "")
+    expect(page.locator("#view-browse")).to_be_hidden()  # empty search: closed again
     page.evaluate("document.activeElement.blur()")  # leave the text box
 
     page.keyboard.press("n")
@@ -376,14 +383,26 @@ def test_laptop_second_device(p, sheet):
     first = page.locator("#suggestion-link").inner_text()
     page.click("#suggestion-next")
     expect(page.locator("#suggestion-link")).not_to_have_text(first)
-    # Search: the suggestion steps aside while typing
+    # Search: results open in a sheet on top, while typing goes on below
     page.keyboard.press("/")
     page.keyboard.type("shak")
-    expect(suggestion).to_be_hidden()
+    expect(page.locator("#view-browse")).to_be_visible()
+    expect(page.locator("#browse-title")).to_have_text("Search")
+    expect(page.locator("#search")).to_be_focused()
     expect(page.locator(".recipe-card")).to_have_count(1)
-    page.fill("#search", "")
+    # A result opens on top of the results; closing it lands back on them
+    page.click(".recipe-card")
+    expect(page.locator("#view-recipe")).to_be_visible()
+    expect(page.locator("#view-browse")).to_be_visible()  # still underneath
+    page.keyboard.press("Escape")
+    expect(page.locator("#view-recipe")).to_be_hidden()
+    expect(page.locator("#view-browse")).to_be_visible()
+    expect(page.locator("#search")).to_have_value("shak")
+    # Esc closes the results, and the search starts empty next time
+    page.keyboard.press("Escape")
+    expect(page.locator("#view-browse")).to_be_hidden()
+    expect(page.locator("#search")).to_have_value("")
     expect(suggestion).to_be_visible()
-    page.evaluate("document.activeElement.blur()")  # leave the text box
     # Open the suggested recipe
     picked = page.locator("#suggestion-link").inner_text()
     page.click("#suggestion")
@@ -393,9 +412,11 @@ def test_laptop_second_device(p, sheet):
     expect(page.locator("#view-list")).to_be_visible()
     expect(page.locator("#view-recipe")).to_be_hidden()
 
-    # Filters are folded away until asked for (F or the Filter button)
+    # Filters are folded away until asked for (F or the Filter button);
+    # F on the recipes page opens the meals with their filters
     expect(page.locator("#filter-panel")).to_be_hidden()
     page.keyboard.press("f")
+    expect(page.locator("#view-browse")).to_be_visible()
     expect(page.locator("#filter-panel")).to_be_visible()
 
     # Tag filter
@@ -419,32 +440,29 @@ def test_laptop_second_device(p, sheet):
     expect(page.locator(".recipe-card-title")).to_have_text(["Beef Shakshuka", "Miso Aubergine with Soba", "Spicy Miso Aubergine"])
     page.select_option("#sort-select", "rating")
     expect(page.locator(".recipe-card-title").first).to_have_text("Miso Aubergine with Soba")
-    page.reload()  # choice is remembered on this device
+    page.reload()  # choice is remembered on this device (the sheet stays open)
     expect(page.locator("#sort-select")).to_have_value("rating")
     expect(page.locator("#filter-panel")).to_be_hidden()  # folded again after reload
-    # "All recipes" is folded on every start: only the suggestion and search
-    panel = page.locator("#all-panel")
+    page.keyboard.press("Escape")
+    panel = page.locator("#view-browse")
     expect(panel).to_be_hidden()
     expect(page.locator("#suggestion")).to_be_visible()
     expect(page.locator("#add-recipe")).to_be_visible()
-    # Searching unfolds it, and clearing the search folds it again
-    page.keyboard.press("/")
-    page.keyboard.type("shak")
-    expect(page.locator(".recipe-card").first).to_be_visible()
-    expect(page.locator("#meals-toggle")).to_be_hidden()
-    page.fill("#search", "")
-    expect(panel).to_be_hidden()
-    page.evaluate("document.activeElement.blur()")  # leave the text box
-    # A shows and hides it; so does a click, for the phone
+    # A opens the meals and closes them again; S switches to sauces
     page.keyboard.press("a")
     expect(panel).to_be_visible()
-    expect(page.locator("#meals-toggle")).to_have_attribute("aria-expanded", "true")
+    expect(page.locator("#browse-title")).to_have_text("Meals")
     page.screenshot(path=SHOTS / "laptop-5-unfolded.png")
-    page.click("#meals-toggle")
+    page.keyboard.press("s")
+    expect(page.locator("#browse-title")).to_have_text("Sauces & condiments")
+    page.keyboard.press("s")
     expect(panel).to_be_hidden()
+    page.click("#meals-toggle")
+    expect(panel).to_be_visible()
+    close_recipe(page)  # a tap above the sheet closes it
     page.screenshot(path=SHOTS / "laptop-6-folded.png")
-    # Folded, the three panels fill the height down to the tab bar
-    gap = page.evaluate("window.innerHeight - document.getElementById('sauces-toggle').getBoundingClientRect().bottom")
+    # The page fills the height down to the search bar at the bottom
+    gap = page.evaluate("document.getElementById('list-dock').getBoundingClientRect().top - document.getElementById('sauces-toggle').getBoundingClientRect().bottom")
     assert 0 < gap < 32, gap
     assert page.evaluate("document.documentElement.scrollHeight <= window.innerHeight")
     # Suggestion initials: starts with this phone's owner (Tõnis)
@@ -473,12 +491,13 @@ def test_laptop_second_device(p, sheet):
     page.keyboard.press("t")
     page.keyboard.press("k")
     expect(page.locator("#suggestion-next")).to_be_enabled()
-    # F from the folded page opens the list with its filters
+    # F from the recipes page opens the list with its filters
     page.keyboard.press("f")
     expect(panel).to_be_visible()
     expect(page.locator("#filter-panel")).to_be_visible()
     page.screenshot(path=SHOTS / "laptop-4-sorted.png")
     page.select_option("#sort-select", "newest")
+    page.keyboard.press("Escape")
 
     # Add two recipes: a list sorted by shop section
     expect(page.locator("#plan-start")).to_have_count(0)
@@ -526,6 +545,7 @@ def test_laptop_second_device(p, sheet):
     go_home(page)
 
     # Delete syncs as well
+    show_meals(page)
     page.click(".recipe-card:has-text('Beef Shakshuka')")
     expect(page.locator("#view-recipe")).to_be_visible()
     expect(page.locator("#recipe-title")).to_have_text("Beef Shakshuka")
@@ -603,24 +623,41 @@ def test_shopping_shared(p, sheet):
     print("shopping shared: ok")
 
 
+SHEETS = "#view-recipe:not([hidden]), #view-plan:not([hidden]), #view-browse:not([hidden])"
+
+
 def close_recipe(page):
-    """Tap above the recipe sheet (or the plan sheet)."""
-    page.locator("#recipe-backdrop").click(position={"x": 5, "y": 3})
-    expect(page.locator("#view-recipe")).to_be_hidden()
-    expect(page.locator("#view-plan")).to_be_hidden()
+    """Tap above the sheets until the recipes page shows: a recipe may lie
+    on the list or plan it was opened from."""
+    for _ in range(3):
+        if page.locator(SHEETS).count() == 0:
+            break
+        page.wait_for_timeout(350)  # an opening sheet may still be moving
+        before = page.evaluate("location.hash")
+        page.locator("#recipe-backdrop").click(position={"x": 5, "y": 3})
+        page.wait_for_function("h => location.hash !== h", arg=before)
+    expect(page.locator(SHEETS)).to_have_count(0)
+
+
+def show_meals(page):
+    """On the recipes page, open the meals sheet (the cards live there)."""
+    if page.locator("#view-browse").is_hidden():
+        page.click("#meals-toggle")
+        expect(page.locator("#view-browse")).to_be_visible()
+        page.wait_for_timeout(350)  # let it finish rising
 
 
 def open_tab(page, name):
     """Tap a page icon, closing a sheet first: it covers the top bar."""
     page.wait_for_timeout(250)  # a screen change may still be under way
-    if page.locator("#view-recipe").is_visible() or page.locator("#view-plan").is_visible():
+    if page.locator(SHEETS).count():
         close_recipe(page)
     page.locator(f".tab[data-tab={name}]").click()
 
 
 def go_home(page):
     page.wait_for_timeout(250)  # a screen change may still be under way
-    if page.locator("#view-recipe").is_visible() or page.locator("#view-plan").is_visible():
+    if page.locator(SHEETS).count():
         close_recipe(page)  # that's home already
     else:
         page.locator(".brand").click()
@@ -633,8 +670,8 @@ def add_to_list(page, name):
     page.goto(BASE + "#/")
     expect(page.locator("#view-list")).to_be_visible()
     expect(page.locator("#view-recipe")).to_be_hidden()
-    if page.locator("#all-panel").is_hidden():
-        page.click("#meals-toggle")
+    page.click("#meals-toggle")
+    expect(page.locator("#view-browse")).to_be_visible()
     page.locator(".recipe-card", has_text=name).first.click()
     expect(page.locator("#view-recipe")).to_be_visible()
     expect(page.locator("#recipe-title")).to_have_text(name)
@@ -1030,7 +1067,7 @@ def test_meals_and_sauces(p):
     watch_errors(page, errors)
     page.goto(BASE)
     # No recipes yet: no rows, just how to add the first one
-    expect(page.locator("#empty-list")).to_be_visible()
+    expect(page.locator("#welcome")).to_be_visible()
     expect(page.locator("#meals-toggle")).to_be_hidden()
     page.click("#add-recipe")
     expect(page.locator("#edit-kind .segment.active")).to_have_text("Meal")
@@ -1040,8 +1077,9 @@ def test_meals_and_sauces(p):
     page.go_back()
     expect(page.locator("#recipe-count")).to_have_text("1")
     expect(page.locator("#sauce-count")).to_have_text("0")
-    # + from the open sauces row starts a sauce
+    # + from the open sauces sheet starts a sauce
     page.click("#sauces-toggle")
+    expect(page.locator("#view-browse")).to_be_visible()
     expect(page.locator("#no-results")).to_contain_text("No sauces or condiments yet")
     page.screenshot(path=SHOTS / "phone-sauces-empty.png")
     page.click("#add-recipe")
@@ -1050,14 +1088,16 @@ def test_meals_and_sauces(p):
     page.click("#edit-form button[type=submit]")
     expect(page.locator("#view-recipe")).to_be_visible()
     page.go_back()
-    # Each row lists only its own kind, and the panel sits under it
+    # Each sheet lists only its own kind
+    expect(page.locator("#view-browse")).to_be_visible()
     expect(page.locator(".recipe-card-title")).to_have_text(["Chilli crisp"])
-    assert page.evaluate("document.getElementById('sauces-head').nextElementSibling.id") == "all-panel"
+    close_recipe(page)
     page.click("#meals-toggle")
     expect(page.locator(".recipe-card-title")).to_have_text(["Miso Aubergine with Soba"])
-    assert page.evaluate("document.getElementById('meals-head').nextElementSibling.id") == "all-panel"
-    page.click("#meals-toggle")
-    expect(page.locator("#all-panel")).to_be_hidden()
+    # Pulling the sheet down from the top closes it, like a recipe
+    page.wait_for_timeout(400)
+    swipe_down(page, 120, 400)
+    expect(page.locator("#view-browse")).to_be_hidden()
     expect(page.locator("#recipe-count")).to_have_text("1")
     expect(page.locator("#sauce-count")).to_have_text("1")
     # The suggestion only picks meals
@@ -1069,6 +1109,7 @@ def test_meals_and_sauces(p):
     expect(page.locator(".recipe-card")).to_have_count(2)
     expect(page.locator(".recipe-card", has_text="Chilli crisp")).to_contain_text("Sauce or condiment")
     page.fill("#search", "")
+    expect(page.locator("#view-browse")).to_be_hidden()
     # Changing the type moves it to the other row, and it survives a reload
     page.click("#sauces-toggle")
     page.click(".recipe-card")
@@ -1322,12 +1363,13 @@ def test_recipe_swipe(p):
     page.locator(".recipe-card", has_text=cards[2]).click()
     expect(title).to_have_text(cards[2])
     page.wait_for_timeout(400)
-    # After the last one: back to the list, with a message
+    # After the last one: back to the list it came from, with a message
     swipe(page, 330, 120)
-    expect(page.locator("#view-list")).to_be_visible()
+    expect(page.locator("#view-browse")).to_be_visible()
     expect(page.locator("#view-recipe")).to_be_hidden()
     expect(page.locator("#toast")).to_contain_text("That was the last recipe")
     # From the suggestion, it goes on through the other ideas
+    close_recipe(page)
     page.reload()
     shown = page.locator("#suggestion-link").inner_text()
     # Undo goes back to the previous idea, and is gone at the first one
