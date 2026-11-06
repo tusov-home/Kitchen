@@ -19,7 +19,6 @@
   --warn: #a9832f;
   --focus: #4f6a8a;       /* aizome indigo */
   --star: #a88b66;
-  --grain: 0.05;
   --surface-glaze: rgb(250 250 246 / 0.72);
   --radius-sm: 10px;
   --radius: 12px;
@@ -48,7 +47,6 @@
     --warn: #d2b06a;
     --focus: #8fa9c9;
     --star: #c4a67e;
-    --grain: 0.07;
     --surface-glaze: rgb(50 54 49 / 0.55);
   }
 }
@@ -69,17 +67,6 @@ body {
   font-size: 1rem;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
-}
-
-/* A faint paper grain over everything, like washi. */
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  opacity: var(--grain);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.5 0 0 0 0 0.5 0 0 0 0 0.45 0 0 0 1.6 -0.35'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
 /* Titles in the brush-like Mincho serif */
@@ -268,11 +255,6 @@ h3,
 
 .button.danger {
   color: var(--danger);
-}
-
-.primary:active,
-.button:active {
-  transform: translateY(1px);
 }
 
 /* ---------- List ---------- */
@@ -1228,23 +1210,25 @@ body.has-tabbar {
 #view-list,
 #view-shopping,
 #view-pantry,
-#view-projects {
+#view-projects,
+#view-recipe {
   touch-action: pan-y pinch-zoom;
 }
 
 /* Page slides in from the side it came from, settling with a tiny bounce */
 @keyframes slide-from-right {
-  from { transform: translateX(40%); opacity: 0; }
+  from { transform: translateX(28%); opacity: 0; }
   to { transform: none; opacity: 1; }
 }
 @keyframes slide-from-left {
-  from { transform: translateX(-40%); opacity: 0; }
+  from { transform: translateX(-28%); opacity: 0; }
   to { transform: none; opacity: 1; }
 }
 .view.slide-from-right,
 .view.slide-from-left {
-  animation-duration: 0.3s;
-  animation-timing-function: cubic-bezier(0.2, 0.9, 0.3, 1.08);
+  animation-duration: 0.26s;
+  animation-timing-function: cubic-bezier(0.22, 0.8, 0.3, 1);
+  will-change: transform, opacity; /* its own layer: the phone just moves it */
 }
 .view.slide-from-right { animation-name: slide-from-right; }
 .view.slide-from-left { animation-name: slide-from-left; }
@@ -1939,4 +1923,95 @@ html:has(#view-recipe:not([hidden])) {
 .suggestion-reason {
   position: static;
   z-index: auto; /* the panel can be a flexbox, where z-index works even without a position */
+}
+
+/* ---------- Pressing things ---------- */
+
+/* No blue flash: a press pushes the thing down instead */
+html {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button,
+a.primary,
+a.button,
+.tab,
+.dock-button,
+.recipe-card {
+  transition: transform 0.12s ease-out, background-color 0.12s ease-out;
+}
+
+button:active:not(:disabled),
+a.primary:active,
+a.button:active,
+.tab:active,
+.dock-button:active {
+  transform: scale(0.94);
+}
+
+/* Bigger things give less */
+.recipe-card:active,
+.all-toggle:active:not(:disabled),
+#project-add:active {
+  transform: scale(0.985);
+}
+
+.suggestion {
+  transition: transform 0.14s ease-out, box-shadow 0.14s ease-out;
+}
+
+/* Pressing the card itself, not one of its buttons */
+.suggestion:has(a.suggestion-title:active),
+.suggestion.pressed {
+  transform: scale(0.97);
+  box-shadow: inset 0 14px 26px -8px var(--niche), inset 0 0 0 1px var(--border);
+}
+
+/* The recipe sheet rises from below, and sinks back when closed */
+@keyframes sheet-up {
+  from { transform: translateY(100%); }
+}
+
+@keyframes shade-in {
+  from { opacity: 0; }
+}
+
+body.sheet-opening #view-recipe,
+body.sheet-opening #recipe-dock {
+  animation: sheet-up 0.32s cubic-bezier(0.22, 0.8, 0.3, 1);
+  will-change: transform;
+}
+
+body.sheet-opening .recipe-backdrop {
+  animation: shade-in 0.32s ease-out;
+}
+
+body.sheet-closing #view-recipe,
+body.sheet-closing #recipe-dock {
+  transform: translateY(100%);
+  transition: transform 0.2s ease-in;
+  will-change: transform;
+}
+
+body.sheet-closing .recipe-backdrop {
+  opacity: 0;
+  transition: opacity 0.2s ease-in;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  button,
+  a.primary,
+  a.button,
+  .tab,
+  .dock-button,
+  .recipe-card,
+  .suggestion {
+    transition: none;
+  }
+
+  body.sheet-opening #view-recipe,
+  body.sheet-opening #recipe-dock,
+  body.sheet-opening .recipe-backdrop {
+    animation: none;
+  }
 }

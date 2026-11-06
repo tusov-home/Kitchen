@@ -108,8 +108,10 @@ export function renderTabs(screen, view) {
       tab.removeAttribute("aria-current");
     }
   }
+  document.body.classList.remove("sheet-closing");
   // Undo any finger-drag position left on the pages.
   for (const page of document.querySelectorAll(".view")) {
+    page.style.willChange = "";
     page.style.transform = "";
     page.style.opacity = "";
     page.style.transition = "";
@@ -159,20 +161,20 @@ function hideHint() {
 // Follows the finger down, a bit slower, as if the page were heavy.
 function dragDown(view, dy) {
   view.style.transition = "none";
-  view.style.transform = "translateY(" + dy * 0.6 + "px)";
-  view.style.opacity = String(1 - Math.min(dy / (CLOSE_PX * 3), 0.6));
+  view.style.transform = "translate3d(0, " + dy * 0.6 + "px, 0)";
 }
 
-function closeRecipe(view) {
-  const finish = closeToList;
+// The sheet sinks away, then the recipe closes.
+export function closeRecipeSheet() {
   if (reduceMotion.matches) {
-    finish();
+    closeToList();
     return;
   }
-  view.style.transition = "transform 0.16s ease-in, opacity 0.16s ease-in";
-  view.style.transform = "translateY(" + window.innerHeight * 0.4 + "px)";
-  view.style.opacity = "0";
-  setTimeout(finish, 170);
+  const view = currentView();
+  view.style.transform = "";
+  view.style.transition = "";
+  document.body.classList.add("sheet-closing");
+  setTimeout(closeToList, 200);
 }
 
 function currentView() {
@@ -180,10 +182,33 @@ function currentView() {
 }
 
 // Moves the page with the finger (dx pixels sideways).
+// Only moves the page, so the phone can slide what it already drew.
 function dragTo(view, dx) {
   view.style.transition = "none";
-  view.style.transform = "translateX(" + dx + "px)";
-  view.style.opacity = String(1 - Math.min(Math.abs(dx) / window.innerWidth, 1) * 0.5);
+  view.style.transform = "translate3d(" + dx + "px, 0, 0)";
+}
+
+// While dragging, the page gets its own layer, and moves at most once per
+// screen refresh however fast the finger reports.
+let nextMove = null;
+
+function moveOnNextFrame(move) {
+  if (nextMove === null) {
+    requestAnimationFrame(function () {
+      const run = nextMove;
+      nextMove = null;
+      if (run) {
+        run();
+      }
+    });
+  }
+  nextMove = move;
+}
+
+function cancelMove() {
+  if (nextMove !== null) {
+    nextMove = () => {};
+  }
 }
 
 // Not far enough: the page springs back into place.
@@ -261,7 +286,9 @@ function initSwipe() {
     if (drag.axis === "down") {
       drag.dy = Math.max(dy, 0);
       if (!reduceMotion.matches) {
-        dragDown(drag.view, drag.dy);
+        const { view, dy: distance } = drag;
+        view.style.willChange = "transform";
+        moveOnNextFrame(() => dragDown(view, distance));
       }
       return;
     }
@@ -279,7 +306,10 @@ function initSwipe() {
       return;
     }
     const direction = dx < 0 ? 1 : -1;
-    dragTo(drag.view, hasNeighbour(direction) ? dx : dx * RUBBER_BAND);
+    const { view } = drag;
+    const distance = hasNeighbour(direction) ? dx : dx * RUBBER_BAND;
+    view.style.willChange = "transform";
+    moveOnNextFrame(() => dragTo(view, distance));
   }, { passive: true });
 
   function release(event, cancelled) {
@@ -288,10 +318,11 @@ function initSwipe() {
     }
     const current = drag;
     drag = null;
+    cancelMove();
     hideHint();
     if (current.axis === "down") {
       if (!cancelled && current.dy > CLOSE_PX) {
-        closeRecipe(current.view);
+        closeRecipeSheet();
       } else {
         springBack(current.view);
       }

@@ -637,8 +637,9 @@ def test_pantry_tabs(p, sheet):
 
     # The page follows the finger while it's down
     swipe(page, 300, 200, lift=False)
+    page.wait_for_timeout(50)  # moves on the next screen refresh
     moved = page.evaluate("document.getElementById('view-shopping').style.transform")
-    assert moved == "translateX(-100px)", moved
+    assert moved == "translate3d(-100px, 0px, 0px)", moved
     page.evaluate("""() => {
         const t = new Touch({ identifier: 1, target: document.body, clientX: 200, clientY: 400 });
         document.body.dispatchEvent(new TouchEvent("touchend", { touches: [], changedTouches: [t], bubbles: true }));
@@ -670,8 +671,9 @@ def test_pantry_tabs(p, sheet):
     expect(page.locator("#view-recipe")).to_be_hidden()
     # First page: swiping right only stretches a little, then springs back
     swipe(page, 100, 300, lift=False)
+    page.wait_for_timeout(50)
     stretched = page.evaluate("document.getElementById('view-list').style.transform")
-    assert stretched == "translateX(50px)", stretched
+    assert stretched == "translate3d(50px, 0px, 0px)", stretched
     page.evaluate("""() => {
         const t = new Touch({ identifier: 1, target: document.body, clientX: 300, clientY: 400 });
         document.body.dispatchEvent(new TouchEvent("touchend", { touches: [], changedTouches: [t], bubbles: true }));
@@ -1078,6 +1080,7 @@ def test_recipe_layout(p):
     # The dock shows on the recipe page only
     dock = page.locator("#recipe-dock")
     expect(dock).to_be_visible()
+    page.wait_for_timeout(450)  # the sheet finishes rising
     assert page.evaluate("document.getElementById('recipe-dock').getBoundingClientRect().bottom") == page.evaluate("innerHeight")
     expect(page.locator(".jump-button")).to_have_text(["Notes", "Ingredients", "Method"])
     page.screenshot(path=SHOTS / "phone-recipe-dock.png")

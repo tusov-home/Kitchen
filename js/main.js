@@ -2,7 +2,7 @@
 import { APP_VERSION } from "./version.js";
 import * as state from "./state.js";
 import * as sync from "./sync.js";
-import { parseRoute, trackHistory, go, goBack, closeToList, stillClosing } from "./ui/router.js";
+import { parseRoute, trackHistory, go, goBack, stillClosing } from "./ui/router.js";
 import { toggleSuggestionOwner } from "./ui/suggestion.js";
 import { initList, renderList, focusSearch, toggleKind, toggleFilters } from "./ui/list.js";
 import { initRecipe, renderRecipe, changeServings, canEditCurrent, swipeRecipe, showNextRecipe, addAndContinue } from "./ui/recipe.js";
@@ -16,7 +16,7 @@ import { initShortcuts } from "./ui/shortcuts.js";
 import { initPwa, onInstallAvailable, install } from "./pwa.js";
 import * as shoppingState from "./shoppingState.js";
 import { initShopping, renderShopping, renderCartCount } from "./ui/shopping.js";
-import { initTabs, renderTabs, goToTab, stepTab, onRecipeSwipe } from "./ui/tabs.js";
+import { initTabs, renderTabs, goToTab, stepTab, onRecipeSwipe, closeRecipeSheet } from "./ui/tabs.js";
 import { pantry, pantrySections } from "./pantryState.js";
 import { initPantry, renderPantry, renderPantryBadge, focusPantryAdd } from "./ui/pantry.js";
 import { initPantrySections, openSections } from "./ui/pantrySections.js";
@@ -68,8 +68,14 @@ function route() {
       go("#/", true); // recipe no longer exists
       return;
     }
-    renderList();
+    // Coming from the recipes page, it's already drawn under the sheet.
+    if (cameFrom !== "list") {
+      renderList();
+    }
     views.recipe.scrollTop = 0;
+    if (cameFrom !== "recipe") {
+      playSheetOpening();
+    }
   } else if (current.screen === "edit") {
     const result = openEditor(current.id, current.copyFrom);
     if (result === "locked") {
@@ -95,13 +101,21 @@ function route() {
     }
   } else {
     document.title = "Kitchen";
-    renderList();
+    // Under a closing recipe it's already drawn, and a redraw would stutter.
+    if (cameFrom !== "recipe") {
+      renderList();
+    }
   }
   renderTabs(current.screen, views[current.screen]);
   // The page under a recipe stays where you left it.
   if (current.screen !== "recipe" && !(current.screen === "list" && cameFrom === "recipe")) {
     window.scrollTo(0, 0);
   }
+}
+
+function playSheetOpening() {
+  document.body.classList.add("sheet-opening");
+  setTimeout(() => document.body.classList.remove("sheet-opening"), 340);
 }
 
 // When recipes change (also from the other phone), refresh what's shown.
@@ -168,7 +182,7 @@ document.getElementById("add-recipe").addEventListener("click", function () {
 
 initList();
 initRecipe();
-document.getElementById("recipe-backdrop").addEventListener("click", closeToList);
+document.getElementById("recipe-backdrop").addEventListener("click", closeRecipeSheet);
 onRecipeSwipe(swipeRecipe);
 initRating();
 initRecipeJump();
@@ -220,7 +234,7 @@ initShortcuts(
       } else if (current.screen === "project") {
         document.getElementById("project-back").click();
       } else if (current.screen === "recipe") {
-        closeToList();
+        closeRecipeSheet();
       } else if (current.screen !== "list") {
         goBack("#/");
       }

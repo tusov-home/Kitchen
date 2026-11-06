@@ -147,8 +147,22 @@ function step(by) {
   showChange();
 }
 
+// A quick tap still shows the card being pushed, then the recipe rises.
+function openWithPress(event) {
+  queueFromHere();
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    return;
+  }
+  event.preventDefault();
+  box.classList.add("pressed");
+  setTimeout(function () {
+    box.classList.remove("pressed");
+    location.hash = link.getAttribute("href");
+  }, 130);
+}
+
 export function initSuggestion() {
   previousButton.addEventListener("click", () => step(-1));
-  link.addEventListener("click", queueFromHere);
+  link.addEventListener("click", openWithPress);
   nextButton.addEventListener("click", () => step(1));
 }

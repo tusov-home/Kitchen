@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-06 t
+- Pressing a button or card now pushes it down, instead of a blue flash. The suggestion presses in, then the recipe rises from below and sinks back when closed.
+- Smoother swiping: pages move on their own layer, at most once per screen refresh, and costly effects are gone.
+
 ## 2026-11-06 s
 - An undo arrow next to **Another idea** goes back to the previous suggestion.
 
