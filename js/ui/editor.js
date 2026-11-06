@@ -54,7 +54,9 @@ export function openEditor(id, copyFrom) {
   notesInput.value = start ? start.notes : "";
   deleteButton.hidden = !recipe;
   titleIsAutomatic = !start;
-  textInput.focus();
+  // The heading takes the focus, not the text box: the phone keyboard stays
+  // closed until you tap, and on a laptop Tab goes to the text box.
+  heading.focus();
   return "ok";
 }
 
@@ -91,7 +93,20 @@ export function cancelEditor() {
   goBack(editingId ? "#/r/" + encodeURIComponent(editingId) : "#/");
 }
 
+// N then Ctrl+V on the laptop: pasting with no text box active still lands
+// in the recipe text.
+function pasteIntoRecipe(event) {
+  if (event.target.closest("input, textarea")) {
+    return;
+  }
+  event.preventDefault();
+  textInput.focus();
+  textInput.setRangeText(event.clipboardData.getData("text"), textInput.selectionStart, textInput.selectionEnd, "end");
+  textInput.dispatchEvent(new Event("input", { bubbles: true }));
+}
+
 export function initEditor() {
+  form.addEventListener("paste", pasteIntoRecipe);
   // Fill in the title from the first line, unless the user wrote their own.
   textInput.addEventListener("input", function () {
     if (titleIsAutomatic) {

@@ -157,7 +157,8 @@ h3,
 }
 
 /* The settings heading takes focus on open; no outline needed there. */
-.dialog-title:focus {
+.dialog-title:focus,
+#edit-heading:focus {
   outline: none;
 }
 

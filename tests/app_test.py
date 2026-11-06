@@ -112,6 +112,7 @@ def test_phone(p, sheet):
 
     # Add a recipe by pasting
     page.click("#add-recipe")
+    expect(page.locator("#edit-heading")).to_be_focused()  # keyboard stays closed
     page.fill("#edit-text", RECIPE)
     expect(page.locator("#edit-title")).to_have_value("Miso Aubergine with Soba")
     page.fill("#edit-tags", "Quick, vegetarian")
@@ -256,6 +257,18 @@ def test_laptop_second_device(p, sheet):
 
     page.keyboard.press("n")
     expect(page.locator("#view-edit")).to_be_visible()
+    expect(page.locator("#edit-heading")).to_be_focused()
+    # Ctrl+V straight away lands in the text box and fills in the title
+    page.evaluate("""() => {
+        const data = new DataTransfer();
+        data.setData("text", "Pasted title");
+        document.activeElement.dispatchEvent(new ClipboardEvent("paste", { clipboardData: data, bubbles: true, cancelable: true }));
+    }""")
+    expect(page.locator("#edit-text")).to_have_value("Pasted title")
+    expect(page.locator("#edit-title")).to_have_value("Pasted title")
+    page.fill("#edit-text", "")
+    page.locator("#edit-heading").focus()
+    page.keyboard.press("Tab")  # Tab goes to the text box
     page.keyboard.type("Beef Shakshuka\n\n- 300 g beef mince\n- 4 eggs")
     page.fill("#edit-tags", "weekday")
     page.keyboard.press("Control+s")

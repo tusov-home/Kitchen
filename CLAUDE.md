@@ -82,8 +82,8 @@ explains the app itself (features, files, shortcuts, sync setup).
 - Recipes page order: today's suggestion → search with + on the right →
   framed "All recipes" row, filling the phone's height while folded. List,
   Filter and Plan shopping fold behind that row.
-- Dialogs must not pop up the phone keyboard on open: give the heading
-  `tabindex="-1" autofocus`.
+- Dialogs and the recipe form must not pop up the phone keyboard on open:
+  the heading takes the focus (`tabindex="-1"`), never a text box.
 - Every frequent action gets a keyboard shortcut in `js/ui/shortcuts.js`
   (never while typing, except Esc / Ctrl+S); list them in the README.
 

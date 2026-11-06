@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-06 f
+- Opening the recipe form no longer jumps into the text box, so the phone keyboard stays closed until you tap.
+- On the laptop, N then Ctrl+V still works: pasting lands in the recipe text.
+
 ## 2026-11-06 e
 - The **+** button to add a recipe is back on the recipes page, on the same row as the search box.
 
