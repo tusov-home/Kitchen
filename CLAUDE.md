@@ -105,7 +105,15 @@ above. If a look-only change turns out bigger than expected, say so.
   Meals, Sauces and search results (one sheet, `#view-browse`, addresses
   `#/meals`, `#/sauces`, `#/search`, Filter at its top), the plan, a recipe.
   A recipe lies on the sheet it came from and closes back to it (`under` in
-  `main.js`). Closing: pull down, tap above, Back, Esc.
+  `main.js`). One project is a sheet on top of the projects page. Closing:
+  pull down, tap above, Back, Esc.
+- One width everywhere: `--content-w` and `--gutter` set the edges of pages,
+  sheets and bottom bars alike. Type-in fields in bottom bars use the
+  shopping style (`.shop-add`: plain input + `.button`).
+- Pages, swipeable in this order: Recipes, Shopping, Pantry, Projects,
+  Settings (all icons in the top bar).
+- The suggestion card: tapping anywhere opens the dish; an unusable arrow is
+  hidden. After the plan is shopped for, it steps through planned meals.
 - Main actions live in a bar at the bottom of every page (`.page-dock`).
   Keep the `interactive-widget=resizes-content` viewport setting: it lifts
   the bars above the phone keyboard.

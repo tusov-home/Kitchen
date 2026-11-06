@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-11-07 f
+- One width for everything: pages, sheets and the bars at the bottom share the same edges.
+- The search bar and + look like the shopping list's "Add" field; all bottom bars match.
+- Pantry: the button now says "Restock: add N to shopping", without the green.
+- A project opens as a sheet on top of the projects list (no Back button).
+- Settings is its own page after Projects: swipe to it, or tap its icon, which now matches the others.
+- Once the plan is shopped for, the card on the recipes page steps through the planned meals.
+- The whole suggestion card opens the dish, also between the arrows; a back arrow that can't be used is hidden.
+
 ## 2026-11-07 e
 - Recipes page: search and + moved to a bar at the bottom.
 - Meals, Sauces & condiments and search results open as a sheet on top, like the cooking plan and recipes; Filter sits at the top of that sheet.

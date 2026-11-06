@@ -23,9 +23,9 @@
       <a href="#/shopping" class="tab" data-tab="shopping" title="Shopping list (L)"><span class="tab-icon"><svg class="line-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3.5 10h17l-1.7 8.4a2 2 0 0 1-2 1.6H7.2a2 2 0 0 1-2-1.6z"/><path d="M8 10l3.2-5.5"/><path d="M16 10l-3.2-5.5"/><path d="M9 13.5v3.5M12 13.5v3.5M15 13.5v3.5"/></svg></span><span class="tab-label">Shopping</span><span id="cart-count" class="tab-badge" hidden></span></a>
       <a href="#/pantry" class="tab" data-tab="pantry" title="Pantry"><span class="tab-icon"><svg class="line-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M8.5 3.5h7v3h-7z"/><path d="M7.5 6.5h9a1.5 1.5 0 0 1 1.5 1.5v10.5a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V8a1.5 1.5 0 0 1 1.5-1.5z"/><path d="M9.5 12.5h5"/></svg></span><span class="tab-label">Pantry</span><span id="pantry-count" class="tab-badge" hidden></span></a>
       <a href="#/projects" class="tab" data-tab="projects" title="Projects"><span class="tab-icon"><svg class="line-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3.5 11.2 12 4.5l8.5 6.7"/><path d="M5.8 9.5v10.5h12.4V9.5"/><path d="M10 20v-5.5h4V20"/></svg></span><span class="tab-label">Projects</span></a>
+      <a href="#/settings" class="tab" data-tab="settings" title="Settings and sync"><span class="tab-icon"><svg class="line-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 7.5h9M19 7.5h1M4 16.5h3M13 16.5h7"/><circle cx="16" cy="7.5" r="2.2"/><circle cx="10" cy="16.5" r="2.2"/></svg></span><span class="tab-label">Settings</span></a>
     </nav>
     <button id="install-app" class="button small" type="button" title="Install Kitchen as an app" hidden>Install app</button>
-    <button id="open-settings" class="icon-button" type="button" title="Settings and sync" aria-label="Settings and sync"><svg class="line-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 7.5h9M19 7.5h1M4 16.5h3M13 16.5h7"/><circle cx="16" cy="7.5" r="2.2"/><circle cx="10" cy="16.5" r="2.2"/></svg></button>
   </header>
 
   <!-- List of recipes -->
@@ -175,12 +175,10 @@
 
   <!-- One project -->
   <main id="view-project" class="view" hidden>
-    <div class="actions">
-      <a href="#/projects" class="button" id="project-back" title="Back (Esc)">← Projects</a>
-      <span class="spacer"></span>
+    <div class="project-head">
+      <h1 id="project-title" class="page-title"></h1>
       <button id="project-edit" class="button" type="button" title="Edit (E)">Edit</button>
     </div>
-    <h1 id="project-title" class="page-title"></h1>
     <p id="project-meta" class="shop-recipes"></p>
 
     <div id="project-status" class="segmented status-switch" role="group" aria-label="Status">
@@ -212,6 +210,40 @@
       <h2>Notes <span class="hint">measurements, links, ideas — saved automatically</span></h2>
       <textarea id="project-notes" rows="4" aria-label="Notes"></textarea>
     </section>
+  </main>
+
+  <!-- Settings, sync and backup: the last page, swipe left from Projects -->
+  <main id="view-settings" class="view settings-page" hidden>
+    <h1 class="page-title">Settings</h1>
+
+    <h3>This phone</h3>
+    <label for="my-name">Your name <span class="hint">marks your recipes and ratings — keep it the same, or you'll lose editing rights to your recipes</span></label>
+    <input id="my-name" type="text" autocomplete="given-name" placeholder="e.g. Tõnis">
+
+    <h3>Sync with Google Sheet</h3>
+    <p class="hint">Paste the web app link from your Apps Script (see the README for the 10-minute setup). Use the same link on every phone.</p>
+    <label for="sync-url">Web app link</label>
+    <input id="sync-url" type="url" placeholder="https://script.google.com/macros/s/…/exec" autocomplete="off">
+    <div class="actions">
+      <button id="sync-save" class="primary" type="button">Save and sync</button>
+      <button id="sync-now" class="button" type="button">Sync now</button>
+    </div>
+    <p id="settings-sync-status" class="hint" role="status"></p>
+
+    <h3>Backup</h3>
+    <div class="actions">
+      <button id="export-file" class="button" type="button">Export to file</button>
+      <label class="button file-button">
+        Import from file
+        <input id="import-file" type="file" accept="application/json,.json">
+      </label>
+    </div>
+
+    <h3>Privacy</h3>
+    <p class="hint">Recipes are saved on this device. If sync is set up, they are also stored in your own Google Sheet, reached through the web app link: anyone with that link can read and change the recipes, so only share it with each other. Nothing else is sent anywhere, and there is no tracking. To delete everything, delete the recipes here and the Sheet in Google Drive.</p>
+
+    <p class="hint version" id="app-version"></p>
+    <p class="hint version">Fonts: Zen Old Mincho and Zen Kaku Gothic New by Yoshimichi Ohira (SIL Open Font License).</p>
   </main>
 
   <!-- One recipe -->
@@ -276,46 +308,6 @@
     </form>
   </main>
 
-  <!-- Settings, sync and backup -->
-  <dialog id="settings" class="dialog">
-    <form method="dialog" class="dialog-body" id="settings-form">
-      <!-- Focus lands here, not in a text box, so the phone keyboard stays closed -->
-      <h2 tabindex="-1" autofocus class="dialog-title">Settings</h2>
-
-      <h3>This phone</h3>
-      <label for="my-name">Your name <span class="hint">marks your recipes and ratings — keep it the same, or you'll lose editing rights to your recipes</span></label>
-      <input id="my-name" type="text" autocomplete="given-name" placeholder="e.g. Tõnis">
-
-      <h3>Sync with Google Sheet</h3>
-      <p class="hint">Paste the web app link from your Apps Script (see the README for the 10-minute setup). Use the same link on every phone.</p>
-      <label for="sync-url">Web app link</label>
-      <input id="sync-url" type="url" placeholder="https://script.google.com/macros/s/…/exec" autocomplete="off">
-      <div class="actions">
-        <button id="sync-save" class="primary" type="button">Save and sync</button>
-        <button id="sync-now" class="button" type="button">Sync now</button>
-      </div>
-      <p id="settings-sync-status" class="hint" role="status"></p>
-
-      <h3>Backup</h3>
-      <div class="actions">
-        <button id="export-file" class="button" type="button">Export to file</button>
-        <label class="button file-button">
-          Import from file
-          <input id="import-file" type="file" accept="application/json,.json">
-        </label>
-      </div>
-
-      <h3>Privacy</h3>
-      <p class="hint">Recipes are saved on this device. If sync is set up, they are also stored in your own Google Sheet, reached through the web app link: anyone with that link can read and change the recipes, so only share it with each other. Nothing else is sent anywhere, and there is no tracking. To delete everything, delete the recipes here and the Sheet in Google Drive.</p>
-
-      <div class="actions">
-        <span class="spacer"></span>
-        <button class="button" value="close" title="Close (Esc)">Close</button>
-      </div>
-      <p class="hint version" id="app-version"></p>
-      <p class="hint version">Fonts: Zen Old Mincho and Zen Kaku Gothic New by Yoshimichi Ohira (SIL Open Font License).</p>
-    </form>
-  </dialog>
 
   <!-- Keyboard shortcut list, opened with ? -->
   <dialog id="shortcut-help" class="dialog">
@@ -347,12 +339,9 @@
   <!-- Each page's actions, in thumb reach -->
   <!-- The recipes page: search and adding a recipe, in thumb reach -->
   <div id="list-dock" class="page-dock">
-    <div class="search-row">
-      <label class="search-box">
-        <svg class="line-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg>
-        <input id="search" class="search" type="search" placeholder="Recipe or ingredient" aria-label="Search recipes" title="Search (/)" enterkeyhint="search">
-      </label>
-      <button id="add-recipe" class="icon-button add-button" type="button" title="Add recipe (N)" aria-label="Add recipe"><svg class="line-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 5v14M5 12h14"/></svg></button>
+    <div class="shop-add search-row">
+      <input id="search" class="search" type="search" placeholder="Search recipes" aria-label="Search recipes" title="Search (/)" enterkeyhint="search" autocomplete="off">
+      <button id="add-recipe" class="button add-button" type="button" title="Add recipe (N)" aria-label="Add recipe"><svg class="line-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 5v14M5 12h14"/></svg></button>
     </div>
   </div>
 
@@ -374,8 +363,7 @@
 
   <div id="pantry-dock" class="page-dock">
     <div id="pantry-restock" class="dock-row" hidden>
-      <span id="pantry-restock-text" class="dock-note"></span>
-      <button id="pantry-to-shopping" class="primary" type="button">Add to shopping list</button>
+      <button id="pantry-to-shopping" class="button dock-wide" type="button" title="Put what's low or out on the shopping list"></button>
     </div>
     <form id="pantry-add" class="shop-add">
       <input id="pantry-add-input" type="text" placeholder="Add something, e.g. rice" aria-label="Add to pantry" autocomplete="off">

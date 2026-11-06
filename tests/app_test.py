@@ -181,6 +181,14 @@ def test_phone(p, sheet):
     expect(page.locator("#cart-count")).to_have_text("3")
     expect(page.locator("#plan-shop-section")).to_be_hidden()
     expect(page.locator("#plan-finish")).to_be_visible()
+    # Shopped for: the card on the recipes page shows the planned meal
+    close_recipe(page)
+    expect(page.locator("#suggestion-label")).to_have_text("From the cooking plan: 1 of 1")
+    expect(page.locator("#suggestion-link")).to_have_text("Miso Aubergine with Soba")
+    expect(page.locator("#suggestion-reason")).to_have_text("4 servings")
+    page.screenshot(path=SHOTS / "phone-plan-card.png")
+    page.click("#plan-row")
+    expect(page.locator("#view-plan")).to_be_visible()
     # Review: cooked goes into the notes, stars from 1 to 5
     page.click("#plan-review .plan-cooked input")
     page.locator("#plan-review .star").nth(3).click()
@@ -196,6 +204,8 @@ def test_phone(p, sheet):
     page.click("#plan-finish")
     page.click("#ask-dialog button[value=ok]")
     expect(page.locator("#plan-empty")).to_be_visible()
+    close_recipe(page)
+    expect(page.locator("#suggestion-label")).to_contain_text("Suggestion for")  # daily ideas again
     # Clear the shopping list again, for the laptop's turn
     page.goto(BASE + "#/shopping")
     page.click("#shop-delete")
@@ -219,14 +229,16 @@ def test_phone(p, sheet):
     expect(page.locator("#view-browse")).to_be_hidden()
     expect(page.locator("#view-list")).to_be_visible()
 
-    # Set up sync
-    page.click("#open-settings")
+    # Set up sync: Settings is the last page, in the top bar
+    page.click(".tab[data-tab=settings]")
+    expect(page.locator("#view-settings")).to_be_visible()
     page.fill("#sync-url", SHEET_URL)
     page.click("#sync-save")
     expect(page.locator("#settings-sync-status")).to_contain_text("Synced")
     expect(page.locator("#brand-mark")).to_have_attribute("data-state", "ok")
     page.screenshot(path=SHOTS / "phone-4-settings.png")
     page.keyboard.press("Escape")
+    expect(page.locator("#view-list")).to_be_visible()
     assert len(sheet.recipes) == 1, "recipe reached the Sheet"
 
     # Survives a reload (stored on the device)
@@ -623,7 +635,7 @@ def test_shopping_shared(p, sheet):
     print("shopping shared: ok")
 
 
-SHEETS = "#view-recipe:not([hidden]), #view-plan:not([hidden]), #view-browse:not([hidden])"
+SHEETS = "#view-recipe:not([hidden]), #view-plan:not([hidden]), #view-browse:not([hidden]), #view-project:not([hidden])"
 
 
 def close_recipe(page):
@@ -839,7 +851,7 @@ def test_pantry_tabs(p, sheet):
     page.screenshot(path=SHOTS / "phone-7-pantry.png", full_page=True)
 
     # Low/out → shopping list; buying it restocks the pantry
-    expect(page.locator("#pantry-restock")).to_contain_text("1 low or out")
+    expect(page.locator("#pantry-to-shopping")).to_have_text("Restock: add 1 to shopping")
     page.click("#pantry-to-shopping")
     expect(page.locator("#pantry-restock")).to_be_hidden()
     open_tab(page, "shopping")
@@ -969,7 +981,9 @@ def test_projects(p, sheet):
     page.fill("#project-title-input", "Herb box for the balcony")
     page.select_option("#project-who", "Kadi")
     page.click("#project-form button[value=save]")
-    page.click("#project-back")
+    expect(page.locator("#view-project")).to_be_visible()
+    expect(page.locator("#view-projects")).to_be_visible()  # a sheet on top of the list
+    close_recipe(page)
     expect(page.locator(".project-group.group-idea")).to_contain_text("Herb box for the balcony")
     # Coming back must not replay an old slide animation
     assert page.evaluate("document.getElementById('view-projects').className") == "view", "stale slide class"
@@ -1009,6 +1023,14 @@ def test_projects(p, sheet):
     expect(laptop.locator("#view-projects")).to_be_visible()
     expect(laptop.locator(".project-group.group-done")).to_contain_text("Hang hallway shelf")
     laptop.screenshot(path=SHOTS / "laptop-6-projects.png")
+    # Settings is the page after Projects: → (or a swipe) gets there
+    laptop.goto(BASE + "#/projects")
+    expect(laptop.locator("#view-projects")).to_be_visible()
+    laptop.keyboard.press("ArrowRight")
+    expect(laptop.locator("#view-settings")).to_be_visible()
+    expect(laptop.locator(".tab[data-tab=settings]")).to_have_attribute("aria-current", "page")
+    laptop.keyboard.press("ArrowLeft")
+    expect(laptop.locator("#view-projects")).to_be_visible()
 
     assert not errors, errors
     print("projects: ok")
@@ -1390,15 +1412,15 @@ def test_recipe_swipe(p):
         const r = document.getElementById('suggestion-next').getBoundingClientRect();
         return document.elementFromPoint(r.x + 5, r.y + r.height / 2).id;
     })()""") == "suggestion-next"
-    # Both bottom corners belong to the arrows, even the switched-off one
-    for x_part, expected in (("left + 4", "suggestion-previous"), ("right - 4", "suggestion-next")):
-        hit = page.evaluate(f"""(() => {{
-            const r = document.getElementById('suggestion').getBoundingClientRect();
-            const e = document.elementFromPoint(r.{x_part}, r.bottom - 8);
-            return e.closest('button') ? e.closest('button').id : e.id;
-        }})()""")
-        assert hit == expected, (x_part, hit)
-    page.click("#suggestion")
+    # The switched-off back arrow is hidden; a tap there, or between the
+    # arrows, opens the recipe like the rest of the card
+    expect(page.locator("#suggestion-previous")).to_be_hidden()
+    box = page.locator("#suggestion").bounding_box()
+    page.mouse.click(box["x"] + box["width"] / 2, box["y"] + box["height"] - 20)  # between
+    expect(title).to_have_text(shown)
+    close_recipe(page)
+    page.wait_for_timeout(500)
+    page.mouse.click(box["x"] + 24, box["y"] + box["height"] - 20)  # where "back" would be
     expect(title).to_have_text(shown)
     page.wait_for_timeout(400)
     swipe(page, 330, 120)

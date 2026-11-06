@@ -1,12 +1,11 @@
-// The settings dialog: sync link, backup export/import, privacy.
+// The settings page (the last page, after Projects): your name, sync link,
+// backup export/import, privacy.
 import * as state from "../state.js";
 import * as storage from "../storage.js";
 import * as sync from "../sync.js";
 import { showToast } from "./toast.js";
 import { getMyName, setMyName } from "./name.js";
 
-const dialog = document.getElementById("settings");
-const openButton = document.getElementById("open-settings");
 const urlInput = document.getElementById("sync-url");
 const saveButton = document.getElementById("sync-save");
 const syncNowButton = document.getElementById("sync-now");
@@ -15,10 +14,11 @@ const exportButton = document.getElementById("export-file");
 const importInput = document.getElementById("import-file");
 const nameInput = document.getElementById("my-name");
 
-export function openSettings() {
+// Fills in the page each time it's shown.
+export function renderSettings() {
+  document.title = "Settings · Kitchen";
   urlInput.value = storage.loadSettings().syncUrl;
   nameInput.value = getMyName();
-  dialog.showModal();
 }
 
 export function setSettingsStatus(message) {
@@ -26,8 +26,6 @@ export function setSettingsStatus(message) {
 }
 
 export function initSettings() {
-  openButton.addEventListener("click", openSettings);
-
   // Saved as soon as you leave the box; refresh shows the new name.
   nameInput.addEventListener("change", function () {
     setMyName(nameInput.value);

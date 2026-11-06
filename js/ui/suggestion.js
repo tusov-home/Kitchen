@@ -1,12 +1,16 @@
 // "Today's suggestion" at the top of the recipes page: one recipe to
 // cook, with a short reason. "Another idea" steps through the day's list.
 // The initials in the corner choose whose recipes it picks from.
+// Once the cooking plan is shopped for, the card shows the planned meals
+// instead (still to cook first), and the arrows step through those.
 import * as storage from "../storage.js";
 import { dailySuggestions, activeOwners, toggleOwner, recipesOfOwners, initial } from "../lib/suggest.js";
 import { allOwners } from "../lib/recipes.js";
 import { toDateString } from "../lib/dates.js";
 import { getMyName } from "./name.js";
 import { setQueue } from "./recipeQueue.js";
+import * as plan from "../planState.js";
+import { formatAmount } from "../lib/scale.js";
 
 const box = document.getElementById("suggestion");
 const label = document.getElementById("suggestion-label");
@@ -38,6 +42,45 @@ function saveOffset(today, offset) {
 
 let lastRecipes = [];
 let shownId = "";
+// Which planned meal is shown (this visit only).
+let planOffset = 0;
+
+// The shopped-for meals, the ones still to cook first; none before shopping.
+function plannedMeals() {
+  const shopped = plan.getMeals().filter((meal) => meal.shopped);
+  return [...shopped.filter((meal) => !meal.cooked), ...shopped.filter((meal) => meal.cooked)];
+}
+
+function plannedReason(meal) {
+  const base = meal.recipe.servings;
+  const servings = base ? Math.round(base * meal.factor) + " servings" : "× " + formatAmount(meal.factor);
+  return servings + (meal.cooked ? " · cooked" : "");
+}
+
+// The list the card steps through: [{ recipe, reason }].
+function currentList(recipes, today) {
+  const planned = plannedMeals();
+  if (planned.length) {
+    return planned.map((meal) => ({ recipe: meal.recipe, reason: plannedReason(meal) }));
+  }
+  return todaysList(recipes, today);
+}
+
+function inPlanMode() {
+  return plannedMeals().length > 0;
+}
+
+function getOffset(today) {
+  return inPlanMode() ? planOffset : loadOffset(today);
+}
+
+function setOffset(today, offset) {
+  if (inPlanMode()) {
+    planOffset = offset;
+  } else {
+    saveOffset(today, offset);
+  }
+}
 
 function currentOwners(owners) {
   return activeOwners(owners, storage.loadSettings().suggestOwners, getMyName());
@@ -111,31 +154,44 @@ function showChange() {
 // visible: false while searching, so the list has the stage.
 export function renderSuggestion(recipes, visible) {
   lastRecipes = recipes;
-  box.hidden = !visible || recipes.length === 0;
+  const planMode = inPlanMode();
+  box.hidden = !visible || (recipes.length === 0 && !planMode);
   if (box.hidden) {
     return;
   }
   const now = new Date();
   const today = toDateString(now);
-  renderOwners(recipes);
-  const list = todaysList(recipes, today);
-  const pick = list[loadOffset(today) % list.length];
+  box.classList.toggle("from-plan", planMode);
+  if (planMode) {
+    ownerButtons.hidden = true;
+  } else {
+    renderOwners(recipes);
+  }
+  const list = currentList(recipes, today);
+  const offset = getOffset(today);
+  const pick = list[offset % list.length];
   shownId = pick.recipe.id;
   const href = "#/r/" + encodeURIComponent(pick.recipe.id);
 
-  label.textContent = "Suggestion for " + now.toLocaleDateString("en-GB", { weekday: "long" });
+  label.textContent = planMode
+    ? "From the cooking plan: " + ((offset % list.length) + 1) + " of " + list.length
+    : "Suggestion for " + now.toLocaleDateString("en-GB", { weekday: "long" });
   link.textContent = pick.recipe.title;
   link.href = href;
   reason.textContent = pick.reason;
   reason.hidden = !pick.reason;
-  // Switched off, not removed: its corner keeps catching taps.
+  // Switched off arrows are invisible, and a tap there opens the recipe.
   nextButton.disabled = list.length < 2;
-  previousButton.disabled = list.length < 2 || loadOffset(today) === 0;
+  previousButton.disabled = list.length < 2 || offset === 0;
+  nextButton.title = planMode ? "Next planned meal" : "Another idea";
+  nextButton.setAttribute("aria-label", nextButton.title);
+  previousButton.title = planMode ? "Previous planned meal" : "Back to the previous idea";
+  previousButton.setAttribute("aria-label", previousButton.title);
 }
 
 // Swiping on the recipe goes on through today's other ideas.
 function queueFromHere() {
-  const ids = todaysList(lastRecipes, toDateString(new Date())).map((item) => item.recipe.id);
+  const ids = currentList(lastRecipes, toDateString(new Date())).map((item) => item.recipe.id);
   const start = ids.indexOf(shownId);
   setQueue([...ids.slice(start), ...ids.slice(0, start)]);
 }
@@ -146,7 +202,7 @@ let turning = false;
 function step(by) {
   const today = toDateString(new Date());
   const show = function () {
-    saveOffset(today, Math.max(loadOffset(today) + by, 0));
+    setOffset(today, Math.max(getOffset(today) + by, 0));
     renderSuggestion(lastRecipes, true);
   };
   if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
@@ -197,4 +253,15 @@ export function initSuggestion() {
   previousButton.addEventListener("click", () => step(-1));
   link.addEventListener("click", openWithPress);
   nextButton.addEventListener("click", () => step(1));
+  // The whole card opens the recipe, also the space between the arrows;
+  // only its buttons do something else.
+  box.addEventListener("click", function (event) {
+    if (event.target.closest("button, a")) {
+      return;
+    }
+    openWithPress(event);
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      location.hash = link.getAttribute("href");
+    }
+  });
 }

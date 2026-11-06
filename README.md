@@ -19,11 +19,11 @@ Kitchen lives in the `tusov-home` organization so it has its own web address. Pa
 - **Cook it:** open the recipe. Ticking it as cooked in the plan's review adds the date to the notes; **Edit** lets you change anything and add notes ("less chilli next time").
 - **Servings:** use **− / +** on a recipe to cook for more or fewer people. Ingredient amounts change (highlighted); the method stays as written. The base number comes from "Serves 2" in the text, or set it in **Edit → Servings**. Without it, the stepper multiplies (×½, ×1½, ×2 …).
 - **Owners:** whoever adds a recipe owns it, and only they can edit or delete it. The other person can view and rate it, or tap **Make my copy** to adjust it as their own recipe; the copy links back to the original. This is a household convenience, not real security: it trusts the name each phone is set to, so keep your name the same.
-- **Pages:** the icons in the top bar switch between **Recipes**, **Shopping**, **Pantry** and **Projects**. Swipe left or right to move between them: the page follows your finger, and a short swipe or quick flick is enough (start a little away from the screen edge, which Android uses for Back). The small numbers show what needs attention.
+- **Pages:** the icons in the top bar switch between **Recipes**, **Shopping**, **Pantry**, **Projects** and **Settings**. Swipe left or right to move between them: the page follows your finger, and a short swipe or quick flick is enough (start a little away from the screen edge, which Android uses for Back). The small numbers show what needs attention.
 - **Pantry categories:** tap **Categories** on the Pantry page (or press C) to add, rename, reorder and remove them; they sync between phones. Removing one moves its items to **Other**, which always stays. To move an item, tap its name.
-- **Pantry:** what you have at home. Tap **Have** to mark something **Low**, again for **Out**. **Add to shopping list** puts everything low or out on the list, and ticking it off while shopping marks it as **Have** again. Shopping lists made from recipes put things you have under **Check you have** (the pantry doesn't know amounts, so they're not removed). Tap a name to rename it, move it to another section or delete it.
-- **Projects:** home improvements with no deadline. **+ Add project**, then add **steps** (tick them off as you go) and **things to buy** (**Add to shopping list** puts them on the shared list; ticking them off there marks them bought). Set the status with 💡 Idea / 🔨 Doing / ✅ Done, and keep measurements or links in **Notes**, which save by themselves. You can both work on the same project at once.
-- **Today's suggestion:** the recipes page opens with one dish to cook today and why it was picked. Below it are the rows **Meals** and **Sauces & condiments**; tap one to open its list (or press A or S on the laptop). Search and **+** sit in the bar at the bottom. It changes daily, favours well-rated dishes you haven't cooked lately (it reads the "Cooked …" dates in the notes) and weekend dishes on weekends. The clockwise arrow in its corner shows another idea, and the counterclockwise arrow goes back. The initials in its corner (**T**, **K**) choose whose recipes it picks from: both on means all recipes, and one always stays on. Each phone starts with its own person and remembers your choice, so the two phones can show different dishes.
+- **Pantry:** what you have at home. Tap **Have** to mark something **Low**, again for **Out**. **Restock: add … to shopping** (at the bottom) puts everything low or out on the list, and ticking it off while shopping marks it as **Have** again. Shopping lists made from recipes put things you have under **Check you have** (the pantry doesn't know amounts, so they're not removed). Tap a name to rename it, move it to another section or delete it.
+- **Projects:** home improvements with no deadline. **+ Add project**, then add **steps** (tick them off as you go) and **things to buy** (**Add to shopping list** puts them on the shared list; ticking them off there marks them bought). Set the status with 💡 Idea / 🔨 Doing / ✅ Done, and keep measurements or links in **Notes**, which save by themselves. A project opens as a sheet on top of the list; close it like a recipe (pull down, tap above, Back or Esc). You can both work on the same project at once.
+- **Today's suggestion:** the recipes page opens with one dish to cook today and why it was picked. Below it are the rows **Meals** and **Sauces & condiments**; tap one to open its list (or press A or S on the laptop). Search and **+** sit in the bar at the bottom. It changes daily, favours well-rated dishes you haven't cooked lately (it reads the "Cooked …" dates in the notes) and weekend dishes on weekends. The clockwise arrow in its corner shows another idea, and the counterclockwise arrow goes back. The initials in its corner (**T**, **K**) choose whose recipes it picks from: both on means all recipes, and one always stays on. Each phone starts with its own person and remembers your choice, so the two phones can show different dishes. Tap anywhere on the card to open the dish. Once the cooking plan is shopped for, the card shows the planned meals instead ("From the cooking plan: 1 of 3", still-to-cook first), and the arrows step through them.
 - **Owner, tags and sorting:** open a list and tap **Filter** at its top (or press F). Tap a name to see only that person's recipes, a tag to narrow down, and **Sort** for Newest, A–Z or Best rated. Each phone remembers its sort order.
 - **Shopping list:** recipes come from the cooking plan, each at its planned servings. The list groups everything by shop section; tick things off as you buy them, and they fold away under **Ticked**. **Remove ticked** and **Start over** are at the bottom, with the box for adding anything else.
 - **Swipe through recipes:** on an open recipe, swipe left for the next one, or right to add it to the cooking plan; OK on the notice brings the next, and **Cancel** takes it out again. The order follows the list you came from, or today's ideas if you opened the suggestion. Pull down from the top, tap above it, or use Back to return to the list. On the laptop: → and ←.
@@ -63,7 +63,7 @@ Then make one downloadable file called kitchen-recipes.json with exactly this sh
 Rules: amounts in grams/ml, tbsp/tsp for small amounts; one ingredient per "- " line, starting with the amount; method as numbered steps; tags in lowercase. Before making the file, show me the list of dish names you found so I can remove any I don't want.
 ```
 
-Then in Kitchen: **⚙ → Import from file** and pick `kitchen-recipes.json`. The recipes are owned by whoever's phone imports them. Importing the same file again won't create doubles.
+Then in Kitchen: **Settings (last icon in the top bar) → Import from file** and pick `kitchen-recipes.json`. The recipes are owned by whoever's phone imports them. Importing the same file again won't create doubles.
 
 ## Keyboard shortcuts
 
@@ -101,12 +101,12 @@ Recipes are always saved on the device first, so the app works offline. With syn
    - *Who has access:* **Anyone**
 4. Press **Deploy**, allow access with your Google account (Google shows a warning because it's your own unverified script: *Advanced → Go to … (unsafe)* is expected here).
 5. Copy the **Web app URL** (ends with `/exec`).
-6. In the Kitchen app: **⚙ → Web app link**, paste it, press **Save and sync**. The ensō turning green in the top bar means synced.
+6. In the Kitchen app: **Settings (last icon in the top bar) → Web app link**, paste it, press **Save and sync**. The ensō turning green in the top bar means synced.
 7. Send the same link to the other phone (e.g. in a private message) and paste it there too.
 
 **`Code.gs` should rarely change:** it stores whole recipes without needing to know their fields. If an update ever does change it (the CHANGELOG says so), paste the new code over the old one, save, then: Deploy → Manage deployments → ✏ Edit → Version: *New version* → Deploy. The link stays the same.
 
-Sync status dot: green = synced, amber = offline (will sync later), red = sync problem (tap ⚙ to see the message).
+Sync status dot: green = synced, amber = offline (will sync later), red = sync problem (open Settings to see the message).
 
 ## Privacy
 
@@ -165,7 +165,7 @@ js/ui/pantrySections.js  the Pantry categories dialog
 js/ui/projects.js     the projects list and add/edit dialog
 js/ui/project.js      one project: status, steps, things to buy, notes
 js/ui/editor.js       add/edit form
-js/ui/settings.js     settings dialog: sync, backup, privacy
+js/ui/settings.js     settings page: your name, sync, backup, privacy
 js/ui/shortcuts.js    all keyboard shortcuts in one table
 js/ui/toast.js        short pop-up messages
 apps-script/Code.gs   the Google Sheet side of sync (stores each item as JSON; one tab per collection)

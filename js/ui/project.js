@@ -5,7 +5,6 @@ import { entryList, progress, materialsToBuy, STATUS_LABELS } from "../lib/proje
 import { nameKey } from "../lib/shopping.js";
 import { dueLabel, toDateString } from "../lib/dates.js";
 import { projectSummary, openProjectDialog } from "./projects.js";
-import { goBack } from "./router.js";
 import { showToast } from "./toast.js";
 
 const title = document.getElementById("project-title");
@@ -21,7 +20,6 @@ const materialInput = document.getElementById("project-material-input");
 const toShoppingButton = document.getElementById("project-to-shopping");
 const notesInput = document.getElementById("project-notes");
 const editButton = document.getElementById("project-edit");
-const backButton = document.getElementById("project-back");
 
 let currentId = null;
 
@@ -180,9 +178,4 @@ export function initProject() {
   notesInput.addEventListener("blur", saveNotes);
 
   editButton.addEventListener("click", editCurrentProject);
-  backButton.addEventListener("click", function (event) {
-    event.preventDefault();
-    saveNotes();
-    goBack("#/projects");
-  });
 }

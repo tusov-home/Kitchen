@@ -9,7 +9,8 @@
 //   #/shopping    the shopping list
 //   #/pantry      what we have at home
 //   #/projects    home improvement projects
-//   #/project/<id> one project
+//   #/project/<id> one project, in a sheet on top of the projects
+//   #/settings    settings and sync
 // Using the address means the phone's Back button works as expected.
 
 // How many app screens lie behind the current one in the history.
@@ -19,7 +20,7 @@ let replacing = false;
 
 export function parseRoute(hash) {
   const path = (hash || "").replace(/^#/, "") || "/";
-  if (["/shopping", "/pantry", "/projects", "/plan"].includes(path)) {
+  if (["/shopping", "/pantry", "/projects", "/plan", "/settings"].includes(path)) {
     return { screen: path.slice(1), id: null };
   }
   const browse = { "/meals": "meal", "/sauces": "sauce", "/search": "search" }[path];

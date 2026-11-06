@@ -14,7 +14,7 @@ import { initHaptics } from "./ui/haptics.js";
 import { initAsk } from "./ui/ask.js";
 import { initName } from "./ui/name.js";
 import { initEditor, openEditor, saveFromEditor, cancelEditor } from "./ui/editor.js";
-import { initSettings, setSettingsStatus } from "./ui/settings.js";
+import { initSettings, setSettingsStatus, renderSettings } from "./ui/settings.js";
 import { initShortcuts } from "./ui/shortcuts.js";
 import { initPwa, onInstallAvailable, install } from "./pwa.js";
 import * as shoppingState from "./shoppingState.js";
@@ -37,6 +37,7 @@ const views = {
   project: document.getElementById("view-project"),
   plan: document.getElementById("view-plan"),
   browse: document.getElementById("view-browse"),
+  settings: document.getElementById("view-settings"),
 };
 const searchInput = document.getElementById("search");
 const brand = document.getElementById("brand");
@@ -56,7 +57,9 @@ function showView(screen) {
   }
   // Sheets lie on top of the recipes page, which stays underneath; a recipe
   // can also lie on the sheet it was opened from.
-  if (isSheet(screen)) {
+  if (screen === "project") {
+    views.projects.hidden = false;
+  } else if (isSheet(screen)) {
     views.list.hidden = false;
   }
   if (screen === "recipe" && under) {
@@ -78,6 +81,8 @@ function trackUnder(cameFrom) {
 function closeSheet() {
   if (current.screen === "recipe" && under) {
     closeTo(under.depth, under.screen, under.hash);
+  } else if (current.screen === "project") {
+    closeTo(getDepth() - 1, "projects", "#/projects");
   } else {
     closeToList();
   }
@@ -191,12 +196,22 @@ function route() {
   } else if (current.screen === "pantry") {
     renderPantry();
   } else if (current.screen === "projects") {
-    renderProjects();
+    // Under a closing project it's already drawn, and a redraw would stutter.
+    if (cameFrom !== "project") {
+      renderProjects();
+    }
+  } else if (current.screen === "settings") {
+    renderSettings();
   } else if (current.screen === "project") {
     if (!renderProject(current.id)) {
       go("#/projects", true); // project no longer exists
       return;
     }
+    if (cameFrom !== "projects") {
+      renderProjects();
+    }
+    views.project.scrollTop = 0;
+    playSheetOpening(views.project, true);
   } else {
     document.title = "Kitchen";
     // Back on the recipes page, the search starts empty again.
@@ -210,7 +225,8 @@ function route() {
   }
   renderTabs(current.screen, views[current.screen]);
   // The page under a sheet stays where you left it.
-  if (!isSheet(current.screen) && !(current.screen === "list" && isSheet(cameFrom))) {
+  const backUnder = (current.screen === "list" && isSheet(cameFrom)) || (current.screen === "projects" && cameFrom === "project");
+  if (!isSheet(current.screen) && !backUnder) {
     window.scrollTo(0, 0);
   }
 }
@@ -285,6 +301,7 @@ projects.onChange(function () {
   if (current.screen === "projects") {
     renderProjects();
   } else if (current.screen === "project") {
+    renderProjects(); // the page under the sheet
     if (!renderProject(current.id)) {
       go("#/projects", true);
     }
@@ -355,8 +372,6 @@ initShortcuts(
     back: function () {
       if (current.screen === "edit") {
         cancelEditor();
-      } else if (current.screen === "project") {
-        document.getElementById("project-back").click();
       } else if (isSheet(current.screen)) {
         closeRecipeSheet();
       } else if (current.screen !== "list") {

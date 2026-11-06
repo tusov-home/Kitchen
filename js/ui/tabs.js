@@ -1,4 +1,4 @@
-// Page icons in the top bar: Recipes · Shopping · Pantry · Projects. Tap a tab, swipe
+// Page icons in the top bar: Recipes · Shopping · Pantry · Projects · Settings. Tap a tab, swipe
 // left/right anywhere on a page, or press ← / → on the laptop.
 import { go, goBack } from "./router.js";
 import * as storage from "../storage.js";
@@ -8,15 +8,17 @@ export const TABS = [
   { id: "shopping", screens: ["shopping"], hash: () => "#/shopping" },
   { id: "pantry", screens: ["pantry"], hash: () => "#/pantry" },
   { id: "projects", screens: ["projects"], hash: () => "#/projects" },
+  { id: "settings", screens: ["settings"], hash: () => "#/settings" },
 ];
 
 // Pages opened from a tab still light up its tab.
 const BELONGS_TO = { recipe: "list", project: "projects", plan: "list", browse: "list" };
 
-// Sheets lie on top of the recipes page: a list (meals, sauces, search),
-// the cooking plan, and a recipe (which may lie on one of the others).
+// Sheets lie on top of a page: on the recipes page a list (meals, sauces,
+// search), the cooking plan, and a recipe (which may lie on one of the
+// others); on the projects page, one project.
 export function isSheet(screen) {
-  return screen === "recipe" || screen === "plan" || screen === "browse";
+  return screen === "recipe" || screen === "plan" || screen === "browse" || screen === "project";
 }
 
 const tabbar = document.getElementById("tabbar");
@@ -309,7 +311,7 @@ function initSwipe() {
       // it. Otherwise: an ordinary scroll.
       if (Math.abs(dx) > Math.abs(dy) * 1.2) {
         // Only recipes and tab pages have neighbours to swipe to.
-        drag.axis = getScreen() === "plan" || getScreen() === "browse" ? "none" : "x";
+        drag.axis = isSheet(getScreen()) && getScreen() !== "recipe" ? "none" : "x";
       } else {
         drag.axis = drag.atTop && dy > 0 ? "down" : "y";
       }

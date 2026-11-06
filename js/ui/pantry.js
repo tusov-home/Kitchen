@@ -8,7 +8,6 @@ import { setBadge } from "./tabs.js";
 import { showToast } from "./toast.js";
 
 const restock = document.getElementById("pantry-restock");
-const restockText = document.getElementById("pantry-restock-text");
 const toShoppingButton = document.getElementById("pantry-to-shopping");
 const addForm = document.getElementById("pantry-add");
 const addInput = document.getElementById("pantry-add-input");
@@ -71,7 +70,7 @@ export function renderPantry() {
 
   const toBuy = needToBuy();
   restock.hidden = toBuy.length === 0;
-  restockText.textContent = toBuy.length + " low or out";
+  toShoppingButton.textContent = "Restock: add " + toBuy.length + " to shopping";
 
   for (const button of filterBar.querySelectorAll("button[data-filter]")) {
     const on = button.dataset.filter === filter;
