@@ -133,8 +133,14 @@ def test_phone(p, sheet):
     expect(page.locator("#recipe-notes")).to_contain_text("Cooked")
 
     # Rating (name is already known)
+    # Stars stay out of the way until asked for
+    expect(page.locator("#my-stars")).to_be_hidden()
+    page.click("#rate-open")
+    expect(page.locator("#rate-dialog")).to_be_visible()
     page.locator("#my-stars .star").nth(3).click()
+    expect(page.locator("#rate-dialog")).to_be_hidden()
     expect(page.locator("#my-stars .star.filled")).to_have_count(4)
+    expect(page.locator("#rate-open-label")).to_have_text("4 of 5")
     expect(page.locator("#my-rating-label")).to_have_text("Kadi's rating")
     expect(page.locator("#all-ratings")).to_contain_text("Kadi")
 
@@ -867,7 +873,7 @@ def test_meals_and_sauces(p):
     page.fill("#edit-text", RECIPE)
     page.click("#edit-form button[type=submit]")
     expect(page.locator("#view-recipe")).to_be_visible()
-    page.click("a:has-text('Back')")
+    page.click("a.dock-button:has-text('Back')")
     expect(page.locator("#recipe-count")).to_have_text("1")
     expect(page.locator("#sauce-count")).to_have_text("0")
     # + from the open sauces row starts a sauce
@@ -879,7 +885,7 @@ def test_meals_and_sauces(p):
     page.fill("#edit-text", "Chilli crisp\n- 200 ml oil\n- 3 tbsp chilli flakes")
     page.click("#edit-form button[type=submit]")
     expect(page.locator("#view-recipe")).to_be_visible()
-    page.click("a:has-text('Back')")
+    page.click("a.dock-button:has-text('Back')")
     # Each row lists only its own kind, and the panel sits under it
     expect(page.locator(".recipe-card-title")).to_have_text(["Chilli crisp"])
     assert page.evaluate("document.getElementById('sauces-head').nextElementSibling.id") == "all-panel"
@@ -996,6 +1002,64 @@ def test_pantry_categories(p, sheet):
     expect(page.locator(".shop-section", has_text="Top shelf")).to_have_count(0)
     assert not errors, errors
     print("pantry categories: ok")
+
+
+def test_recipe_layout(p):
+    """Bottom buttons and the jump bar on a long recipe."""
+    ctx = p.chromium.launch().new_context(**p.devices["Pixel 7"])
+    ctx.add_init_script("if (!localStorage.getItem('kitchen.settings.v1')) localStorage.setItem('kitchen.settings.v1', JSON.stringify({myName: 'Kadi'}))")
+    page = ctx.new_page()
+    errors = []
+    watch_errors(page, errors)
+    page.goto(BASE)
+    long_method = "\n".join(f"{n}. Stir the pot and wait a while." for n in range(1, 40))
+    page.click("#add-recipe")
+    page.fill("#edit-text", f"Long soup\n\nServes 2\n\n## Ingredients\n- 1 onion\n- 2 carrots\n\n## Method\n{long_method}\n\n## To serve\nEnjoy.")
+    page.fill("#edit-notes", "More salt")
+    page.click("#edit-form button[type=submit]")
+    expect(page.locator("#view-recipe")).to_be_visible()
+    # The dock shows on the recipe page only
+    dock = page.locator("#recipe-dock")
+    expect(dock).to_be_visible()
+    assert page.evaluate("document.getElementById('recipe-dock').getBoundingClientRect().bottom") == page.evaluate("innerHeight")
+    expect(page.locator(".jump-button")).to_have_text(["Notes", "Ingredients", "Method"])
+    page.screenshot(path=SHOTS / "phone-recipe-dock.png")
+    # Jumping brings the heading under the top bar, and marks it
+    page.click(".jump-button:has-text('Method')")
+    page.wait_for_timeout(900)
+    top = page.evaluate("[...document.querySelectorAll('#recipe-body h1, #recipe-body h2, #recipe-body h3')].find((h) => h.textContent === 'Method').getBoundingClientRect().top")
+    bar = page.evaluate("document.querySelector('.topbar').getBoundingClientRect().bottom")
+    assert bar <= top < bar + 40, (bar, top)
+    expect(page.locator(".jump-button.active")).to_have_text("Method")
+    page.click(".jump-button:has-text('Ingredients')")
+    page.wait_for_timeout(900)
+    expect(page.locator(".jump-button.active")).to_have_text("Ingredients")
+    expect(page.locator("#recipe-servings")).to_be_in_viewport()
+    # The text can scroll clear of the dock
+    page.evaluate("window.scrollTo(0, document.documentElement.scrollHeight)")
+    page.wait_for_timeout(200)
+    last = page.evaluate("document.getElementById('recipe-body').getBoundingClientRect().bottom")
+    assert last <= page.evaluate("document.getElementById('recipe-dock').getBoundingClientRect().top"), last
+    # Changing the servings keeps the bar working
+    page.evaluate("window.scrollTo(0, 0)")
+    page.click("#servings-up")
+    expect(page.locator(".jump-button")).to_have_count(3)
+    page.click("a.dock-button:has-text('Back')")
+    expect(page.locator("#view-list")).to_be_visible()
+    expect(dock).to_be_hidden()
+    # A recipe without headings has no bar
+    page.click("#add-recipe")
+    page.fill("#edit-text", "Toast\nPut butter on it.")
+    page.click("#edit-form button[type=submit]")
+    expect(page.locator("#view-recipe")).to_be_visible()
+    expect(page.locator("#recipe-jump")).to_be_hidden()
+    # "**Ingredients**" lines count as headings too
+    page.click("#edit-link")
+    page.fill("#edit-text", "Toast\n\n**Ingredients**\n- 1 slice bread\n\n**Method**\n1. Toast it.")
+    page.click("#edit-form button[type=submit]")
+    expect(page.locator(".jump-button")).to_have_text(["Ingredients", "Method"])
+    assert not errors, errors
+    print("recipe layout: ok")
 
 
 # A small web server for test_site_missing: serves the app until a file
@@ -1123,6 +1187,7 @@ def main():
             test_installable_and_offline(p)
             test_add_from_recipe(p)
             test_meals_and_sauces(p)
+            test_recipe_layout(p)
             test_pantry_categories(p, FakeSheet())
             test_site_missing(p)
             test_update_after_publish(p)

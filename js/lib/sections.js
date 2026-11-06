@@ -34,6 +34,14 @@ export function headingOf(line) {
   return null;
 }
 
+// Where a recipe's ingredients and method start, as positions in its list
+// of headings; -1 if it doesn't have that heading.
+export function findJumps(headings) {
+  const ingredients = headings.findIndex((text) => INGREDIENT_WORDS.test(text));
+  const method = headings.findIndex((text) => METHOD_WORDS.test(text));
+  return { ingredients: ingredients, method: method };
+}
+
 // Keeps track of whether we are inside the ingredients part while
 // going through a recipe line by line.
 export function createSectionTracker(lines) {

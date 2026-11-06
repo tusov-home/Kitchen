@@ -7,6 +7,7 @@ import { bodyWithoutTitle, cookedNote, canEdit } from "../lib/recipes.js";
 import { renderMarkdown } from "../lib/markdown.js";
 import { formatAmount, stepServings } from "../lib/scale.js";
 import { renderRating } from "./rating.js";
+import { renderJump } from "./recipeJump.js";
 import { go } from "./router.js";
 import { getMyName } from "./name.js";
 import { showToast } from "./toast.js";
@@ -50,6 +51,7 @@ function renderServingsAndBody(recipe) {
 
   // renderMarkdown escapes all HTML, so this is safe.
   body.innerHTML = renderMarkdown(bodyWithoutTitle(recipe.text, recipe.title), { scale: factor });
+  renderJump(body);
 }
 
 // Returns false if the recipe doesn't exist (e.g. deleted on the other phone).
@@ -110,8 +112,6 @@ function renderOwner(recipe) {
   cookedButton.hidden = !mine;
   editLink.href = "#/r/" + encodeURIComponent(recipe.id) + "/edit";
   copyLink.href = "#/copy/" + encodeURIComponent(recipe.id);
-  // For someone else's recipe, copying is the main action.
-  copyLink.className = mine ? "button" : "primary";
 }
 
 export function canEditCurrent() {

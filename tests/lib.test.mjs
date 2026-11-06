@@ -194,6 +194,7 @@ test("a copy keeps the recipe but not notes, ratings or owner", () => {
 
 // ---------- Owner filter and sorting ----------
 import { allOwners } from "../js/lib/recipes.js";
+import { findJumps } from "../js/lib/sections.js";
 
 const shelf = [
   { id: "1", title: "banana bread", text: "", tags: [], owner: "Tõnis", updatedAt: 3, ratings: { K: { stars: 3, at: 1 } } },
@@ -227,4 +228,10 @@ test("a recipe is a meal unless it says it's a sauce", () => {
 
 test("a copy keeps the type", () => {
   assert.equal(copyForEditing({ title: "Chilli oil", text: "Heat.", tags: [], kind: "sauce" }).kind, "sauce");
+});
+
+test("the jump bar finds ingredients and method headings", () => {
+  assert.deepEqual(findJumps(["Ingredients", "Method", "To serve"]), { ingredients: 0, method: 1 });
+  assert.deepEqual(findJumps(["Intro", "Zutaten", "Zubereitung"]), { ingredients: 1, method: 2 });
+  assert.deepEqual(findJumps(["To serve"]), { ingredients: -1, method: -1 });
 });

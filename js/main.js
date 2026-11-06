@@ -7,7 +7,8 @@ import { toggleSuggestionOwner } from "./ui/suggestion.js";
 import { initList, renderList, focusSearch, toggleKind, toggleFilters } from "./ui/list.js";
 import { initRecipe, renderRecipe, changeServings, canEditCurrent, addCurrentToList } from "./ui/recipe.js";
 import { showToast } from "./ui/toast.js";
-import { rate } from "./ui/rating.js";
+import { rate, initRating, openRating } from "./ui/rating.js";
+import { initRecipeJump, jumpTo } from "./ui/recipeJump.js";
 import { initName } from "./ui/name.js";
 import { initEditor, openEditor, saveFromEditor, cancelEditor } from "./ui/editor.js";
 import { initSettings, setSettingsStatus } from "./ui/settings.js";
@@ -156,6 +157,8 @@ document.getElementById("add-recipe").addEventListener("click", function () {
 
 initList();
 initRecipe();
+initRating();
+initRecipeJump();
 initName();
 initEditor();
 initSettings();
@@ -186,6 +189,9 @@ initShortcuts(
       }
     },
     copyRecipe: () => go("#/copy/" + encodeURIComponent(current.id)),
+    openRating: openRating,
+    jumpIngredients: () => jumpTo("Ingredients"),
+    jumpMethod: () => jumpTo("Method"),
     rate1: () => rate(1),
     rate2: () => rate(2),
     rate3: () => rate(3),

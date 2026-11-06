@@ -1,5 +1,5 @@
-// Star ratings on the recipe screen: your own stars to tap, and
-// everyone's ratings listed. Anyone can rate any recipe.
+// Star ratings: the Rate button opens your own stars to tap, and everyone's
+// ratings listed. Anyone can rate any recipe.
 import * as state from "../state.js";
 import { ratingList } from "../lib/recipes.js";
 import { getMyName, withMyName } from "./name.js";
@@ -8,6 +8,9 @@ import { showToast } from "./toast.js";
 const myLabel = document.getElementById("my-rating-label");
 const myStars = document.getElementById("my-stars");
 const allRatings = document.getElementById("all-ratings");
+const dialog = document.getElementById("rate-dialog");
+const openButton = document.getElementById("rate-open");
+const openLabel = document.getElementById("rate-open-label");
 
 let currentRecipe = null;
 
@@ -21,6 +24,8 @@ export function renderRating(recipe) {
   const mine = name && recipe.ratings[name] ? recipe.ratings[name].stars : 0;
 
   myLabel.textContent = name ? name + "'s rating" : "Your rating";
+  openLabel.textContent = mine ? mine + " of 5" : "Rate";
+  openButton.classList.toggle("rated", mine > 0);
   myStars.replaceChildren();
   for (let stars = 1; stars <= 5; stars++) {
     const button = document.createElement("button");
@@ -30,7 +35,10 @@ export function renderRating(recipe) {
     button.setAttribute("aria-label", stars + (stars === 1 ? " star" : " stars"));
     button.setAttribute("aria-pressed", stars === mine ? "true" : "false");
     button.title = stars === mine ? "Tap again to clear (" + stars + ")" : stars + " of 5 (" + stars + ")";
-    button.addEventListener("click", () => rate(stars));
+    button.addEventListener("click", function () {
+      dialog.close();
+      rate(stars);
+    });
     myStars.appendChild(button);
   }
 
@@ -70,4 +78,12 @@ export function rate(stars) {
     state.setRating(recipeId, name, newStars);
     showToast(newStars ? "Rated " + starText(newStars) : "Rating cleared");
   });
+}
+
+export function openRating() {
+  dialog.showModal();
+}
+
+export function initRating() {
+  openButton.addEventListener("click", openRating);
 }

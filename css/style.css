@@ -991,23 +991,10 @@ body.has-tabbar .plan-bar {
 
 /* ---------- Ratings ---------- */
 
-.rating-box {
-  margin: 0 0 1rem;
-}
-
-.my-rating {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.25rem 0.75rem;
-}
-
-.rating-label {
-  font-weight: 500;
-}
-
 .stars {
   display: flex;
+  justify-content: center;
+  margin: 0.25rem 0 0.5rem;
 }
 
 .star {
@@ -1036,6 +1023,7 @@ body.has-tabbar .plan-bar {
 
 .all-ratings {
   margin: 0.25rem 0 0;
+  text-align: center;
   color: var(--muted);
   font-size: 0.9rem;
 }
@@ -1057,18 +1045,6 @@ body.has-tabbar .plan-bar {
   border-radius: var(--radius);
   background: var(--surface);
   width: fit-content;
-}
-
-.add-to-list {
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
-  margin: 0.5rem 0 0.25rem;
-}
-
-.add-to-list .line-icon {
-  width: 1.25rem;
-  height: 1.25rem;
 }
 
 .round-button {
@@ -1730,4 +1706,102 @@ html {
 /* Initials keep their own solid ground on the textured panel */
 .owner-initial {
   background: var(--surface);
+}
+
+/* ---------- Recipe: buttons at the bottom ---------- */
+
+.recipe-dock {
+  display: none;
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 30;
+  padding-bottom: env(safe-area-inset-bottom);
+  border-top: 1px solid var(--border);
+  background:
+    linear-gradient(var(--wall-glaze), var(--wall-glaze)),
+    var(--bg) var(--stone) center top / 320px;
+}
+
+/* Lives outside the page, so it stays put while the page swipes */
+body:has(#view-recipe:not([hidden])) .recipe-dock {
+  display: block;
+}
+
+/* Makes room for it; also lifts pop-up messages above it */
+body:has(#view-recipe:not([hidden])) {
+  --tabbar-h: 3.9rem;
+}
+
+body:has(#view-recipe:not([hidden])):has(#recipe-jump:not([hidden])) {
+  --tabbar-h: 6.5rem;
+}
+
+.recipe-jump {
+  display: flex;
+  justify-content: center;
+  gap: 0.25rem;
+  padding: 0.35rem 0.75rem 0;
+}
+
+.jump-button {
+  flex: 1;
+  max-width: 10rem;
+  min-height: 2.35rem;
+  padding: 0 0.5rem;
+  border: none;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.jump-button.active {
+  background: var(--surface);
+  color: var(--text);
+}
+
+.dock-buttons {
+  display: flex;
+  justify-content: center;
+  min-height: 3.9rem;
+}
+
+.dock-button {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.1rem;
+  max-width: 7rem;
+  min-width: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.dock-button.rated {
+  color: var(--star);
+}
+
+.dock-button .line-icon {
+  width: 1.4rem;
+  height: 1.4rem;
+}
+
+/* Jumping leaves the heading clear of the top bar */
+#recipe-body > *,
+#recipe-notes-box,
+#recipe-servings {
+  scroll-margin-top: 4.25rem;
 }

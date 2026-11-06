@@ -224,38 +224,22 @@
 
   <!-- One recipe -->
   <main id="view-recipe" class="view" hidden>
-    <div class="actions">
-      <a href="#/" class="button" title="Back (Esc)">← Back</a>
-      <span class="spacer"></span>
-      <button id="cooked-today" class="button" type="button" title="Add today's date to the notes">✓ Cooked today</button>
-      <a id="edit-link" class="button" title="Edit (E)">Edit</a>
-      <a id="copy-link" class="button" title="Make your own copy to adjust (C)">Make my copy</a>
-    </div>
     <article class="recipe">
       <h1 id="recipe-title"></h1>
       <p id="recipe-owner" class="owner-line"></p>
       <div id="recipe-tags" class="tags"></div>
-
-      <section class="rating-box" aria-label="Ratings">
-        <div class="my-rating">
-          <span id="my-rating-label" class="rating-label">Your rating</span>
-          <div id="my-stars" class="stars" role="group" aria-label="Your rating"></div>
-        </div>
-        <p id="all-ratings" class="all-ratings"></p>
-      </section>
 
       <section id="recipe-notes-box" class="notes" hidden>
         <h2>Notes</h2>
         <p id="recipe-notes"></p>
       </section>
 
-      <div class="servings" aria-label="Servings">
+      <div id="recipe-servings" class="servings" aria-label="Servings">
         <button id="servings-down" class="round-button" type="button" aria-label="Fewer servings" title="Fewer servings (−)">−</button>
         <span id="servings-label" class="servings-label" aria-live="polite"></span>
         <button id="servings-up" class="round-button" type="button" aria-label="More servings" title="More servings (+)">+</button>
         <button id="servings-reset" class="text-button" type="button" hidden>Reset</button>
       </div>
-      <button id="add-to-list" class="button add-to-list" type="button" title="Add the ingredients, for these servings (A)"><svg class="line-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3.5 10h17l-1.7 8.4a2 2 0 0 1-2 1.6H7.2a2 2 0 0 1-2-1.6z"/><path d="M8 10l3.2-5.5"/><path d="M16 10l-3.2-5.5"/></svg>Add to shopping list</button>
 
       <div id="recipe-body" class="recipe-body"></div>
     </article>
@@ -374,6 +358,32 @@
         <span class="spacer"></span>
         <button class="button" type="button" id="name-cancel">Cancel</button>
         <button class="primary" type="submit">Save</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- The recipe's buttons, all in thumb reach. Shown with the recipe. -->
+  <nav id="recipe-dock" class="recipe-dock" aria-label="Recipe">
+    <div id="recipe-jump" class="recipe-jump" role="group" aria-label="Jump to" hidden></div>
+    <div class="dock-buttons">
+      <a href="#/" class="dock-button" title="Back (Esc)"><svg class="line-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M10 6l-6 6 6 6M4.5 12H20"/></svg><span>Back</span></a>
+      <button id="rate-open" class="dock-button" type="button" title="Rate this recipe (R)"><svg class="line-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 4l2.5 5.2 5.7.8-4.1 4 1 5.7L12 17.2 6.9 19.7l1-5.7-4.1-4 5.7-.8z"/></svg><span id="rate-open-label">Rate</span></button>
+      <button id="add-to-list" class="dock-button" type="button" title="Add the ingredients, for these servings (A)"><svg class="line-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3.5 10h17l-1.7 8.4a2 2 0 0 1-2 1.6H7.2a2 2 0 0 1-2-1.6z"/><path d="M8 10l3.2-5.5"/><path d="M16 10l-3.2-5.5"/></svg><span>To list</span></button>
+      <button id="cooked-today" class="dock-button" type="button" title="Add today's date to the notes"><svg class="line-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span>Cooked</span></button>
+      <a id="edit-link" class="dock-button" title="Edit (E)"><svg class="line-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4.5 19.5l1-4.2L16.3 4.5a1.7 1.7 0 0 1 2.4 0l.8.8a1.7 1.7 0 0 1 0 2.4L8.7 18.5z"/></svg><span>Edit</span></a>
+      <a id="copy-link" class="dock-button" title="Make your own copy to adjust (C)"><svg class="line-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="9" y="9" width="11" height="11" rx="1.5"/><path d="M15 9V5.5A1.5 1.5 0 0 0 13.5 4h-8A1.5 1.5 0 0 0 4 5.5v8A1.5 1.5 0 0 0 5.5 15H9"/></svg><span>My copy</span></a>
+    </div>
+  </nav>
+
+  <!-- Your rating, and everyone's -->
+  <dialog id="rate-dialog" class="dialog">
+    <form method="dialog" class="dialog-body">
+      <h2 id="my-rating-label" tabindex="-1" autofocus class="dialog-title">Your rating</h2>
+      <div id="my-stars" class="stars" role="group" aria-label="Your rating"></div>
+      <p id="all-ratings" class="all-ratings"></p>
+      <div class="actions">
+        <span class="spacer"></span>
+        <button class="button" value="close">Close</button>
       </div>
     </form>
   </dialog>

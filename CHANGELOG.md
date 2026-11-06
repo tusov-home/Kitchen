@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-11-06 l
+- Recipe page: all the buttons now sit at the bottom, in thumb reach.
+- A new bar above them jumps straight to Notes, Ingredients or Method, and shows where you are (I and M on the laptop).
+- The stars moved behind a **Rate** button (R), which also shows everyone's ratings.
+
 ## 2026-11-06 k
 - The page icons moved from the bottom into the top bar, and the Kitchen name is gone: the ensō and version letter are enough.
 - A smaller suggestion title that stops after three lines, so long names no longer push Meals and Sauces & condiments off the screen.
