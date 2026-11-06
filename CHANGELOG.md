@@ -1,5 +1,8 @@
 # Changelog
 
+## 2026-11-06 j
+- Removed the yellow line from the "low or out" panel on the Pantry page.
+
 ## 2026-11-06 i
 - Pantry categories are now yours: tap **Categories** on the Pantry page (C on the laptop) to add, rename, reorder and remove them. They sync between both phones.
 - New categories to start with: Grains, pasta & rice; Tins & jars; Oils, vinegars & sauces; Spice mixes. New items are sorted into them; existing items stay where they are.
