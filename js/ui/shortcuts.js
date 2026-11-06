@@ -18,7 +18,7 @@ const SHORTCUTS = [
   { keys: "i", label: "I", action: "jumpIngredients", where: ["recipe"], text: "Jump to ingredients" },
   { keys: "m", label: "M", action: "jumpMethod", where: ["recipe"], text: "Jump to method" },
   { keys: "ctrl+s", label: "Ctrl+S", action: "save", where: ["edit"], whileTyping: true, text: "Save recipe" },
-  { keys: "escape", label: "Esc", action: "back", where: ["list", "recipe", "edit", "shopping", "pantry", "projects", "project"], whileTyping: true, text: "Back / cancel" },
+  { keys: "escape", label: "Esc", action: "back", where: ["list", "recipe", "plan", "edit", "shopping", "pantry", "projects", "project"], whileTyping: true, text: "Back / cancel" },
   { keys: "arrowleft", label: "← / →", action: "previousTab", where: ["list", "shopping", "pantry", "projects"], text: "Previous / next page" },
   { keys: "arrowright", action: "nextTab", where: ["list", "shopping", "pantry", "projects"] },
   { keys: "n", label: "N", action: "focusPantryAdd", where: ["pantry"], text: "Pantry: add an item" },

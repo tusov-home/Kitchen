@@ -78,7 +78,7 @@ export function goToTab(tabId) {
   if (tabId === "list" || (!isTabScreen(from) && tabOf(from) === tabId)) {
     // Back to Recipes, or from a project page back to its list.
     goBack(target.hash());
-  } else if (from === "recipe" || (isTabScreen(from) && from !== "list")) {
+  } else if (from === "recipe" || from === "plan" || (isTabScreen(from) && from !== "list")) {
     // Leaving a recipe closes it: Back and swiping lead to Recipes, not to it.
     go(target.hash(), true);
   } else {
@@ -142,7 +142,7 @@ function blocksSwipe(target) {
 }
 
 function canSwipe(screen) {
-  return isTabScreen(screen) || screen === "recipe";
+  return isTabScreen(screen) || screen === "recipe" || screen === "plan";
 }
 
 // While dragging a recipe: what letting go will do.
@@ -172,7 +172,7 @@ function dragDown(view, dy) {
   view.style.transform = "translate3d(0, " + dy * 0.6 + "px, 0)";
 }
 
-// The sheet sinks away, then the recipe closes.
+// The sheet (a recipe or the cooking plan) sinks away, then it closes.
 export function closeRecipeSheet() {
   if (reduceMotion.matches) {
     closeToList();
@@ -272,7 +272,8 @@ function initSwipe() {
       return;
     }
     const now = Date.now();
-    const atTop = getScreen() === "recipe" && currentView().scrollTop <= 0;
+    const sheet = getScreen() === "recipe" || getScreen() === "plan";
+    const atTop = sheet && currentView().scrollTop <= 0;
     drag = { x: touch.clientX, y: touch.clientY, axis: null, view: currentView(), lastX: touch.clientX, lastTime: now, speed: 0, atTop: atTop };
   }, { passive: true });
 
@@ -290,7 +291,8 @@ function initSwipe() {
       // Mostly sideways: a page swipe. Down from the top of a recipe: close
       // it. Otherwise: an ordinary scroll.
       if (Math.abs(dx) > Math.abs(dy) * 1.2) {
-        drag.axis = "x";
+        // The plan has no neighbours to swipe to.
+        drag.axis = getScreen() === "plan" ? "none" : "x";
       } else {
         drag.axis = drag.atTop && dy > 0 ? "down" : "y";
       }

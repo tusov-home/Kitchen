@@ -42,12 +42,17 @@ const brandMark = document.getElementById("brand-mark");
 
 let current = { screen: "list", id: null };
 
+function isSheet(screen) {
+  return screen === "recipe" || screen === "plan";
+}
+
 function showView(screen) {
   for (const name in views) {
     views[name].hidden = name !== screen;
   }
-  // A recipe is a sheet on top of the recipes page, which stays underneath.
-  if (screen === "recipe") {
+  // A recipe and the cooking plan are sheets on top of the recipes page,
+  // which stays underneath.
+  if (isSheet(screen)) {
     views.list.hidden = false;
   }
 }
@@ -94,6 +99,16 @@ function route() {
     }
   } else if (current.screen === "plan") {
     renderPlan();
+    if (!isSheet(cameFrom) && cameFrom !== "list") {
+      renderList();
+    }
+    if (cameFrom !== "plan") {
+      views.plan.scrollTop = 0;
+    }
+    // Back from a recipe, the plan is already there under it.
+    if (cameFrom !== "plan" && cameFrom !== "recipe") {
+      playSheetOpening();
+    }
   } else if (current.screen === "shopping") {
     renderShopping();
   } else if (current.screen === "pantry") {
@@ -107,14 +122,14 @@ function route() {
     }
   } else {
     document.title = "Kitchen";
-    // Under a closing recipe it's already drawn, and a redraw would stutter.
-    if (cameFrom !== "recipe") {
+    // Under a closing sheet it's already drawn, and a redraw would stutter.
+    if (!isSheet(cameFrom)) {
       renderList();
     }
   }
   renderTabs(current.screen, views[current.screen]);
-  // The page under a recipe stays where you left it.
-  if (current.screen !== "recipe" && !(current.screen === "list" && cameFrom === "recipe")) {
+  // The page under a sheet stays where you left it.
+  if (!isSheet(current.screen) && !(current.screen === "list" && isSheet(cameFrom))) {
     window.scrollTo(0, 0);
   }
 }
@@ -129,6 +144,7 @@ function playSheetOpening() {
 state.onChange(function () {
   if (current.screen === "plan") {
     renderPlan();
+    renderList();
   } else if (current.screen === "list") {
     renderList();
   } else if (current.screen === "recipe") {
@@ -160,6 +176,7 @@ pantry.onChange(function () {
 plans.onChange(function () {
   if (current.screen === "plan") {
     renderPlan();
+    renderList(); // the page under the sheet shows the plan row
   } else if (current.screen === "list") {
     renderList();
   } else if (current.screen === "recipe") {
@@ -248,7 +265,7 @@ initShortcuts(
         cancelEditor();
       } else if (current.screen === "project") {
         document.getElementById("project-back").click();
-      } else if (current.screen === "recipe") {
+      } else if (isSheet(current.screen)) {
         closeRecipeSheet();
       } else if (current.screen !== "list") {
         goBack("#/");

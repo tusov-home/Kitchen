@@ -105,6 +105,7 @@ above. If a look-only change turns out bigger than expected, say so.
 - Main actions live in a bar at the bottom of every page (`.page-dock`).
   Keep the `interactive-widget=resizes-content` viewport setting: it lifts
   the bars above the phone keyboard.
+- The cooking plan is a sheet on top of the recipes page too (same look, pull down to close, no sideways swipe).
 - Recipe page: a sheet on top of the recipes page, scrolling by itself
   (`#view-recipe`, not `window`); bottom bar with only the jump bar (hidden when it has nothing); edit and copy sit by the title, which wraps beside them for one line
   only. Tags fold away. Rating, "cooked" and notes happen in the plan's

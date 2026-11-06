@@ -1,5 +1,8 @@
 # Changelog
 
+## 2026-11-07 d
+- The cooking plan opens as a sheet over the recipes page, like a recipe: pull it down, tap above it, or press Back or Esc to close it.
+
 ## 2026-11-07 c
 - The recipe page's servings and Add to plan buttons are gone: servings are set in the plan, and swiping right adds to it. A planned recipe shows its amounts for the planned servings.
 - The bottom bar shows only when a recipe has headings to jump to.

@@ -148,6 +148,15 @@ def test_phone(p, sheet):
     expect(page.locator("#plan-count")).to_have_text("1")
     page.click("#plan-row")
     expect(page.locator("#view-plan")).to_be_visible()
+    # The plan is a sheet on top of the recipes page, like a recipe
+    expect(page.locator("#view-list")).to_be_visible()
+    expect(page.locator("#recipe-backdrop")).to_be_visible()
+    page.wait_for_timeout(400)
+    swipe_down(page, 120, 400)  # pulling it down from the top closes it
+    expect(page.locator("#view-plan")).to_be_hidden()
+    expect(page.locator("#view-list")).to_be_visible()
+    page.click("#plan-row")
+    expect(page.locator("#view-plan")).to_be_visible()
     expect(page.locator("#plan-shop .plan-title")).to_have_text(["Miso Aubergine with Soba"])
     page.click("#plan-shop .shop-remove")
     page.click("#ask-dialog button[value=cancel]")
@@ -595,22 +604,23 @@ def test_shopping_shared(p, sheet):
 
 
 def close_recipe(page):
-    """Tap above the recipe sheet."""
+    """Tap above the recipe sheet (or the plan sheet)."""
     page.locator("#recipe-backdrop").click(position={"x": 5, "y": 3})
     expect(page.locator("#view-recipe")).to_be_hidden()
+    expect(page.locator("#view-plan")).to_be_hidden()
 
 
 def open_tab(page, name):
-    """Tap a page icon, closing a recipe first: it covers the top bar."""
+    """Tap a page icon, closing a sheet first: it covers the top bar."""
     page.wait_for_timeout(250)  # a screen change may still be under way
-    if page.locator("#view-recipe").is_visible():
+    if page.locator("#view-recipe").is_visible() or page.locator("#view-plan").is_visible():
         close_recipe(page)
     page.locator(f".tab[data-tab={name}]").click()
 
 
 def go_home(page):
     page.wait_for_timeout(250)  # a screen change may still be under way
-    if page.locator("#view-recipe").is_visible():
+    if page.locator("#view-recipe").is_visible() or page.locator("#view-plan").is_visible():
         close_recipe(page)  # that's home already
     else:
         page.locator(".brand").click()
