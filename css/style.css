@@ -1584,7 +1584,7 @@ html {
 }
 
 /* Each dock lives outside its page, so it stays put while the page swipes */
-body:has(#view-recipe:not([hidden])) #recipe-dock,
+body:has(#view-recipe:not([hidden])):has(#recipe-jump:not([hidden])) #recipe-dock,
 body:has(#view-shopping:not([hidden])) #shop-dock,
 body:has(#view-pantry:not([hidden])) #pantry-dock,
 body:has(#view-projects:not([hidden])) #projects-dock,
@@ -1595,12 +1595,8 @@ body:has(#view-plan:not([hidden])) #plan-dock {
 /* Makes room for it; also lifts pop-up messages above it */
 /* The recipe's own variable: changing --tabbar-h would change the page
    under the sheet, which then visibly moves */
-body:has(#view-recipe:not([hidden])) {
-  --dock-h: 3.9rem;
-}
-
 body:has(#view-recipe:not([hidden])):has(#recipe-jump:not([hidden])) {
-  --dock-h: 6.5rem;
+  --dock-h: 3.2rem;
 }
 
 body:has(#view-shopping:not([hidden])),
@@ -1879,20 +1875,12 @@ a.plan-row {
   margin: 0.25rem 0 0;
 }
 
-/* "In plan": the button stays lit */
-.dock-plan.planned {
-  color: var(--accent);
-}
-
-.dock-plan.planned #plan-toggle-mark {
-  d: path("M8.5 15l2.5 2.5 4.5-5");
-}
 
 .recipe-jump {
   display: flex;
   justify-content: center;
   gap: 0.25rem;
-  padding: 0.35rem 0.75rem 0;
+  padding: 0.4rem 0.75rem;
 }
 
 .jump-button {
@@ -1914,45 +1902,8 @@ a.plan-row {
   color: var(--text);
 }
 
-.dock-buttons {
-  display: flex;
-  justify-content: center;
-  min-height: 3.9rem;
-}
 
-.dock-button {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.1rem;
-  max-width: 7rem;
-  min-width: 0;
-  padding: 0;
-  border: none;
-  background: transparent;
-  color: var(--muted);
-  font: inherit;
-  font-size: 0.72rem;
-  font-weight: 500;
-  text-decoration: none;
-  cursor: pointer;
-}
 
-.dock-servings {
-  display: flex;
-  flex: none;
-  flex-direction: column;
-  margin: 0 0.25rem 0 0.5rem;
-  align-items: center;
-  justify-content: center;
-  max-width: 8rem;
-  min-width: 0;
-  color: var(--muted);
-  font-size: 0.72rem;
-  font-weight: 500;
-}
 
 .dock-stepper {
   display: flex;
@@ -1997,14 +1948,7 @@ a.plan-row {
   cursor: default;
 }
 
-.dock-button.rated {
-  color: var(--star);
-}
 
-.dock-button .line-icon {
-  width: 1.4rem;
-  height: 1.4rem;
-}
 
 /* Jumping leaves the heading clear of the top bar */
 #recipe-body > *,
@@ -2259,4 +2203,8 @@ body.sheet-closing .recipe-backdrop {
 
 .ask-text:focus {
   outline: none;
+}
+
+.recipe-scale {
+  margin: 0 0 0.5rem;
 }

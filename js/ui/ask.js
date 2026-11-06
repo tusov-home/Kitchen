@@ -26,6 +26,11 @@ export function ask(question, yes, danger) {
 
 export function initAsk() {
   dialog.addEventListener("close", function () {
+    // The close event arrives a moment late. If a new question is already
+    // showing, this close belongs to the old one, which ask() has answered.
+    if (dialog.open) {
+      return;
+    }
     const done = answer;
     answer = null;
     if (done) {

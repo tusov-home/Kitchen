@@ -26,7 +26,7 @@ Kitchen lives in the `tusov-home` organization so it has its own web address. Pa
 - **Owner, tags and sorting:** unfold a row and tap **Filter** (or press F). Tap a name to see only that person's recipes, a tag to narrow down, and **Sort** for Newest, A–Z or Best rated. Each phone remembers its sort order.
 - **Shopping list:** recipes come from the cooking plan, each at its planned servings. The list groups everything by shop section; tick things off as you buy them, and they fold away under **Ticked**. **Remove ticked** and **Start over** are at the bottom, with the box for adding anything else.
 - **Swipe through recipes:** on an open recipe, swipe left for the next one, or right to add it to the cooking plan; OK on the notice brings the next, and **Cancel** takes it out again. The order follows the list you came from, or today's ideas if you opened the suggestion. Pull down from the top, tap above it, or use Back to return to the list. On the laptop: → and ←.
-- **Cooking plan:** swipe a recipe right, or tap **Add to plan** at the bottom of a recipe (P). A **Cooking plan** row appears above Meals (P opens it). There you set the servings for each meal and tap **Add … to shopping list**. After eating, tick what you cooked, rate it with stars and add a note, then **Finish plan**. The plan is shared between both phones.
+- **Cooking plan:** swipe a recipe right, or press P on the laptop. A **Cooking plan** row appears above Meals (P opens it). There you set the servings for each meal and tap **Add … to shopping list**. After eating, tick what you cooked, rate it with stars and add a note, then **Finish plan**. The plan is shared between both phones.
 - **Jump around a recipe:** the bar at the bottom goes straight to the notes, ingredients or method (I and M on the laptop).
 ## Install as an app
 
@@ -80,7 +80,6 @@ Then in Kitchen: **⚙ → Import from file** and pick `kitchen-recipes.json`. T
 | `←` | Add to the plan, then next | recipe |
 | `P` | Add to / take out of the plan; on Recipes: open the plan | recipe, list |
 | `I` / `M` | Jump to ingredients / method | recipe |
-| `+` / `−` | More / fewer servings | recipe |
 | `Ctrl+S` | Save | edit form |
 | `Esc` | Back / cancel | recipe, edit form |
 | `←` / `→` | Previous / next page | Recipes, Shopping, Pantry, Projects |
@@ -149,7 +148,7 @@ js/lib/suggest.js     pure helpers: today's suggestion and why
 js/ui/router.js       which screen belongs to which address (#/r/…)
 js/ui/list.js         recipes page: search, filter panel, the list
 js/ui/suggestion.js   today's suggestion
-js/ui/recipe.js       one recipe, servings stepper
+js/ui/recipe.js       one recipe, at the planned servings
 js/ui/ask.js          "Are you sure?" questions in the app's style
 js/ui/haptics.js      the short vibration on a press
 js/ui/plan.js         the cooking plan page and its row on Recipes

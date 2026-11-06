@@ -141,8 +141,9 @@ def test_phone(p, sheet):
     assert tools <= top + line + 1, (tools, top, line)
 
     # The cooking plan: Add to plan, shop for it, then review it
-    page.click("#plan-toggle")
-    expect(page.locator("#plan-toggle-label")).to_have_text("In plan")
+    expect(page.locator("#plan-toggle")).to_have_count(0)  # no button: swipe or P
+    page.keyboard.press("p")
+    expect(page.locator("#toast")).to_contain_text("Added to the cooking plan")
     close_recipe(page)
     expect(page.locator("#plan-count")).to_have_text("1")
     page.click("#plan-row")
@@ -152,7 +153,20 @@ def test_phone(p, sheet):
     page.click("#ask-dialog button[value=cancel]")
     expect(page.locator("#plan-shop .plan-title")).to_have_count(1)
     page.click("#plan-shop .step-button[aria-label='More servings']")
-    expect(page.locator("#plan-shop .step-value")).to_have_text("3")
+    page.click("#plan-shop .step-button[aria-label='More servings']")
+    expect(page.locator("#plan-shop .step-value")).to_have_text("4")
+    # The recipe shows the planned amounts: ingredients double, the method doesn't
+    page.click("#plan-shop .plan-title")
+    expect(page.locator("#view-recipe")).to_be_visible()
+    expect(page.locator("#recipe-scale")).to_have_text("Amounts for 4 servings, as in the cooking plan")
+    body = page.locator("#recipe-body")
+    expect(body).to_contain_text("4 aubergines")
+    expect(body).to_contain_text("400 g soba noodles")
+    expect(body).to_contain_text("2 tbsp sesame")
+    expect(body).to_contain_text("Roast at 220 °C for 20 minutes")
+    page.screenshot(path=SHOTS / "phone-3-recipe.png")
+    page.go_back()
+    expect(page.locator("#view-plan")).to_be_visible()
     page.screenshot(path=SHOTS / "phone-plan.png")
     page.click("#plan-shop-all")
     expect(page.locator("#cart-count")).to_have_text("3")
@@ -183,22 +197,9 @@ def test_phone(p, sheet):
     page.click(".recipe-card")
     expect(page.locator("#recipe-notes")).to_contain_text("Cooked")
     expect(page.locator("#recipe-notes")).to_contain_text("More chilli")
-    expect(page.locator("#plan-toggle-label")).to_have_text("Add to plan")
-
-    # Servings: found "Serves 2", step up to 4 → ingredients double, method doesn't
-    expect(page.locator("#servings-label")).to_have_text("2")
-    page.click("#servings-up")
-    page.click("#servings-up")
-    expect(page.locator("#servings-label")).to_have_text("4")
-    body = page.locator("#recipe-body")
-    expect(body).to_contain_text("4 aubergines")
-    expect(body).to_contain_text("400 g soba noodles")
-    expect(body).to_contain_text("2 tbsp sesame")
-    expect(body).to_contain_text("Roast at 220 °C for 20 minutes")
-    page.screenshot(path=SHOTS / "phone-3-recipe.png", full_page=True)
-    page.click("#servings-label")
-    expect(page.locator("#servings-label")).to_have_text("2")
-    expect(body).to_contain_text("2 aubergines")
+    # Out of the plan, it's as written again
+    expect(page.locator("#recipe-scale")).to_be_hidden()
+    expect(page.locator("#recipe-body")).to_contain_text("2 aubergines")
 
     # Phone Back button goes to the list, not back to the form
     page.go_back()
@@ -253,25 +254,23 @@ def test_laptop_second_device(p, sheet):
     expect(page.locator("#view-recipe")).to_be_visible()
     # Tõnis plans it with the keyboard and finds Kadi's stars kept with his
     page.keyboard.press("p")
-    expect(page.locator("#plan-toggle-label")).to_have_text("In plan")
+    expect(page.locator("#toast")).to_contain_text("Added to the cooking plan")
     # Taking it out asks first: "Cancel" keeps it, "OK" takes it out
     page.keyboard.press("p")
+    expect(page.locator("#ask-dialog")).to_be_visible()
     page.click("#ask-dialog button[value=cancel]")
-    expect(page.locator("#plan-toggle-label")).to_have_text("In plan")
+    expect(page.locator("#ask-dialog")).to_be_hidden()
     page.keyboard.press("p")
+    expect(page.locator("#ask-dialog")).to_be_visible()  # still in, so it asks again
     page.click("#ask-dialog button[value=ok]")
-    expect(page.locator("#plan-toggle-label")).to_have_text("Add to plan")
-    page.keyboard.press("+")
-    expect(page.locator("#servings-label")).to_have_text("3")
-    page.keyboard.press("-")
-    expect(page.locator("#servings-label")).to_have_text("2")
+    expect(page.locator("#toast")).to_contain_text("Taken out of the plan")
     page.keyboard.press("Escape")
     expect(page.locator(".card-stars")).to_have_text("★ 4")
     # Tõnis rates it too, in the plan's review: both ratings are kept
     page.locator(".recipe-card").first.click()
     expect(page.locator("#view-recipe")).to_be_visible()
     page.keyboard.press("p")
-    expect(page.locator("#plan-toggle-label")).to_have_text("In plan")
+    expect(page.locator("#toast")).to_contain_text("Added to the cooking plan")
     # The plan is shared: it reaches the Sheet, with the phone's finished meal too
     page.wait_for_timeout(2500)
     shared_plan = list(sheet.stores["plan"].values())[0]["meals"]
@@ -629,10 +628,17 @@ def add_to_list(page, name):
     page.locator(".recipe-card", has_text=name).first.click()
     expect(page.locator("#view-recipe")).to_be_visible()
     expect(page.locator("#recipe-title")).to_have_text(name)
-    if page.locator("#plan-toggle-label").inner_text() == "In plan":
-        page.click("#plan-toggle")  # from an earlier round: take it out first
+    planned = page.evaluate("""() => {
+        const plan = JSON.parse(localStorage.getItem('kitchen.plan.v1') || '[]')[0];
+        const id = decodeURIComponent(location.hash.split('/').pop());
+        const meal = plan && plan.meals && plan.meals[id];
+        return Boolean(meal && !meal.removed);
+    }""")
+    if planned:  # in the plan from an earlier round? then out first
+        page.keyboard.press("p")
+        expect(page.locator("#ask-dialog")).to_be_visible()
         page.click("#ask-dialog button[value=ok]")
-        expect(page.locator("#plan-toggle-label")).to_have_text("Add to plan")
+        expect(page.locator("#toast")).to_contain_text("Taken out of the plan")
     page.keyboard.press("ArrowLeft")
     expect(page.locator("#added-dialog")).to_be_visible()
     page.click("#added-dialog button[value=ok]")
@@ -973,10 +979,6 @@ def test_add_from_recipe(p):
     page.fill("#edit-text", RECIPE)
     page.click("#edit-form button[type=submit]")
     expect(page.locator("#view-recipe")).to_be_visible()
-    expect(page.locator("#servings-label")).to_have_text("2")
-    page.click("#servings-up")
-    page.click("#servings-up")
-    expect(page.locator("#servings-label")).to_have_text("4")
     page.screenshot(path=SHOTS / "phone-recipe-add.png")
     # L goes to the shopping list and closes the recipe: swiping back leads to Recipes
     page.keyboard.press("l")
@@ -988,15 +990,17 @@ def test_add_from_recipe(p):
     expect(page.locator("#view-recipe")).to_be_hidden()
     page.locator(".recipe-card").first.click() if page.locator(".recipe-card").first.is_visible() else page.click("#suggestion")
     expect(page.locator("#view-recipe")).to_be_visible()
-    expect(page.locator("#servings-label")).to_have_text("4")  # kept from before
-    # Swiping right puts it in the plan, at the servings shown; the plan shops for it
+    # Swiping right puts it in the plan; servings are set there; the plan shops for it
     page.keyboard.press("ArrowLeft")
-    expect(page.locator("#added-text")).to_contain_text("4 servings")
+    expect(page.locator("#added-text")).to_contain_text("Set the servings in the plan")
     page.click("#added-dialog button[value=ok]")
     expect(page.locator("#cart-count")).to_be_hidden()
     page.wait_for_timeout(400)  # it moves on to the next recipe first
     page.goto(BASE + "#/plan")
     expect(page.locator("#view-plan")).to_be_visible()
+    expect(page.locator("#plan-shop .step-value")).to_have_text("2")
+    page.click("#plan-shop .step-button[aria-label='More servings']")
+    page.click("#plan-shop .step-button[aria-label='More servings']")
     expect(page.locator("#plan-shop .step-value")).to_have_text("4")
     page.click("#plan-shop-all")
     expect(page.locator("#cart-count")).to_have_text("3")
@@ -1189,15 +1193,12 @@ def test_recipe_layout(p):
     swipe_down(page, 200, 500)
     page.wait_for_timeout(300)
     expect(page.locator("#view-recipe")).to_be_visible()
-    # Changing the servings keeps the bar working
     page.evaluate("document.getElementById('view-recipe').scrollTo(0, 0)")
-    page.click("#servings-up")
-    expect(page.locator(".jump-button")).to_have_count(3)
     page.go_back()
     expect(page.locator("#view-list")).to_be_visible()
     expect(page.locator("#view-recipe")).to_be_hidden()
     expect(dock).to_be_hidden()
-    # A recipe without headings has no bar
+    # A recipe without headings has no bar, and so no bottom bar at all
     page.click("#add-recipe")
     page.fill("#edit-text", "Toast\nPut butter on it.")
     page.click("#edit-form button[type=submit]")
@@ -1252,11 +1253,9 @@ def test_recipe_swipe(p):
     expect(title).to_have_text(cards[1])
     page.wait_for_timeout(400)
     # Right: into the plan, the notice waits for OK, then the next recipe
-    page.click("#servings-up")
     swipe(page, 90, 300)
     expect(page.locator("#added-dialog")).to_be_visible()
     expect(page.locator("#added-title")).to_have_text("Added to the cooking plan")
-    expect(page.locator("#added-text")).to_contain_text("3 servings")
     assert page.evaluate("document.activeElement.tagName") == "H2"
     expect(title).to_have_text(cards[1])
     expect(page.locator("#plan-count")).to_have_text("1")

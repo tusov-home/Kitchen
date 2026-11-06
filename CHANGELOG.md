@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-11-07 c
+- The recipe page's servings and Add to plan buttons are gone: servings are set in the plan, and swiping right adds to it. A planned recipe shows its amounts for the planned servings.
+- The bottom bar shows only when a recipe has headings to jump to.
+- Fixed: answering two "Are you sure?" questions quickly could take the first answer for the second.
+
 ## 2026-11-07 b
 - "Are you sure?" questions now appear in the app's own style, without the site address on top.
 

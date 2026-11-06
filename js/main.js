@@ -5,7 +5,7 @@ import * as sync from "./sync.js";
 import { parseRoute, trackHistory, go, goBack, stillClosing } from "./ui/router.js";
 import { toggleSuggestionOwner } from "./ui/suggestion.js";
 import { initList, renderList, focusSearch, toggleKind, toggleFilters } from "./ui/list.js";
-import { initRecipe, renderRecipe, changeServings, canEditCurrent, swipeRecipe, showNextRecipe, addAndContinue, togglePlan, renderPlanToggle } from "./ui/recipe.js";
+import { initRecipe, renderRecipe, canEditCurrent, swipeRecipe, showNextRecipe, addAndContinue, togglePlan } from "./ui/recipe.js";
 import { showToast } from "./ui/toast.js";
 import { initPlan, renderPlan } from "./ui/plan.js";
 import { plans } from "./planState.js";
@@ -163,7 +163,7 @@ plans.onChange(function () {
   } else if (current.screen === "list") {
     renderList();
   } else if (current.screen === "recipe") {
-    renderPlanToggle();
+    renderRecipe(current.id); // the amounts follow the planned servings
     renderList(); // the page under the sheet shows the plan row
   }
 });
@@ -242,8 +242,6 @@ initShortcuts(
     addAndNext: addAndContinue,
     togglePlan: togglePlan,
     openPlan: () => go("#/plan"),
-    moreServings: () => changeServings(1),
-    fewerServings: () => changeServings(-1),
     save: saveFromEditor,
     back: function () {
       if (current.screen === "edit") {

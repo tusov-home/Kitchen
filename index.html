@@ -237,6 +237,7 @@
         <p id="recipe-notes"></p>
       </section>
 
+      <p id="recipe-scale" class="hint recipe-scale" hidden></p>
       <div id="recipe-body" class="recipe-body"></div>
     </article>
   </main>
@@ -383,17 +384,6 @@
   <!-- The recipe's buttons, all in thumb reach. Shown with the recipe. -->
   <nav id="recipe-dock" class="page-dock" aria-label="Recipe">
     <div id="recipe-jump" class="recipe-jump" role="group" aria-label="Jump to" hidden></div>
-    <div class="dock-buttons">
-      <div id="recipe-servings" class="dock-servings" role="group" aria-label="Servings">
-        <div class="dock-stepper">
-          <button id="servings-down" class="step-button" type="button" aria-label="Fewer servings" title="Fewer servings (−)">−</button>
-          <button id="servings-label" class="step-value" type="button" aria-live="polite" title="Back to as written"></button>
-          <button id="servings-up" class="step-button" type="button" aria-label="More servings" title="More servings (+)">+</button>
-        </div>
-        <span id="servings-caption"></span>
-      </div>
-      <button id="plan-toggle" class="dock-button dock-plan" type="button" title="Add to the cooking plan (P)"><svg class="line-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="4.5" y="5" width="15" height="15" rx="2"/><path d="M8 3v4M16 3v4M4.5 10h15"/><path id="plan-toggle-mark" d="M12 12.5v5M9.5 15h5"/></svg><span id="plan-toggle-label">Add to plan</span></button>
-    </div>
   </nav>
 
   <!-- Shows what letting go of a swipe on a recipe will do -->

@@ -106,14 +106,13 @@ above. If a look-only change turns out bigger than expected, say so.
   Keep the `interactive-widget=resizes-content` viewport setting: it lifts
   the bars above the phone keyboard.
 - Recipe page: a sheet on top of the recipes page, scrolling by itself
-  (`#view-recipe`, not `window`); bottom dock with servings and Add to plan, and a jump bar above
-  it; edit and copy sit by the title, which wraps beside them for one line
+  (`#view-recipe`, not `window`); bottom bar with only the jump bar (hidden when it has nothing); edit and copy sit by the title, which wraps beside them for one line
   only. Tags fold away. Rating, "cooked" and notes happen in the plan's
   review; shopping happens from the plan.
   Pull down from the top closes the recipe. Swipe left = next
   recipe, swipe right = add to the cooking plan, then OK = next, Cancel = undo.
-  Servings live in the dock; no Back button there (phone Back, or tap above
-  the sheet).
+  Servings are set in the plan; a planned recipe shows the planned amounts.
+  No Back button (phone Back, pull down, or tap above the sheet).
 - Dialogs and the recipe form must not pop up the phone keyboard on open:
   the heading takes the focus (`tabindex="-1"`), never a text box.
 - Every frequent action gets a keyboard shortcut in `js/ui/shortcuts.js`
