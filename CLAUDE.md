@@ -99,10 +99,13 @@ above. If a look-only change turns out bigger than expected, say so.
   generous spacing, soft rectangles rather than pills.
 - Recipes page order: today's suggestion → search with + on the right →
   framed "Meals" and "Sauces & condiments" rows, filling the phone's height
-  while folded. List and Filter fold behind the open row. Plan shopping
-  starts on the Shopping page.
-- Recipe page: all navigation and editing buttons in a bottom dock, with a
-  jump bar above them. Stars live behind the Rate button. Swipe left = next
+  while folded. List and Filter fold behind the open row.
+- Main actions live in a bar at the bottom of every page (`.page-dock`).
+  Keep the `interactive-widget=resizes-content` viewport setting: it lifts
+  the bars above the phone keyboard.
+- Recipe page: bottom dock with servings, Rate, Cooked and Shopping, and a
+  jump bar above it; edit and copy sit by the title. Stars live behind Rate.
+  Pull down from the top closes the recipe. Swipe left = next
   recipe, swipe right = add to shopping list, then OK = next, Cancel = undo.
   Servings live in the dock; no Back button there (phone Back or tab icons).
 - Dialogs and the recipe form must not pop up the phone keyboard on open:

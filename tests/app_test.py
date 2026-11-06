@@ -400,23 +400,11 @@ def test_laptop_second_device(p, sheet):
     page.screenshot(path=SHOTS / "laptop-4-sorted.png")
     page.select_option("#sort-select", "newest")
 
-    # Plan shopping starts on the Shopping page; Esc comes back to it
-    page.keyboard.press("l")
-    expect(page.locator("#view-shopping")).to_be_visible()
-    page.keyboard.press("p")
-    expect(page.locator("#plan-bar")).to_be_visible()
-    page.keyboard.press("Escape")
-    expect(page.locator("#view-shopping")).to_be_visible()
-    expect(page.locator("#plan-bar")).to_be_hidden()
-    # Pick two recipes, make a list sorted by shop section
-    page.click("#plan-start")
-    expect(page.locator("#plan-bar")).to_be_visible()
-    expect(page.locator("#suggestion")).to_be_hidden()  # the list has the stage
-    page.click(".recipe-card:has-text('Miso Aubergine with Soba')")
-    page.click(".recipe-card:has-text('Beef Shakshuka')")
-    expect(page.locator("#plan-count")).to_have_text("2 recipes")
-    expect(page.locator(".recipe-card.picked")).to_have_count(2)
-    page.click("#plan-make")
+    # Add two recipes: a list sorted by shop section
+    expect(page.locator("#plan-start")).to_have_count(0)
+    add_to_list(page, "Miso Aubergine with Soba")
+    add_to_list(page, "Beef Shakshuka")
+    page.click(".tab[data-tab=shopping]")
     expect(page.locator("#view-shopping")).to_be_visible()
     expect(page.locator("#shop-recipes")).to_contain_text("Miso Aubergine with Soba (2)")
     sections = page.locator(".shop-section h2")
@@ -437,17 +425,14 @@ def test_laptop_second_device(p, sheet):
     ticked = [i["name"] for i in shared[0]["items"].values() if i["checked"]]
     assert ticked == ["beef mince"], ticked
 
-    # Making another list asks whether to add or start over
-    # (and shortcuts work right after ticking a checkbox)
+    # Shortcuts work right after ticking a checkbox
     page.click(".shop-item:has-text('aubergines') .shop-check")
     page.click(".shop-item:has-text('aubergines') .shop-check")
-    page.keyboard.press("p")
-    expect(page.locator("#plan-bar")).to_be_visible()
-    page.click(".recipe-card:has-text('Spicy Miso Aubergine')")
-    page.click("#plan-make")
-    expect(page.locator("#make-list-dialog")).to_be_visible()
-    page.click("#make-list-dialog button[value=add]")
-    expect(page.locator("#view-shopping")).to_be_visible()
+    page.keyboard.press("ArrowRight")
+    expect(page.locator("#view-pantry")).to_be_visible()
+    # Another recipe joins the same list
+    add_to_list(page, "Spicy Miso Aubergine")
+    page.click(".tab[data-tab=shopping]")
     expect(page.locator(".shop-name").filter(has_text="aubergines")).to_have_text("4 aubergines")
     page.click(".brand")
 
@@ -527,6 +512,43 @@ def test_shopping_shared(p, sheet):
     assert ticked == ["beef mince", "toilet paper"], ticked
     assert not errors, errors
     print("shopping shared: ok")
+
+
+def add_to_list(page, name):
+    """Open a recipe and add it to the shopping list, like a swipe right."""
+    page.goto(BASE + "#/")
+    expect(page.locator("#view-list")).to_be_visible()
+    if page.locator("#all-panel").is_hidden():
+        page.click("#meals-toggle")
+    page.locator(".recipe-card", has_text=name).first.click()
+    expect(page.locator("#view-recipe")).to_be_visible()
+    expect(page.locator("#recipe-title")).to_have_text(name)
+    page.keyboard.press("ArrowLeft")
+    expect(page.locator("#added-dialog")).to_be_visible()
+    page.click("#added-dialog button[value=ok]")
+    expect(page.locator("#added-dialog")).to_be_hidden()
+    page.wait_for_timeout(300)  # the next recipe arrives
+
+
+def swipe_down(page, from_y, to_y, x=200, lift=True):
+    """A finger pulling the page down."""
+    page.evaluate(
+        """async ([x, fromY, toY, lift]) => {
+            const target = document.elementFromPoint(x, fromY) || document.body;
+            const touch = (y) => new Touch({ identifier: 1, target: target, clientX: x, clientY: y });
+            const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+            target.dispatchEvent(new TouchEvent("touchstart", { touches: [touch(fromY)], changedTouches: [touch(fromY)], bubbles: true }));
+            for (let i = 1; i <= 6; i++) {
+                await wait(16);
+                const y = fromY + ((toY - fromY) * i) / 6;
+                target.dispatchEvent(new TouchEvent("touchmove", { touches: [touch(y)], changedTouches: [touch(y)], bubbles: true }));
+            }
+            if (lift) {
+                target.dispatchEvent(new TouchEvent("touchend", { touches: [], changedTouches: [touch(toY)], bubbles: true }));
+            }
+        }""",
+        [x, from_y, to_y, lift],
+    )
 
 
 def swipe(page, from_x, to_x, y=400, steps=6, step_ms=16, lift=True):
@@ -646,7 +668,7 @@ def test_pantry_tabs(p, sheet):
     page.screenshot(path=SHOTS / "phone-7-pantry.png", full_page=True)
 
     # Low/out → shopping list; buying it restocks the pantry
-    expect(page.locator("#pantry-restock")).to_contain_text("1 item is low or out")
+    expect(page.locator("#pantry-restock")).to_contain_text("1 low or out")
     page.click("#pantry-to-shopping")
     expect(page.locator("#pantry-restock")).to_be_hidden()
     page.click(".tab[data-tab=shopping]")
@@ -659,10 +681,10 @@ def test_pantry_tabs(p, sheet):
     page.fill("#pantry-add-input", "White miso")
     page.keyboard.press("Enter")
     page.click(".tab[data-tab=shopping]")
-    page.click("#plan-start")
-    page.click(".recipe-card:has-text('Miso Aubergine with Soba')")
-    page.click("#plan-make")
-    page.click("#make-list-dialog button[value=new]")
+    page.once("dialog", lambda d: d.accept())
+    page.click("#shop-delete")
+    add_to_list(page, "Miso Aubergine with Soba")
+    page.click(".tab[data-tab=shopping]")
     miso = page.locator(".shop-item", has_text="white miso")
     expect(miso).to_contain_text("In your pantry")
     expect(page.locator(".shop-section", has_text="Check you have")).to_contain_text("white miso")
@@ -838,21 +860,17 @@ def test_add_from_recipe(p):
     page.click("#servings-up")
     expect(page.locator("#servings-label")).to_have_text("4")
     page.screenshot(path=SHOTS / "phone-recipe-add.png")
-    page.click("#add-to-list")
-    expect(page.locator("#toast")).to_contain_text("Added to the shopping list")
-    expect(page.locator("#cart-count")).to_have_text("3")
-    page.click("#toast .toast-action")
+    # The Shopping button only opens the list; adding is a swipe
+    page.click("#to-shopping")
     expect(page.locator("#view-shopping")).to_be_visible()
-    expect(page.locator(".shop-name").filter(has_text="aubergines")).to_have_text("4 aubergines")
-    # A second time asks first, so a double tap doesn't double the list
+    expect(page.locator("#cart-count")).to_be_hidden()
     page.go_back()
     expect(page.locator("#view-recipe")).to_be_visible()
-    page.click("#add-to-list")
-    expect(page.locator("#toast")).to_contain_text("Already on the shopping list")
-    page.click("#toast .toast-action")
-    expect(page.locator("#toast")).to_contain_text("Added to the shopping list")
-    page.click("#toast .toast-action")
-    expect(page.locator(".shop-name").filter(has_text="aubergines")).to_have_text("8 aubergines")
+    page.keyboard.press("ArrowLeft")
+    page.click("#added-dialog button[value=ok]")
+    expect(page.locator("#cart-count")).to_have_text("3")
+    page.click(".tab[data-tab=shopping]")
+    expect(page.locator(".shop-name").filter(has_text="aubergines")).to_have_text("4 aubergines")
     assert not errors, errors
     print("add from recipe: ok")
 
@@ -905,13 +923,7 @@ def test_meals_and_sauces(p):
     expect(page.locator(".recipe-card")).to_have_count(2)
     expect(page.locator(".recipe-card", has_text="Chilli crisp")).to_contain_text("Sauce or condiment")
     page.fill("#search", "")
-    # Plan shopping shows both
-    page.click(".tab[data-tab=shopping]")
-    page.click("#plan-start")
-    expect(page.locator(".recipe-card")).to_have_count(2)
-    page.click("#plan-cancel")
     # Changing the type moves it to the other row, and it survives a reload
-    page.click(".tab[data-tab=list]")
     page.click("#sauces-toggle")
     page.click(".recipe-card")
     page.click("#edit-link")
@@ -1039,6 +1051,10 @@ def test_recipe_layout(p):
     page.wait_for_timeout(200)
     last = page.evaluate("document.getElementById('recipe-body').getBoundingClientRect().bottom")
     assert last <= page.evaluate("document.getElementById('recipe-dock').getBoundingClientRect().top"), last
+    # Further down the recipe, pulling down is an ordinary scroll
+    swipe_down(page, 200, 500)
+    page.wait_for_timeout(300)
+    expect(page.locator("#view-recipe")).to_be_visible()
     # Changing the servings keeps the bar working
     page.evaluate("window.scrollTo(0, 0)")
     page.click("#servings-up")
@@ -1149,6 +1165,15 @@ def test_recipe_swipe(p):
     expect(page.locator("#cart-count")).to_have_text("2")
     page.keyboard.press("Escape")
     expect(page.locator("#cart-count")).to_have_text("1")
+    # Pulling down from the top closes the recipe; a small pull doesn't
+    swipe_down(page, 300, 340)
+    page.wait_for_timeout(400)
+    expect(page.locator("#view-recipe")).to_be_visible()
+    swipe_down(page, 200, 500)
+    expect(page.locator("#view-list")).to_be_visible()
+    page.locator(".recipe-card", has_text=cards[2]).click()
+    expect(title).to_have_text(cards[2])
+    page.wait_for_timeout(400)
     # After the last one: back to the list, with a message
     swipe(page, 330, 120)
     expect(page.locator("#view-list")).to_be_visible()

@@ -70,7 +70,7 @@ export function renderPantry() {
 
   const toBuy = needToBuy();
   restock.hidden = toBuy.length === 0;
-  restockText.textContent = toBuy.length + (toBuy.length === 1 ? " item is" : " items are") + " low or out";
+  restockText.textContent = toBuy.length + " low or out";
 
   for (const button of filterBar.querySelectorAll("button[data-filter]")) {
     const on = button.dataset.filter === filter;

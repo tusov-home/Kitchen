@@ -108,7 +108,7 @@ function showChange() {
   box.classList.add("changed");
 }
 
-// visible: false while searching or planning, so the list has the stage.
+// visible: false while searching, so the list has the stage.
 export function renderSuggestion(recipes, visible) {
   lastRecipes = recipes;
   box.hidden = !visible || recipes.length === 0;

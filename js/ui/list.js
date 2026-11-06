@@ -4,7 +4,6 @@
 import * as state from "../state.js";
 import * as storage from "../storage.js";
 import { visibleRecipes, allTags, allOwners, averageRating, kindOf } from "../lib/recipes.js";
-import { isPlanning, isSelected, toggleSelected } from "./plan.js";
 import { renderSuggestion, initSuggestion } from "./suggestion.js";
 import { setQueue } from "./recipeQueue.js";
 
@@ -71,9 +70,9 @@ function tagChip(tag, selected, onClick) {
 export function renderList() {
   const all = state.getRecipes();
   const meals = all.filter((recipe) => kindOf(recipe) === "meal");
-  // Searching and planning look through everything, so do without the rows.
+  // Searching looks through everything, so do without the rows.
   // With no recipes at all, the panel explains how to add the first one.
-  const everything = Boolean(searchInput.value.trim()) || isPlanning() || all.length === 0;
+  const everything = Boolean(searchInput.value.trim()) || all.length === 0;
   const pool = everything ? all : all.filter((recipe) => kindOf(recipe) === (openKind || "meal"));
   const tags = allTags(pool);
   if (!tags.includes(activeTag)) {
@@ -107,24 +106,6 @@ export function renderList() {
     // Swiping on the recipe goes through this list, as you see it now.
     link.addEventListener("click", () => setQueue(shown.map((item) => item.id)));
     link.className = "recipe-card";
-
-    // While planning, a tap picks the recipe instead of opening it.
-    if (isPlanning()) {
-      const picked = isSelected(recipe.id);
-      link.classList.add("pickable");
-      link.classList.toggle("picked", picked);
-      link.setAttribute("role", "checkbox");
-      link.setAttribute("aria-checked", picked ? "true" : "false");
-      const box = document.createElement("span");
-      box.className = "pick-box";
-      box.textContent = picked ? "✓" : "";
-      box.setAttribute("aria-hidden", "true");
-      link.appendChild(box);
-      link.addEventListener("click", function (event) {
-        event.preventDefault();
-        toggleSelected(recipe.id);
-      });
-    }
 
     const title = document.createElement("span");
     title.className = "recipe-card-title";
@@ -198,8 +179,8 @@ export function renderList() {
   renderRow(mealsToggle, "meal", "meals", "A");
   renderRow(saucesToggle, "sauce", "sauces and condiments", "S");
 
-  // The suggestion steps aside while you search or plan.
-  renderSuggestion(meals, !searchInput.value.trim() && !isPlanning());
+  // The suggestion steps aside while you search.
+  renderSuggestion(meals, !searchInput.value.trim());
 }
 
 function renderRow(toggle, kind, words, key) {

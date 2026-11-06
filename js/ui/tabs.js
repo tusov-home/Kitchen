@@ -22,6 +22,8 @@ const EDGE_PX = 20;
 const DECIDE_PX = 8;
 // Let go past this distance, or flick quickly, to change page.
 const COMMIT_PX = 55;
+// Pulling a recipe down from its top closes it after this distance.
+const CLOSE_PX = 110;
 const FLICK_PX = 25;
 const FLICK_SPEED = 0.35; // pixels per millisecond
 // At the first or last page the page only moves a little, like a rubber band.
@@ -132,7 +134,7 @@ export function setBadge(id, count) {
 // Where a swipe must not switch pages.
 function blocksSwipe(target) {
   return Boolean(
-    target.closest("input, textarea, select, .table-wrap, dialog, [contenteditable], .recipe-dock")
+    target.closest("input, textarea, select, .table-wrap, dialog, [contenteditable], .page-dock")
   );
 }
 
@@ -151,6 +153,25 @@ function showHint(dx) {
 
 function hideHint() {
   swipeHint.hidden = true;
+}
+
+// Follows the finger down, a bit slower, as if the page were heavy.
+function dragDown(view, dy) {
+  view.style.transition = "none";
+  view.style.transform = "translateY(" + dy * 0.6 + "px)";
+  view.style.opacity = String(1 - Math.min(dy / (CLOSE_PX * 3), 0.6));
+}
+
+function closeRecipe(view) {
+  const finish = () => goToTab("list");
+  if (reduceMotion.matches) {
+    finish();
+    return;
+  }
+  view.style.transition = "transform 0.16s ease-in, opacity 0.16s ease-in";
+  view.style.transform = "translateY(" + window.innerHeight * 0.4 + "px)";
+  view.style.opacity = "0";
+  setTimeout(finish, 170);
 }
 
 function currentView() {
@@ -213,7 +234,8 @@ function initSwipe() {
       return;
     }
     const now = Date.now();
-    drag = { x: touch.clientX, y: touch.clientY, axis: null, view: currentView(), lastX: touch.clientX, lastTime: now, speed: 0 };
+    const atTop = getScreen() === "recipe" && window.scrollY <= 0;
+    drag = { x: touch.clientX, y: touch.clientY, axis: null, view: currentView(), lastX: touch.clientX, lastTime: now, speed: 0, atTop: atTop };
   }, { passive: true });
 
   document.addEventListener("touchmove", function (event) {
@@ -227,8 +249,20 @@ function initSwipe() {
       if (Math.abs(dx) < DECIDE_PX && Math.abs(dy) < DECIDE_PX) {
         return;
       }
-      // Mostly sideways: a page swipe. Otherwise: an ordinary scroll.
-      drag.axis = Math.abs(dx) > Math.abs(dy) * 1.2 ? "x" : "y";
+      // Mostly sideways: a page swipe. Down from the top of a recipe: close
+      // it. Otherwise: an ordinary scroll.
+      if (Math.abs(dx) > Math.abs(dy) * 1.2) {
+        drag.axis = "x";
+      } else {
+        drag.axis = drag.atTop && dy > 0 ? "down" : "y";
+      }
+    }
+    if (drag.axis === "down") {
+      drag.dy = Math.max(dy, 0);
+      if (!reduceMotion.matches) {
+        dragDown(drag.view, drag.dy);
+      }
+      return;
     }
     if (drag.axis !== "x") {
       return;
@@ -254,6 +288,14 @@ function initSwipe() {
     const current = drag;
     drag = null;
     hideHint();
+    if (current.axis === "down") {
+      if (!cancelled && current.dy > CLOSE_PX) {
+        closeRecipe(current.view);
+      } else {
+        springBack(current.view);
+      }
+      return;
+    }
     if (current.axis !== "x") {
       return;
     }

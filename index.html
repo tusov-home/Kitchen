@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, interactive-widget=resizes-content">
   <title>Kitchen</title>
   <meta name="description" content="Our household recipe book: save recipes worked out with Claude and cook them again.">
   <!-- Phone status bar matches the page background (light and dark) -->
@@ -72,7 +72,6 @@
     <div class="list-tools">
       <button id="filter-toggle" class="text-button" type="button" aria-expanded="false" aria-controls="filter-panel" title="Filter and sort (F)">Filter</button>
     </div>
-    <p id="plan-hint" class="hint plan-hint" hidden>Tap the recipes you want to cook</p>
 
     <div id="filter-panel" class="filter-panel" hidden>
       <div class="view-tools">
@@ -96,20 +95,11 @@
     </div>
 
     <!-- Shown while picking recipes for the shopping list -->
-    <div id="plan-bar" class="plan-bar" hidden>
-      <span id="plan-count" class="plan-count">0 recipes</span>
-      <span class="spacer"></span>
-      <button id="plan-cancel" class="button" type="button" title="Cancel (Esc)">Cancel</button>
-      <button id="plan-make" class="primary" type="button" title="Make shopping list" disabled>Make shopping list</button>
-    </div>
   </main>
 
   <!-- Shopping list -->
   <main id="view-shopping" class="view" hidden>
-    <div class="page-head">
-      <h1 class="page-title">Shopping list</h1>
-      <button id="plan-start" class="primary" type="button" title="Pick recipes for a shopping list (P)">Plan shopping</button>
-    </div>
+    <h1 class="page-title">Shopping list</h1>
     <p id="shop-recipes" class="shop-recipes"></p>
 
     <div id="shop-progress" class="shop-progress">
@@ -117,22 +107,11 @@
       <div class="progress-track"><div id="shop-progress-fill" class="progress-fill"></div></div>
     </div>
 
-    <form id="shop-add" class="shop-add">
-      <input id="shop-add-input" type="text" placeholder="Add something else, e.g. 2 lemons" aria-label="Add an item" autocomplete="off">
-      <button class="button" type="submit">Add</button>
-    </form>
-
     <div id="shop-sections"></div>
 
     <div id="shop-empty" class="empty" hidden>
       <p class="empty-title">No shopping list yet</p>
-      <p>Tap <strong>Plan shopping</strong>, pick the recipes you'll cook, then <strong>Make shopping list</strong>.</p>
-    </div>
-
-    <div id="shop-footer" class="actions">
-      <button id="shop-remove-ticked" class="button" type="button">Remove ticked</button>
-      <span class="spacer"></span>
-      <button id="shop-delete" class="button danger" type="button">Start over</button>
+      <p>Open a recipe and swipe right to add it, or add something below.</p>
     </div>
   </main>
 
@@ -140,16 +119,6 @@
   <main id="view-pantry" class="view" hidden>
     <h1 class="page-title">Pantry</h1>
     <p class="hint page-hint">What you have at home. Tap <strong>Have</strong> to mark something Low or Out.</p>
-
-    <div id="pantry-restock" class="restock" hidden>
-      <span id="pantry-restock-text"></span>
-      <button id="pantry-to-shopping" class="primary" type="button">Add to shopping list</button>
-    </div>
-
-    <form id="pantry-add" class="shop-add">
-      <input id="pantry-add-input" type="text" placeholder="Add something, e.g. rice" aria-label="Add to pantry" autocomplete="off">
-      <button class="button" type="submit">Add</button>
-    </form>
 
     <div id="pantry-filter" class="owner-filter" role="group" aria-label="Show">
       <button type="button" class="tag selected" data-filter="all" aria-pressed="true">Everything</button>
@@ -169,10 +138,7 @@
 
   <!-- Home improvement projects -->
   <main id="view-projects" class="view" hidden>
-    <div class="page-head">
-      <h1 class="page-title">Projects</h1>
-      <button id="project-add" class="primary" type="button" title="Add project (N)">+ Add project</button>
-    </div>
+    <h1 class="page-title">Projects</h1>
     <div id="projects-filter" class="owner-filter" role="group" aria-label="Show projects for"></div>
     <div id="projects-groups"></div>
     <div id="projects-empty" class="empty" hidden>
@@ -225,7 +191,13 @@
   <!-- One recipe -->
   <main id="view-recipe" class="view" hidden>
     <article class="recipe">
-      <h1 id="recipe-title"></h1>
+      <div class="recipe-head">
+        <h1 id="recipe-title"></h1>
+        <div class="recipe-tools">
+          <a id="edit-link" class="icon-button" title="Edit (E)" aria-label="Edit"><svg class="line-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4.5 19.5l1-4.2L16.3 4.5a1.7 1.7 0 0 1 2.4 0l.8.8a1.7 1.7 0 0 1 0 2.4L8.7 18.5z"/></svg></a>
+          <a id="copy-link" class="icon-button" title="Make your own copy to adjust (C)" aria-label="Make my copy"><svg class="line-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="9" y="9" width="11" height="11" rx="1.5"/><path d="M15 9V5.5A1.5 1.5 0 0 0 13.5 4h-8A1.5 1.5 0 0 0 4 5.5v8A1.5 1.5 0 0 0 5.5 15H9"/></svg></a>
+        </div>
+      </div>
       <p id="recipe-owner" class="owner-line"></p>
       <div id="recipe-tags" class="tags"></div>
 
@@ -327,19 +299,6 @@
     </form>
   </dialog>
 
-  <!-- When a shopping list already exists -->
-  <dialog id="make-list-dialog" class="dialog">
-    <form method="dialog" class="dialog-body">
-      <h2>You already have a shopping list</h2>
-      <p class="hint" id="make-list-text"></p>
-      <div class="actions stack-actions">
-        <button class="primary" value="add">Add to current list</button>
-        <button class="button" value="new">Start a new list</button>
-        <button class="button" value="cancel">Cancel</button>
-      </div>
-    </form>
-  </dialog>
-
   <!-- Asked once per phone, before the first rating -->
   <dialog id="name-dialog" class="dialog">
     <form method="dialog" class="dialog-body" id="name-form">
@@ -355,8 +314,35 @@
     </form>
   </dialog>
 
+  <!-- Each page's actions, in thumb reach -->
+  <div id="shop-dock" class="page-dock">
+    <div id="shop-footer" class="dock-row">
+      <button id="shop-remove-ticked" class="button" type="button">Remove ticked</button>
+      <button id="shop-delete" class="button danger" type="button">Start over</button>
+    </div>
+    <form id="shop-add" class="shop-add">
+      <input id="shop-add-input" type="text" placeholder="Add something else, e.g. 2 lemons" aria-label="Add an item" autocomplete="off">
+      <button class="button" type="submit">Add</button>
+    </form>
+  </div>
+
+  <div id="pantry-dock" class="page-dock">
+    <div id="pantry-restock" class="dock-row" hidden>
+      <span id="pantry-restock-text" class="dock-note"></span>
+      <button id="pantry-to-shopping" class="primary" type="button">Add to shopping list</button>
+    </div>
+    <form id="pantry-add" class="shop-add">
+      <input id="pantry-add-input" type="text" placeholder="Add something, e.g. rice" aria-label="Add to pantry" autocomplete="off">
+      <button class="button" type="submit">Add</button>
+    </form>
+  </div>
+
+  <div id="projects-dock" class="page-dock">
+    <button id="project-add" class="primary" type="button" title="Add project (N)">Add project</button>
+  </div>
+
   <!-- The recipe's buttons, all in thumb reach. Shown with the recipe. -->
-  <nav id="recipe-dock" class="recipe-dock" aria-label="Recipe">
+  <nav id="recipe-dock" class="page-dock" aria-label="Recipe">
     <div id="recipe-jump" class="recipe-jump" role="group" aria-label="Jump to" hidden></div>
     <div class="dock-buttons">
       <div id="recipe-servings" class="dock-servings" role="group" aria-label="Servings">
@@ -368,10 +354,8 @@
         <span id="servings-caption"></span>
       </div>
       <button id="rate-open" class="dock-button" type="button" title="Rate this recipe (R)"><svg class="line-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 4l2.5 5.2 5.7.8-4.1 4 1 5.7L12 17.2 6.9 19.7l1-5.7-4.1-4 5.7-.8z"/></svg><span id="rate-open-label">Rate</span></button>
-      <button id="add-to-list" class="dock-button" type="button" title="Add the ingredients, for these servings (A)"><svg class="line-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3.5 10h17l-1.7 8.4a2 2 0 0 1-2 1.6H7.2a2 2 0 0 1-2-1.6z"/><path d="M8 10l3.2-5.5"/><path d="M16 10l-3.2-5.5"/></svg><span>To list</span></button>
       <button id="cooked-today" class="dock-button" type="button" title="Add today's date to the notes"><svg class="line-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span>Cooked</span></button>
-      <a id="edit-link" class="dock-button" title="Edit (E)"><svg class="line-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4.5 19.5l1-4.2L16.3 4.5a1.7 1.7 0 0 1 2.4 0l.8.8a1.7 1.7 0 0 1 0 2.4L8.7 18.5z"/></svg><span>Edit</span></a>
-      <a id="copy-link" class="dock-button" title="Make your own copy to adjust (C)"><svg class="line-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="9" y="9" width="11" height="11" rx="1.5"/><path d="M15 9V5.5A1.5 1.5 0 0 0 13.5 4h-8A1.5 1.5 0 0 0 4 5.5v8A1.5 1.5 0 0 0 5.5 15H9"/></svg><span>My copy</span></a>
+      <a id="to-shopping" href="#/shopping" class="dock-button" title="Shopping list (L)"><svg class="line-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3.5 10h17l-1.7 8.4a2 2 0 0 1-2 1.6H7.2a2 2 0 0 1-2-1.6z"/><path d="M8 10l3.2-5.5"/><path d="M16 10l-3.2-5.5"/></svg><span>Shopping</span></a>
     </div>
   </nav>
 

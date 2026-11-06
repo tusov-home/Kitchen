@@ -5,7 +5,7 @@ import * as sync from "./sync.js";
 import { parseRoute, trackHistory, go, goBack } from "./ui/router.js";
 import { toggleSuggestionOwner } from "./ui/suggestion.js";
 import { initList, renderList, focusSearch, toggleKind, toggleFilters } from "./ui/list.js";
-import { initRecipe, renderRecipe, changeServings, canEditCurrent, addCurrentToList, swipeRecipe, showNextRecipe, addAndContinue } from "./ui/recipe.js";
+import { initRecipe, renderRecipe, changeServings, canEditCurrent, swipeRecipe, showNextRecipe, addAndContinue } from "./ui/recipe.js";
 import { showToast } from "./ui/toast.js";
 import { rate, initRating, openRating } from "./ui/rating.js";
 import { initRecipeJump, jumpTo } from "./ui/recipeJump.js";
@@ -15,7 +15,6 @@ import { initSettings, setSettingsStatus } from "./ui/settings.js";
 import { initShortcuts } from "./ui/shortcuts.js";
 import { initPwa, onInstallAvailable, install } from "./pwa.js";
 import * as shoppingState from "./shoppingState.js";
-import { initPlan, isPlanning, setPlanning, startPlanning, cancelPlanning } from "./ui/plan.js";
 import { initShopping, renderShopping, renderCartCount } from "./ui/shopping.js";
 import { initTabs, renderTabs, goToTab, stepTab, onRecipeSwipe } from "./ui/tabs.js";
 import { pantry, pantrySections } from "./pantryState.js";
@@ -73,13 +72,10 @@ function route() {
       return;
     }
   } else if (current.screen === "shopping") {
-    setPlanning(false);
     renderShopping();
   } else if (current.screen === "pantry") {
-    setPlanning(false);
     renderPantry();
   } else if (current.screen === "projects") {
-    setPlanning(false);
     renderProjects();
   } else if (current.screen === "project") {
     if (!renderProject(current.id)) {
@@ -163,7 +159,6 @@ initRecipeJump();
 initName();
 initEditor();
 initSettings();
-initPlan(renderList);
 initShopping();
 initPantry();
 initPantrySections();
@@ -198,16 +193,13 @@ initShortcuts(
     rate3: () => rate(3),
     rate4: () => rate(4),
     rate5: () => rate(5),
-    addToList: addCurrentToList,
     nextRecipe: showNextRecipe,
     addAndNext: addAndContinue,
     moreServings: () => changeServings(1),
     fewerServings: () => changeServings(-1),
     save: saveFromEditor,
     back: function () {
-      if (current.screen === "list" && isPlanning()) {
-        cancelPlanning();
-      } else if (current.screen === "edit") {
+      if (current.screen === "edit") {
         cancelEditor();
       } else if (current.screen === "project") {
         document.getElementById("project-back").click();
@@ -222,7 +214,6 @@ initShortcuts(
     openSections: openSections,
     addProject: () => openProjectDialog(null),
     editProject: editCurrentProject,
-    startPlanning: startPlanning,
     showHelp: () => document.getElementById("shortcut-help").showModal(),
   },
   () => current.screen

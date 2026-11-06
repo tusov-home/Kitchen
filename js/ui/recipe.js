@@ -27,7 +27,6 @@ const servingsDown = document.getElementById("servings-down");
 const servingsUp = document.getElementById("servings-up");
 const servingsLabel = document.getElementById("servings-label");
 const servingsCaption = document.getElementById("servings-caption");
-const addToListButton = document.getElementById("add-to-list");
 const addedDialog = document.getElementById("added-dialog");
 const addedTitle = document.getElementById("added-title");
 const addedText = document.getElementById("added-text");
@@ -136,27 +135,6 @@ export function changeServings(direction) {
   renderServingsAndBody(recipe);
 }
 
-function addIngredients(recipe) {
-  shopping.addRecipes([recipe], "add", shownFactor(recipe));
-  showToast("Added to the shopping list", { label: "Open list", run: () => go("#/shopping") });
-}
-
-// Adds the ingredients, for the servings shown, to the current list.
-// A second time would add the amounts up, so that has to be meant.
-export function addCurrentToList() {
-  const recipe = state.getRecipe(currentId);
-  if (!recipe) {
-    return;
-  }
-  if (ingredientLines(recipe.text).length === 0) {
-    showToast("No ingredient list found in this recipe");
-  } else if (shopping.hasRecipe(recipe.id)) {
-    showToast("Already on the shopping list", { label: "Add again", run: () => addIngredients(recipe) });
-  } else {
-    addIngredients(recipe);
-  }
-}
-
 // The next recipe in the list you came from. Replaces this one in the
 // phone's history, so Back returns to the list however far you swiped.
 export function showNextRecipe() {
@@ -227,7 +205,6 @@ export function initRecipe() {
     showToast("Added to notes: " + note);
   });
 
-  addToListButton.addEventListener("click", addCurrentToList);
   servingsUp.addEventListener("click", () => changeServings(1));
   servingsDown.addEventListener("click", () => changeServings(-1));
   servingsLabel.addEventListener("click", function () {

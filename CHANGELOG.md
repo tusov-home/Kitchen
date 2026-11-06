@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-11-06 o
+- Recipe: pull down from the top to close it. The bottom buttons are now servings, Rate, Cooked and Shopping, which opens the list; adding is done by swiping right. Edit and copy moved next to the title.
+- Plan shopping is gone: recipes are added by swiping.
+- Shopping, Pantry and Projects: adding and the other main actions moved to a bar at the bottom.
+
 ## 2026-11-06 n
 - The notice after swiping right has a **Cancel** button, which takes the recipe off the list and stays on it.
 - Servings moved into the bottom bar, where Back was; tap the number to go back to the recipe as written. Use the phone's Back or the page icons to leave a recipe.

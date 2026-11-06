@@ -552,10 +552,6 @@ button.owner-initial {
   border-radius: var(--radius);
 }
 
-.plan-hint {
-  margin: 0.25rem 0 0;
-}
-
 .filter-panel {
   margin-top: 0.5rem;
   padding: 0.75rem 0.9rem;
@@ -768,75 +764,8 @@ div.empty::before {
   text-align: left;
 }
 
-/* ---------- Plan shopping ---------- */
 
 
-
-.recipe-card.pickable {
-  position: relative;
-  padding-right: 3.5rem;
-  cursor: pointer;
-  user-select: none;
-  -webkit-user-select: none;
-  -webkit-touch-callout: none;
-}
-
-.recipe-card.picked {
-  border-color: var(--accent);
-  background: var(--accent-soft);
-}
-
-.pick-box {
-  position: absolute;
-  right: 1rem;
-  top: 50%;
-  transform: translateY(-50%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 1.75rem;
-  height: 1.75rem;
-  border: 2px solid var(--border);
-  border-radius: 8px;
-  background: var(--surface);
-  color: var(--accent-text);
-  font-weight: 700;
-}
-
-.recipe-card.picked .pick-box {
-  border-color: var(--accent);
-  background: var(--accent);
-}
-
-/* Room at the bottom so the bar never covers the last card */
-body.planning .recipe-list {
-  padding-bottom: 5rem;
-}
-
-.plan-bar {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 20;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem max(1rem, calc((100vw - 46rem) / 2 + 1rem));
-  padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
-  border-top: 1px solid var(--border);
-  background: var(--bg);
-}
-
-body.has-tabbar .plan-bar {
-  bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom));
-  padding-bottom: 0.75rem;
-}
-
-.plan-count {
-  font-weight: 500;
-  white-space: nowrap;
-}
 
 .primary:disabled {
   opacity: 0.45;
@@ -1215,10 +1144,6 @@ body.has-tabbar {
   padding-bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom) + 1rem);
 }
 
-body.has-tabbar.planning {
-  padding-bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom) + 5rem);
-}
-
 .tabbar {
   display: flex;
   flex: 1;
@@ -1360,19 +1285,6 @@ body {
 /* The title gives way a little on narrow phones, so both stay on one line */
 .page-head .page-title {
   font-size: clamp(1.45rem, 7vw, 1.85rem);
-}
-
-.restock {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem 1rem;
-  margin: 0.5rem 0;
-  padding: 0.75rem 1rem;
-  border-radius: var(--radius-lg);
-  background: var(--surface);
-  font-weight: 500;
 }
 
 .pantry-item {
@@ -1671,7 +1583,7 @@ html {
 
 /* ---------- Recipe: buttons at the bottom ---------- */
 
-.recipe-dock {
+.page-dock {
   display: none;
   position: fixed;
   right: 0;
@@ -1685,8 +1597,11 @@ html {
     var(--bg) var(--stone) center top / 320px;
 }
 
-/* Lives outside the page, so it stays put while the page swipes */
-body:has(#view-recipe:not([hidden])) .recipe-dock {
+/* Each dock lives outside its page, so it stays put while the page swipes */
+body:has(#view-recipe:not([hidden])) #recipe-dock,
+body:has(#view-shopping:not([hidden])) #shop-dock,
+body:has(#view-pantry:not([hidden])) #pantry-dock,
+body:has(#view-projects:not([hidden])) #projects-dock {
   display: block;
 }
 
@@ -1697,6 +1612,73 @@ body:has(#view-recipe:not([hidden])) {
 
 body:has(#view-recipe:not([hidden])):has(#recipe-jump:not([hidden])) {
   --tabbar-h: 6.5rem;
+}
+
+body:has(#view-shopping:not([hidden])),
+body:has(#view-pantry:not([hidden])),
+body:has(#view-projects:not([hidden])) {
+  --tabbar-h: 4rem;
+}
+
+body:has(#view-shopping:not([hidden])):has(#shop-footer:not([hidden])),
+body:has(#view-pantry:not([hidden])):has(#pantry-restock:not([hidden])) {
+  --tabbar-h: 7.5rem;
+}
+
+/* The phone's pull-to-refresh would fight pulling a recipe down to close it */
+html:has(#view-recipe:not([hidden])) {
+  overscroll-behavior-y: none;
+}
+
+.page-dock > .shop-add,
+.page-dock > .dock-row,
+#projects-dock {
+  padding: 0.5rem 0.75rem 0;
+}
+
+.page-dock > :last-child,
+#projects-dock {
+  padding-bottom: 0.5rem;
+}
+
+.page-dock .shop-add {
+  margin: 0;
+}
+
+.dock-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.dock-note {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+#project-add {
+  width: 100%;
+}
+
+/* Edit and copy sit quietly beside the title */
+.recipe-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.recipe-head h1 {
+  flex: 1;
+  min-width: 0;
+}
+
+.recipe-tools {
+  display: flex;
+  flex-shrink: 0;
+  margin-top: 0.75rem;
+  color: var(--muted);
 }
 
 .recipe-jump {

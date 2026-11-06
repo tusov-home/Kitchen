@@ -11,7 +11,6 @@ const SHORTCUTS = [
   { keys: "k", action: "suggestK", where: ["list"] },
   { keys: "e", label: "E", action: "editRecipe", where: ["recipe"], text: "Edit recipe (your own)" },
   { keys: "c", label: "C", action: "copyRecipe", where: ["recipe"], text: "Make my copy" },
-  { keys: "a", label: "A", action: "addToList", where: ["recipe"], text: "Add ingredients to the shopping list" },
   { keys: "arrowright", label: "→", action: "nextRecipe", where: ["recipe"], text: "Next recipe" },
   { keys: "arrowleft", label: "←", action: "addAndNext", where: ["recipe"], text: "Add to the shopping list, then next" },
   { keys: "r", label: "R", action: "openRating", where: ["recipe"], text: "Open the rating" },
@@ -34,7 +33,6 @@ const SHORTCUTS = [
   { keys: "n", label: "N", action: "addProject", where: ["projects"], text: "Projects: add a project" },
   { keys: "e", label: "E", action: "editProject", where: ["project"], text: "Project: edit" },
   { keys: "l", label: "L", action: "openShopping", where: ["list", "recipe"], text: "Open shopping list" },
-  { keys: "p", label: "P", action: "startPlanning", where: ["shopping"], text: "Plan shopping: pick recipes" },
   { keys: "?", label: "?", action: "showHelp", where: ["any"], text: "Show this list" },
 ];
 

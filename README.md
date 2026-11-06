@@ -12,7 +12,7 @@ Kitchen lives in the `tusov-home` organization so it has its own web address. Pa
 
 ## Use it
 
-- **Meals and sauces:** every recipe is a **Meal** or a **Sauce or condiment**; choose in the recipe form. The daily suggestion only picks meals; search and Plan shopping cover both. Recipes from before this count as meals, and the owner can change the type.
+- **Meals and sauces:** every recipe is a **Meal** or a **Sauce or condiment**; choose in the recipe form. The daily suggestion only picks meals; search covers both. Recipes from before this count as meals, and the owner can change the type.
 - **Add a recipe:** copy the recipe from Claude, tap **+** next to the search box, tap the text box and paste. On the laptop, N then Ctrl+V is enough. The first line becomes the title (you can change it). Add tags like `quick, weekend, chicken`.
 - **Find it again:** search by name, tag or ingredient, or tap a tag to filter.
 - **Cook it:** open the recipe. **✓ Cooked today** adds the date to the notes; **Edit** lets you change anything and add notes ("less chilli next time").
@@ -24,9 +24,8 @@ Kitchen lives in the `tusov-home` organization so it has its own web address. Pa
 - **Projects:** home improvements with no deadline. **+ Add project**, then add **steps** (tick them off as you go) and **things to buy** (**Add to shopping list** puts them on the shared list; ticking them off there marks them bought). Set the status with 💡 Idea / 🔨 Doing / ✅ Done, and keep measurements or links in **Notes**, which save by themselves. You can both work on the same project at once.
 - **Today's suggestion:** the recipes page opens with one dish to cook today and why it was picked. Below it are the search and two folded rows, **Meals** and **Sauces & condiments**; tap one for its list (or press A or S on the laptop). It changes daily, favours well-rated dishes you haven't cooked lately (it reads the "Cooked …" dates in the notes) and weekend dishes on weekends. **Another idea** shows the next one. The initials in its corner (**T**, **K**) choose whose recipes it picks from: both on means all recipes, and one always stays on. Each phone starts with its own person and remembers your choice, so the two phones can show different dishes.
 - **Owner, tags and sorting:** unfold a row and tap **Filter** (or press F). Tap a name to see only that person's recipes, a tag to narrow down, and **Sort** for Newest, A–Z or Best rated. Each phone remembers its sort order.
-- **One recipe to the list:** on a recipe, set the servings at the bottom and tap **To list** (or press A). It joins the current list, and **Open list** takes you there.
-- **Shopping list:** on the Shopping page tap **Plan shopping**, tap the recipes you'll cook, then **Make shopping list**. Items are sorted by shop section and the same ingredient is added up (two recipes with 200 g feta → 400 g feta; "7+ tbsp olive oil" means some recipes didn't say how much). Things you probably have (salt, oil, spices) go under **Check you have**. Tick items off as you shop, ✕ to remove one, or add your own. With sync, you both see the same list and ticks. 🛒 in the top bar opens it.
-- **Swipe through recipes:** on an open recipe, swipe left for the next one, or right to add it to the shopping list; OK on the notice brings the next, and **Cancel** takes it off the list again. The order follows the list you came from, or today's ideas if you opened the suggestion. Back returns to the list. On the laptop: → and ←.
+- **Shopping list:** swipe right on a recipe to add it, for the servings shown. The list groups everything by shop section; tick things off as you buy them. **Remove ticked** and **Start over** are at the bottom, with the box for adding anything else.
+- **Swipe through recipes:** on an open recipe, swipe left for the next one, or right to add it to the shopping list; OK on the notice brings the next, and **Cancel** takes it off the list again. The order follows the list you came from, or today's ideas if you opened the suggestion. Pull down from the top of a recipe, or use Back, to return to the list. On the laptop: → and ←.
 - **Jump around a recipe:** the bar at the bottom goes straight to the notes, ingredients or method (I and M on the laptop).
 - **Rate it:** tap **Rate** at the bottom and choose 1–5 stars after eating. Each of you rates on your own phone (the app asks your name once; change it in ⚙). Tap the same star again to clear. The list shows the average.
 ## Install as an app
@@ -75,7 +74,6 @@ Then in Kitchen: **⚙ → Import from file** and pick `kitchen-recipes.json`. T
 | `S` | Show / hide sauces & condiments | list |
 | `F` | Show / hide filters | list |
 | `T` / `K` | Suggestions: whose recipes | list |
-| `A` | Add ingredients to the shopping list | recipe |
 | `E` | Edit recipe (your own) | recipe |
 | `C` | Make my copy | recipe |
 | `→` | Next recipe | recipe |
@@ -86,7 +84,6 @@ Then in Kitchen: **⚙ → Import from file** and pick `kitchen-recipes.json`. T
 | `+` / `−` | More / fewer servings | recipe |
 | `Ctrl+S` | Save | edit form |
 | `Esc` | Back / cancel | recipe, edit form |
-| `P` | Plan shopping (pick recipes) | shopping |
 | `←` / `→` | Previous / next page | Recipes, Shopping, Pantry, Projects |
 | `N` | Add an item / a project | Pantry / Projects |
 | `C` | Edit categories | Pantry |
@@ -158,7 +155,6 @@ js/ui/rating.js       the Rate button and star ratings
 js/ui/recipeJump.js   the bar jumping to notes, ingredients and method
 js/ui/recipeQueue.js  which recipe comes next when swiping
 js/ui/name.js         whose phone this is (asked once)
-js/ui/plan.js         Plan shopping: picking recipes for a list
 js/ui/shopping.js     the shopping list screen
 js/ui/tabs.js         the page icons and swiping between pages
 js/ui/pantry.js       the pantry screen
