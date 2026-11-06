@@ -1,5 +1,8 @@
 # Changelog
 
+## 2026-11-07 a
+- Taking a meal out of the cooking plan asks first.
+
 ## 2026-11-06 z
 - Plan: servings numbers no longer overlap the − button. Shopped meals can be taken out (×). Meals keep their place when ticked or rated, and **Hide cooked** folds away the ticked ones.
 

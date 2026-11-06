@@ -148,6 +148,9 @@ def test_phone(p, sheet):
     page.click("#plan-row")
     expect(page.locator("#view-plan")).to_be_visible()
     expect(page.locator("#plan-shop .plan-title")).to_have_text(["Miso Aubergine with Soba"])
+    page.once("dialog", lambda d: d.dismiss())  # × asks first
+    page.click("#plan-shop .shop-remove")
+    expect(page.locator("#plan-shop .plan-title")).to_have_count(1)
     page.click("#plan-shop .step-button[aria-label='More servings']")
     expect(page.locator("#plan-shop .step-value")).to_have_text("3")
     page.screenshot(path=SHOTS / "phone-plan.png")
@@ -251,6 +254,11 @@ def test_laptop_second_device(p, sheet):
     # Tõnis plans it with the keyboard and finds Kadi's stars kept with his
     page.keyboard.press("p")
     expect(page.locator("#plan-toggle-label")).to_have_text("In plan")
+    # Taking it out asks first: "Cancel" keeps it, "OK" takes it out
+    page.once("dialog", lambda d: d.dismiss())
+    page.keyboard.press("p")
+    expect(page.locator("#plan-toggle-label")).to_have_text("In plan")
+    page.once("dialog", lambda d: d.accept())
     page.keyboard.press("p")
     expect(page.locator("#plan-toggle-label")).to_have_text("Add to plan")
     page.keyboard.press("+")
@@ -622,6 +630,7 @@ def add_to_list(page, name):
     expect(page.locator("#view-recipe")).to_be_visible()
     expect(page.locator("#recipe-title")).to_have_text(name)
     if page.locator("#plan-toggle-label").inner_text() == "In plan":
+        page.once("dialog", lambda d: d.accept())
         page.click("#plan-toggle")  # from an earlier round: take it out first
         expect(page.locator("#plan-toggle-label")).to_have_text("Add to plan")
     page.keyboard.press("ArrowLeft")

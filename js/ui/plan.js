@@ -59,6 +59,14 @@ function iconButton(className, label, text, onClick) {
   return button;
 }
 
+// Taking a meal out always asks first: a mistaken tap would lose its place.
+export function confirmRemove(meal) {
+  if (confirm("Take " + meal.recipe.title + " out of the cooking plan?")) {
+    plan.removeMeal(meal.id);
+    showToast("Taken out of the plan");
+  }
+}
+
 function shopRow(meal, meals) {
   const row = document.createElement("li");
   row.className = "plan-item";
@@ -72,10 +80,7 @@ function shopRow(meal, meals) {
     value,
     iconButton("step-button", "More servings", "+", () => plan.stepServings(meal.id, 1))
   );
-  const remove = iconButton("shop-remove", "Remove " + meal.recipe.title + " from the plan", "×", function () {
-    plan.removeMeal(meal.id);
-    showToast("Removed from the plan");
-  });
+  const remove = iconButton("shop-remove", "Take " + meal.recipe.title + " out of the plan", "×", () => confirmRemove(meal));
   row.append(recipeLink(meal, meals), stepper, remove);
   return row;
 }
@@ -148,10 +153,7 @@ function reviewRow(meal, meals) {
   });
   cooked.append(box);
   // Shopped but never cooked: it can still leave the plan.
-  const remove = iconButton("shop-remove", "Take " + meal.recipe.title + " out of the plan", "×", function () {
-    plan.removeMeal(meal.id);
-    showToast("Taken out of the plan");
-  });
+  const remove = iconButton("shop-remove", "Take " + meal.recipe.title + " out of the plan", "×", () => confirmRemove(meal));
   top.append(cooked, recipeLink(meal, meals), remove);
   row.append(top, stars(meal));
   if (canEdit(meal.recipe, getMyName())) {

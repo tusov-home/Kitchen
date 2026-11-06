@@ -179,8 +179,10 @@ export function togglePlan() {
     return;
   }
   if (plan.hasMeal(recipe.id)) {
-    plan.removeMeal(recipe.id);
-    showToast("Taken out of the plan");
+    if (confirm("Take " + recipe.title + " out of the cooking plan?")) {
+      plan.removeMeal(recipe.id);
+      showToast("Taken out of the plan");
+    }
   } else {
     plan.addMeal(recipe.id, shownFactor(recipe));
     showToast("Added to the cooking plan");
