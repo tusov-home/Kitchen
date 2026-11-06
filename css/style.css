@@ -20,6 +20,7 @@
   --focus: #4f6a8a;       /* aizome indigo */
   --star: #a88b66;
   --grain: 0.05;
+  --surface-glaze: rgb(250 250 246 / 0.72);
   --radius-sm: 10px;
   --radius: 12px;
   --radius-lg: 16px;
@@ -48,6 +49,7 @@
     --focus: #8fa9c9;
     --star: #c4a67e;
     --grain: 0.07;
+    --surface-glaze: rgb(50 54 49 / 0.55);
   }
 }
 
@@ -324,21 +326,13 @@ body:has(#view-list:not([hidden]) #all-panel[hidden]) {
   flex-direction: column;
 }
 
-#view-list:has(#all-panel[hidden]) .suggestion::after {
-  right: -3.5rem;
-  bottom: -3.5rem;
-  width: 18rem;
-  height: 18rem;
-}
-
-/* Title in the middle of the free space, buttons at the bottom */
+/* The branch has the upper part; the words sit together above the buttons */
 #view-list:has(#all-panel[hidden]) .suggestion-title {
   margin-top: auto;
   font-size: 2.3rem;
 }
 
 #view-list:has(#all-panel[hidden]) .suggestion-actions {
-  margin-top: auto;
   padding-top: 1.25rem;
 }
 
@@ -1642,4 +1636,140 @@ body {
   .actions {
     display: none;
   }
+}
+
+/* ---------- Materials ----------
+   Timber frames the screen, stone carries the content, and one bamboo
+   branch hangs in the suggestion. Textures are drawn by
+   tools/make_textures.py; each has a light and a dark version. */
+
+:root {
+  --stone: url("../textures/stone-light.webp");
+  --timber: url("../textures/timber-light.webp");
+  --bamboo: url("../textures/bamboo-light.webp");
+  --bamboo-shadow: url("../textures/bamboo-shadow-light.webp");
+  --timber-shade: rgb(255 248 235 / 0.28);
+  --lit-edge: rgb(255 255 255 / 0.7);
+  --drop: rgb(52 48 38 / 0.2);
+  --niche: rgb(52 48 38 / 0.16);
+  --window-light: rgb(255 255 255 / 0.5);
+  --shadow-strength: 0.32;
+  --wall-glaze: rgb(236 237 231 / 0.45);
+  --on-timber: #4a4235;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --stone: url("../textures/stone-dark.webp");
+    --timber: url("../textures/timber-dark.webp");
+    --bamboo: url("../textures/bamboo-dark.webp");
+    --bamboo-shadow: url("../textures/bamboo-shadow-dark.webp");
+    --timber-shade: rgb(16 12 9 / 0.25);
+    --lit-edge: rgb(255 255 255 / 0.06);
+    --drop: rgb(0 0 0 / 0.55);
+    --niche: rgb(0 0 0 / 0.5);
+    --window-light: rgb(226 224 205 / 0.075);
+    --shadow-strength: 0.8;
+    --wall-glaze: rgb(28 30 27 / 0.45);
+    --on-timber: #b3ad9f;
+  }
+}
+
+html {
+  background:
+    linear-gradient(var(--wall-glaze), var(--wall-glaze)),
+    var(--bg) var(--stone) center top / 320px;
+}
+
+/* Timber: the top bar and the tab bar */
+.topbar,
+.tabbar {
+  background:
+    linear-gradient(var(--timber-shade), var(--timber-shade)),
+    var(--timber) center / 512px 128px;
+  border-color: transparent;
+}
+
+.topbar {
+  box-shadow: 0 1px 0 var(--lit-edge) inset, 0 8px 18px -8px var(--drop);
+}
+
+.tabbar {
+  box-shadow: 0 1px 0 var(--lit-edge) inset, 0 -8px 18px -8px var(--drop);
+}
+
+/* Stone: raised slabs, lit from above */
+.search-box,
+.all-toggle,
+.recipe-card {
+  background:
+    linear-gradient(var(--surface-glaze), var(--surface-glaze)),
+    var(--stone) center / 320px;
+  box-shadow: inset 0 1px 0 var(--lit-edge), 0 6px 12px -7px var(--drop);
+}
+
+/* The suggestion is a niche in the wall: set back, with daylight falling
+   in from the side and a branch hanging in front of it. */
+.suggestion {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background:
+    radial-gradient(120% 90% at 8% 0%, var(--window-light), transparent 62%),
+    linear-gradient(var(--surface-glaze), var(--surface-glaze)),
+    var(--stone) center / 320px;
+  box-shadow: inset 0 10px 18px -8px var(--niche), inset 0 0 0 1px var(--border), 0 1px 0 var(--lit-edge);
+}
+
+/* The branch, and below it its shadow on the wall (replaces the big ensō) */
+.suggestion::before,
+.suggestion::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: 0;
+  right: 0;
+  width: min(52%, 15rem);
+  height: auto;
+  aspect-ratio: 900 / 1100;
+  background: var(--bamboo) right top / 100% no-repeat;
+  pointer-events: none;
+  -webkit-mask: none;
+  mask: none;
+  opacity: 1;
+}
+
+.suggestion::before {
+  top: 2.2rem;
+  right: 1.1rem;
+  background-image: var(--bamboo-shadow);
+  opacity: var(--shadow-strength);
+}
+
+/* With the whole phone to itself, the branch can grow */
+#view-list:has(#all-panel[hidden]) .suggestion::before,
+#view-list:has(#all-panel[hidden]) .suggestion::after {
+  top: -2.5rem;
+  right: -3rem;
+  width: min(84%, 24rem);
+}
+
+#view-list:has(#all-panel[hidden]) .suggestion::before {
+  top: -0.5rem;
+  right: -2rem;
+}
+
+/* On a short phone a leaf may reach the title: a soft halo keeps it readable */
+.suggestion-title {
+  text-shadow: 0 0 4px var(--surface), 0 0 16px var(--surface);
+}
+
+/* Initials stay readable in front of the leaves */
+.owner-initial {
+  background: var(--surface);
+}
+
+/* Words on timber */
+.tabbar .tab:not(.active) {
+  color: var(--on-timber);
 }
