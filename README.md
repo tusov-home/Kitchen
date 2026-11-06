@@ -151,6 +151,7 @@ js/ui/router.js       which screen belongs to which address (#/r/…)
 js/ui/list.js         recipes page: search, filter panel, the list
 js/ui/suggestion.js   today's suggestion
 js/ui/recipe.js       one recipe, servings stepper
+js/ui/haptics.js      the short vibration on a press
 js/ui/rating.js       the Rate button and star ratings
 js/ui/recipeJump.js   the bar jumping to notes, ingredients and method
 js/ui/recipeQueue.js  which recipe comes next when swiping

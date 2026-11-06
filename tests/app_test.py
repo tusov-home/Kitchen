@@ -1154,6 +1154,7 @@ def test_recipe_swipe(p):
     page.wait_for_timeout(300)
     expect(title).to_have_text(cards[0])
     swipe(page, 330, 120, lift=False)
+    page.wait_for_timeout(50)  # shows on the next screen refresh
     expect(page.locator("#swipe-hint")).to_have_text("Next recipe")
     page.evaluate("""() => {
         const t = new Touch({ identifier: 1, target: document.body, clientX: 330, clientY: 400 });

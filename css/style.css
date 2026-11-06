@@ -1657,10 +1657,11 @@ html:has(#view-recipe:not([hidden])) {
   overscroll-behavior: contain;
   padding: 0.5rem 1.25rem calc(var(--tabbar-h) + 1rem);
   border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-  background:
-    linear-gradient(var(--surface-glaze), var(--surface-glaze)),
-    var(--stone) center / 320px;
-  box-shadow: inset 0 1px 0 var(--lit-edge), 0 -6px 28px var(--drop);
+  /* A plain surface and its own layer from the start: moving it is then
+     just sliding a picture, with no texture or soft shadow to redraw */
+  background: var(--surface);
+  box-shadow: inset 0 1px 0 var(--lit-edge);
+  will-change: transform;
 }
 
 /* A small handle: this can be pulled down */
@@ -1698,9 +1699,8 @@ html:has(#view-recipe:not([hidden])) {
   left: 0.5rem;
   max-width: 46rem;
   margin: 0 auto;
-  background:
-    linear-gradient(var(--surface-glaze), var(--surface-glaze)),
-    var(--stone) center / 320px;
+  background: var(--surface);
+  will-change: transform;
 }
 
 .shop-ticked {
@@ -1864,6 +1864,7 @@ html:has(#view-recipe:not([hidden])) {
 
 /* Beside the recipe as it's dragged */
 .swipe-hint {
+  will-change: opacity;
   position: fixed;
   top: 45%;
   right: 1rem;

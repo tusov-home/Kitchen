@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-11-06 v
+- A very short vibration when you press something or finish a swipe (Android).
+- The round arrows now have proper arrowheads, leading the way.
+- Smoother recipe swiping: much less work per finger movement, and a plainer sheet that's quick to move.
+
 ## 2026-11-06 u
 - The suggestion has two round arrows in its bottom corners, like the ensō: clockwise for another idea, counterclockwise to go back.
 - Smoother recipes: swiping moves them like cards, and opening and closing wait until the recipe is drawn.

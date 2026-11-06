@@ -1,6 +1,7 @@
 // Page icons in the top bar: Recipes · Shopping · Pantry · Projects. Tap a tab, swipe
 // left/right anywhere on a page, or press ← / → on the laptop.
 import { go, goBack, closeToList } from "./router.js";
+import { buzz } from "./haptics.js";
 import * as storage from "../storage.js";
 
 export const TABS = [
@@ -146,15 +147,23 @@ function canSwipe(screen) {
 }
 
 // While dragging a recipe: what letting go will do.
+// The words only change when the direction does: writing them on every
+// finger movement made the whole page work out its layout again.
+let hintSide = "";
+
 function showHint(dx) {
-  const reached = Math.min(Math.abs(dx) / COMMIT_PX, 1);
-  swipeHint.hidden = false;
-  swipeHint.textContent = dx < 0 ? "Next recipe" : "Add to shopping list";
-  swipeHint.classList.toggle("from-left", dx > 0);
-  swipeHint.style.opacity = String(reached);
+  const side = dx < 0 ? "left" : "right";
+  if (side !== hintSide) {
+    hintSide = side;
+    swipeHint.textContent = dx < 0 ? "Next recipe" : "Add to shopping list";
+    swipeHint.classList.toggle("from-left", dx > 0);
+    swipeHint.hidden = false;
+  }
+  swipeHint.style.opacity = String(Math.min(Math.abs(dx) / COMMIT_PX, 1));
 }
 
 function hideHint() {
+  hintSide = "";
   swipeHint.hidden = true;
 }
 
@@ -224,7 +233,8 @@ function slideOut(view, direction, whenDone) {
     whenDone();
     return;
   }
-  view.style.transition = "transform 0.16s ease-in, opacity 0.16s ease-in";
+  // Starts at speed, so it carries on from the finger's movement.
+  view.style.transition = "transform 0.18s cubic-bezier(0.3, 0.6, 0.6, 1), opacity 0.18s linear";
   // A recipe leaves whole, like a card; a page fades into the next one.
   const card = getScreen() === "recipe";
   const distance = window.innerWidth * (card ? 1.05 : 0.6);
@@ -302,17 +312,23 @@ function initSwipe() {
     drag.speed = (touch.clientX - drag.lastX) / Math.max(now - drag.lastTime, 1);
     drag.lastX = touch.clientX;
     drag.lastTime = now;
-    if (getScreen() === "recipe") {
-      showHint(dx);
-    }
+    const hint = getScreen() === "recipe";
     if (reduceMotion.matches) {
+      if (hint) {
+        showHint(dx);
+      }
       return;
     }
     const direction = dx < 0 ? 1 : -1;
     const { view } = drag;
     const distance = hasNeighbour(direction) ? dx : dx * RUBBER_BAND;
     view.style.willChange = "transform";
-    moveOnNextFrame(() => dragTo(view, distance));
+    moveOnNextFrame(function () {
+      dragTo(view, distance);
+      if (hint) {
+        showHint(dx);
+      }
+    });
   }, { passive: true });
 
   function release(event, cancelled) {
@@ -325,6 +341,7 @@ function initSwipe() {
     hideHint();
     if (current.axis === "down") {
       if (!cancelled && current.dy > CLOSE_PX) {
+        buzz();
         closeRecipeSheet();
       } else {
         springBack(current.view);
@@ -339,6 +356,9 @@ function initSwipe() {
     const direction = dx < 0 ? 1 : -1;
     const flicked = Math.abs(dx) > FLICK_PX && Math.abs(current.speed) > FLICK_SPEED && Math.sign(current.speed) === Math.sign(dx);
     const commit = !cancelled && hasNeighbour(direction) && (Math.abs(dx) > COMMIT_PX || flicked);
+    if (commit) {
+      buzz();
+    }
     if (commit && getScreen() === "recipe") {
       if (direction > 0) {
         slideOut(current.view, direction, () => recipeSwipe(direction));
