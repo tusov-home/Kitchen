@@ -54,7 +54,8 @@ explains the app itself (features, files, shortcuts, sync setup).
   `apps-script/Code.gs`. Never rename storage keys or fields without a
   migration; old data must keep loading.
 - `Code.gs` is field-agnostic: one Sheet tab per collection (`Recipes`,
-  `shopping`, `pantry`, `projects`), each item stored as JSON. A `chores`
+  `shopping`, `pantry`, `pantry-sections`, `projects`), each item stored as
+  JSON. A `chores`
   tab may remain from a removed feature; the app no longer reads it.
   New fields and new collections need **no script change**. If a change
   ever does need it, say so clearly — Tõnis has to paste it by hand.

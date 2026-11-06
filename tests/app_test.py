@@ -921,6 +921,83 @@ def test_meals_and_sauces(p):
     print("meals and sauces: ok")
 
 
+def test_pantry_categories(p, sheet):
+    """Your own pantry categories, shared between two phones."""
+    def device(name, **options):
+        ctx = p.chromium.launch().new_context(**options)
+        ctx.route(SHEET_URL, sheet.handle)
+        ctx.add_init_script(
+            f"if (!localStorage.getItem('kitchen.settings.v1')) localStorage.setItem('kitchen.settings.v1', JSON.stringify({{syncUrl: '{SHEET_URL}', myName: '{name}'}}))"
+        )
+        page = ctx.new_page()
+        watch_errors(page, errors)
+        page.goto(BASE + "#/pantry")
+        return page
+
+    errors = []
+    page = device("Kadi", **p.devices["Pixel 7"])
+    page.fill("#pantry-add-input", "Soy sauce")
+    page.keyboard.press("Enter")
+    page.fill("#pantry-add-input", "Basmati rice")
+    page.keyboard.press("Enter")
+    expect(page.locator(".shop-section", has_text="Oils, vinegars & sauces")).to_contain_text("Soy sauce")
+    expect(page.locator(".shop-section", has_text="Grains, pasta & rice")).to_contain_text("Basmati rice")
+
+    # Add a category: the keyboard stays closed, and a duplicate is refused
+    page.click("#sections-open")
+    expect(page.locator("#sections-dialog")).to_be_visible()
+    assert page.evaluate("document.activeElement.tagName") == "H2"
+    page.screenshot(path=SHOTS / "phone-pantry-categories.png")
+    page.fill("#sections-add-input", "fridge")
+    page.click("#sections-add")
+    expect(page.locator("#sections-note")).to_contain_text("already")
+    page.fill("#sections-add-input", "Top shelf")
+    page.keyboard.press("Enter")
+    expect(page.locator(".section-row input").last).to_have_value("Top shelf")
+    expect(page.locator("#sections-dialog")).to_be_visible()  # Enter didn't close it
+    # Move it up one
+    page.click(".section-row:last-child [data-action=up]")
+    expect(page.locator(".section-row input").nth(-2)).to_have_value("Top shelf")
+    # Rename a category: its items follow
+    rename = page.locator(".section-row input[aria-label='Name of Grains, pasta & rice']")
+    rename.fill("Dry goods")
+    page.keyboard.press("Enter")
+    expect(page.locator(".section-row input[aria-label='Name of Dry goods']")).to_be_visible()
+    page.click("#sections-form button[value=done]")
+    expect(page.locator(".shop-section", has_text="Dry goods")).to_contain_text("Basmati rice")
+
+    # Put an item in the new category
+    page.click(".pantry-name:has-text('Soy sauce')")
+    page.select_option("#pantry-section", "Top shelf")
+    page.click("#pantry-form button[value=save]")
+    expect(page.locator(".shop-section", has_text="Top shelf")).to_contain_text("Soy sauce")
+    page.wait_for_timeout(2500)  # sync
+
+    # The second device gets the same categories and order
+    other = device("Tõnis", viewport={"width": 1366, "height": 768})
+    expect(other.locator(".shop-section", has_text="Top shelf")).to_contain_text("Soy sauce")
+    expect(other.locator(".shop-section", has_text="Dry goods")).to_contain_text("Basmati rice")
+    other.keyboard.press("c")
+    expect(other.locator("#sections-dialog")).to_be_visible()
+    expect(other.locator(".section-row input").nth(-2)).to_have_value("Top shelf")
+    # Removing a category moves its items to Other
+    other.once("dialog", lambda d: d.accept())
+    other.click(".section-row:has(input[aria-label='Name of Top shelf']) [data-action=remove]")
+    expect(other.locator(".section-row input[aria-label='Name of Top shelf']")).to_have_count(0)
+    other.click("#sections-form button[value=done]")
+    expect(other.locator(".shop-section", has_text="Other")).to_contain_text("Soy sauce")
+    other.wait_for_timeout(2500)  # sync
+
+    # It stays gone after a reload, on the first phone too
+    page.reload()
+    page.wait_for_timeout(1500)
+    page.reload()
+    expect(page.locator(".shop-section", has_text="Other")).to_contain_text("Soy sauce")
+    expect(page.locator(".shop-section", has_text="Top shelf")).to_have_count(0)
+    assert not errors, errors
+    print("pantry categories: ok")
+
+
 # A small web server for test_site_missing: serves the app until a file
 # named OFF appears next to it, then answers 404 for everything, like
 # GitHub Pages does while a site is unpublished.
@@ -1046,6 +1123,7 @@ def main():
             test_installable_and_offline(p)
             test_add_from_recipe(p)
             test_meals_and_sauces(p)
+            test_pantry_categories(p, FakeSheet())
             test_site_missing(p)
             test_update_after_publish(p)
         print(f"all browser tests passed ({sheet.calls} sync calls)")

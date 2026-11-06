@@ -25,6 +25,7 @@ const SHORTCUTS = [
   { keys: "arrowleft", label: "← / →", action: "previousTab", where: ["list", "shopping", "pantry", "projects"], text: "Previous / next page" },
   { keys: "arrowright", action: "nextTab", where: ["list", "shopping", "pantry", "projects"] },
   { keys: "n", label: "N", action: "focusPantryAdd", where: ["pantry"], text: "Pantry: add an item" },
+  { keys: "c", label: "C", action: "openSections", where: ["pantry"], text: "Pantry: edit categories" },
   { keys: "n", label: "N", action: "addProject", where: ["projects"], text: "Projects: add a project" },
   { keys: "e", label: "E", action: "editProject", where: ["project"], text: "Project: edit" },
   { keys: "l", label: "L", action: "openShopping", where: ["list", "recipe"], text: "Open shopping list" },

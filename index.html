@@ -147,6 +147,7 @@
     <div id="pantry-filter" class="owner-filter" role="group" aria-label="Show">
       <button type="button" class="tag selected" data-filter="all" aria-pressed="true">Everything</button>
       <button type="button" class="tag" data-filter="low" aria-pressed="false">Low &amp; out</button>
+      <button id="sections-open" type="button" class="text-button sections-open" title="Add, rename or reorder categories (C)">Categories</button>
     </div>
 
     <div id="pantry-sections"></div>
@@ -395,6 +396,24 @@
     </form>
   </dialog>
 
+
+  <!-- The pantry's categories -->
+  <dialog id="sections-dialog" class="dialog">
+    <form method="dialog" class="dialog-body" id="sections-form">
+      <h2 tabindex="-1" autofocus class="dialog-title">Pantry categories</h2>
+      <ul id="sections-list" class="sections-list"></ul>
+      <p class="hint">Anything else goes under Other. Tap a name to change it.</p>
+      <div class="shop-add">
+        <input id="sections-add-input" type="text" maxlength="40" placeholder="New category" aria-label="New category" autocomplete="off">
+        <button id="sections-add" class="button" type="button">Add</button>
+      </div>
+      <p id="sections-note" class="sections-note" role="status" hidden></p>
+      <div class="actions">
+        <span class="spacer"></span>
+        <button class="primary" value="done">Done</button>
+      </div>
+    </form>
+  </dialog>
 
   <!-- Add or edit a project -->
   <dialog id="project-dialog" class="dialog">

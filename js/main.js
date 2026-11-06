@@ -17,8 +17,9 @@ import * as shoppingState from "./shoppingState.js";
 import { initPlan, isPlanning, setPlanning, startPlanning, cancelPlanning } from "./ui/plan.js";
 import { initShopping, renderShopping, renderCartCount } from "./ui/shopping.js";
 import { initTabs, renderTabs, goToTab, stepTab } from "./ui/tabs.js";
-import { pantry } from "./pantryState.js";
+import { pantry, pantrySections } from "./pantryState.js";
 import { initPantry, renderPantry, renderPantryBadge, focusPantryAdd } from "./ui/pantry.js";
+import { initPantrySections, openSections } from "./ui/pantrySections.js";
 import { projects } from "./projectsState.js";
 import { initProjects, renderProjects, openProjectDialog } from "./ui/projects.js";
 import { initProject, renderProject, editCurrentProject } from "./ui/project.js";
@@ -121,6 +122,11 @@ pantry.onChange(function () {
     renderShopping();
   }
 });
+pantrySections.onChange(function () {
+  if (current.screen === "pantry") {
+    renderPantry();
+  }
+});
 projects.onChange(function () {
   if (current.screen === "projects") {
     renderProjects();
@@ -156,6 +162,7 @@ initSettings();
 initPlan(renderList);
 initShopping();
 initPantry();
+initPantrySections();
 initProjects();
 initProject();
 initTabs(() => current.screen);
@@ -203,6 +210,7 @@ initShortcuts(
     previousTab: () => stepTab(-1),
     nextTab: () => stepTab(1),
     focusPantryAdd: focusPantryAdd,
+    openSections: openSections,
     addProject: () => openProjectDialog(null),
     editProject: editCurrentProject,
     startPlanning: startPlanning,

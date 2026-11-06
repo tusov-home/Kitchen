@@ -4,7 +4,7 @@
 // the background whenever there is a connection.
 import * as state from "./state.js";
 import * as shopping from "./shoppingState.js";
-import { pantry } from "./pantryState.js";
+import { pantry, pantrySections } from "./pantryState.js";
 import { projects } from "./projectsState.js";
 import * as storage from "./storage.js";
 import { normaliseRecipe } from "./lib/recipes.js";
@@ -59,6 +59,7 @@ async function syncRecipes(url) {
 const COLLECTIONS = [
   { name: "shopping", store: shopping },
   { name: "pantry", store: pantry },
+  { name: "pantry-sections", store: pantrySections },
   { name: "projects", store: projects },
 ];
 

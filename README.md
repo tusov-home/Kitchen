@@ -19,6 +19,7 @@ Kitchen lives in the `tusov-home` organization so it has its own web address. Pa
 - **Servings:** use **− / +** on a recipe to cook for more or fewer people. Ingredient amounts change (highlighted); the method stays as written. The base number comes from "Serves 2" in the text, or set it in **Edit → Servings**. Without it, the stepper multiplies (×½, ×1½, ×2 …).
 - **Owners:** whoever adds a recipe owns it, and only they can edit or delete it. The other person can view and rate it, or tap **Make my copy** to adjust it as their own recipe; the copy links back to the original. This is a household convenience, not real security: it trusts the name each phone is set to, so keep your name the same.
 - **Pages:** the tab bar at the bottom switches between **Recipes**, **Shopping**, **Pantry** and **Projects**. Swipe left or right to move between them: the page follows your finger, and a short swipe or quick flick is enough (start a little away from the screen edge, which Android uses for Back). The small numbers show what needs attention.
+- **Pantry categories:** tap **Categories** on the Pantry page (or press C) to add, rename, reorder and remove them; they sync between phones. Removing one moves its items to **Other**, which always stays. To move an item, tap its name.
 - **Pantry:** what you have at home. Tap **Have** to mark something **Low**, again for **Out**. **Add to shopping list** puts everything low or out on the list, and ticking it off while shopping marks it as **Have** again. Shopping lists made from recipes put things you have under **Check you have** (the pantry doesn't know amounts, so they're not removed). Tap a name to rename it, move it to another section or delete it.
 - **Projects:** home improvements with no deadline. **+ Add project**, then add **steps** (tick them off as you go) and **things to buy** (**Add to shopping list** puts them on the shared list; ticking them off there marks them bought). Set the status with 💡 Idea / 🔨 Doing / ✅ Done, and keep measurements or links in **Notes**, which save by themselves. You can both work on the same project at once.
 - **Today's suggestion:** the recipes page opens with one dish to cook today and why it was picked. Below it are the search and two folded rows, **Meals** and **Sauces & condiments**; tap one for its list (or press A or S on the laptop). It changes daily, favours well-rated dishes you haven't cooked lately (it reads the "Cooked …" dates in the notes) and weekend dishes on weekends. **Another idea** shows the next one. The initials in its corner (**T**, **K**) choose whose recipes it picks from: both on means all recipes, and one always stays on. Each phone starts with its own person and remembers your choice, so the two phones can show different dishes.
@@ -82,6 +83,7 @@ Then in Kitchen: **⚙ → Import from file** and pick `kitchen-recipes.json`. T
 | `P` | Plan shopping (pick recipes) | shopping |
 | `←` / `→` | Previous / next page | Recipes, Shopping, Pantry, Projects |
 | `N` | Add an item / a project | Pantry / Projects |
+| `C` | Edit categories | Pantry |
 | `E` | Edit project | a project |
 | `L` | Open shopping list | list, recipe |
 | `?` | Show all shortcuts | everywhere |
@@ -138,7 +140,7 @@ js/lib/markdown.js    turns Claude's Markdown into safe HTML, scales the ingredi
 js/lib/scale.js       pure helpers: find servings, scale and format amounts
 js/lib/sections.js    finds the ingredients part of a recipe (shared rules)
 js/lib/shopping.js    pure helpers: read ingredients, shop sections, add up, merge lists
-js/lib/pantry.js      pure helpers: pantry sections, statuses, matching ingredients
+js/lib/pantry.js      pure helpers: pantry categories, statuses, matching ingredients
 js/lib/dates.js       pure helpers: dates and date labels
 js/lib/projects.js    pure helpers: steps and materials, merging, progress, grouping
 js/lib/suggest.js     pure helpers: today's suggestion and why
@@ -152,6 +154,7 @@ js/ui/plan.js         Plan shopping: picking recipes for a list
 js/ui/shopping.js     the shopping list screen
 js/ui/tabs.js         bottom tab bar and swiping between pages
 js/ui/pantry.js       the pantry screen
+js/ui/pantrySections.js  the Pantry categories dialog
 js/ui/projects.js     the projects list and add/edit dialog
 js/ui/project.js      one project: status, steps, things to buy, notes
 js/ui/editor.js       add/edit form

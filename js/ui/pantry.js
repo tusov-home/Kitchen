@@ -1,7 +1,7 @@
 // The pantry screen: what's at home, by section, with Have/Low/Out.
-import { pantry, addItem, cycleStatus, addStaples } from "../pantryState.js";
+import { pantry, addItem, cycleStatus, addStaples, sectionNames } from "../pantryState.js";
 import * as shopping from "../shoppingState.js";
-import { groupPantry, lowOrOut, PANTRY_SECTIONS, STATUS_LABELS } from "../lib/pantry.js";
+import { groupPantry, lowOrOut, OTHER_SECTION, STATUS_LABELS } from "../lib/pantry.js";
 import { nameKey } from "../lib/shopping.js";
 import { setBadge } from "./tabs.js";
 import { showToast } from "./toast.js";
@@ -72,7 +72,7 @@ export function renderPantry() {
   restock.hidden = toBuy.length === 0;
   restockText.textContent = toBuy.length + (toBuy.length === 1 ? " item is" : " items are") + " low or out";
 
-  for (const button of filterBar.querySelectorAll("button")) {
+  for (const button of filterBar.querySelectorAll("button[data-filter]")) {
     const on = button.dataset.filter === filter;
     button.classList.toggle("selected", on);
     button.setAttribute("aria-pressed", on ? "true" : "false");
@@ -80,7 +80,7 @@ export function renderPantry() {
   filterBar.hidden = all.length === 0;
 
   sections.replaceChildren();
-  for (const group of groupPantry(shown)) {
+  for (const group of groupPantry(shown, sectionNames())) {
     const section = document.createElement("section");
     section.className = "shop-section";
     const heading = document.createElement("h2");
@@ -106,7 +106,10 @@ function openItem(id) {
   }
   editingId = id;
   titleInput.value = item.title;
-  sectionSelect.value = item.section;
+  // Built here, as the categories can change.
+  const names = sectionNames();
+  sectionSelect.replaceChildren(...names.map((name) => new Option(name, name)));
+  sectionSelect.value = names.includes(item.section) ? item.section : OTHER_SECTION;
   dialog.returnValue = "";
   dialog.showModal();
 }
@@ -116,10 +119,6 @@ export function focusPantryAdd() {
 }
 
 export function initPantry() {
-  for (const section of PANTRY_SECTIONS) {
-    sectionSelect.add(new Option(section, section));
-  }
-
   addForm.addEventListener("submit", function (event) {
     event.preventDefault();
     const before = pantry.getAll().length;

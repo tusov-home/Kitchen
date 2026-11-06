@@ -1513,6 +1513,48 @@ body {
   width: 100%;
 }
 
+/* ---------- Pantry categories ---------- */
+
+.sections-open {
+  margin-left: auto;
+}
+
+.sections-list {
+  margin: 0.5rem 0;
+  padding: 0;
+  list-style: none;
+}
+
+.section-row {
+  display: flex;
+  align-items: center;
+  gap: 0.15rem;
+  padding: 0.15rem 0;
+}
+
+.section-row input {
+  flex: 1;
+  min-width: 0;
+  padding-right: 0.4rem;
+  padding-left: 0.6rem;
+  font-size: 0.9rem;
+}
+
+.section-action {
+  flex-shrink: 0;
+  min-width: 2rem;
+}
+
+.section-action:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.sections-note {
+  margin: 0.5rem 0 0;
+  color: var(--danger);
+}
+
 /* ---------- Segmented switch ---------- */
 
 .segmented {

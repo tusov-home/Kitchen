@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-06 i
+- Pantry categories are now yours: tap **Categories** on the Pantry page (C on the laptop) to add, rename, reorder and remove them. They sync between both phones.
+- New categories to start with: Grains, pasta & rice; Tins & jars; Oils, vinegars & sauces; Spice mixes. New items are sorted into them; existing items stay where they are.
+
 ## 2026-11-06 h
 - Two kinds of recipe: **Meals** and **Sauces & condiments**, each with its own row on the recipes page (A and S on the laptop). Choose the type in the recipe form; existing recipes count as meals.
 - The daily suggestion only picks meals. Search and Plan shopping cover both.
