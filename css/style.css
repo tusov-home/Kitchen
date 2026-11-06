@@ -1912,8 +1912,25 @@ html:has(#view-recipe:not([hidden])) {
   z-index: 2;
 }
 
-.suggestion-previous {
-  margin: 0 -0.75rem 0 -0.5rem;
+/* One round arrow in each bottom corner of the panel, echoing the ensō:
+   counterclockwise goes back, clockwise brings another idea */
+.suggestion-actions {
+  justify-content: space-between;
+  margin: 1.25rem -0.5rem -0.25rem;
+}
+
+#suggestion-next {
+  margin-left: auto;
+}
+
+.round-arrow {
+  width: 2rem;
+  height: 2rem;
+  stroke-width: 1.5;
+}
+
+.round-arrow.mirrored {
+  transform: scaleX(-1);
 }
 
 /* Words stay under the stretched link, so tapping them opens the recipe too */
@@ -1976,15 +1993,31 @@ a.button:active,
   from { opacity: 0; }
 }
 
+/* It starts a moment late and off-screen: the phone gets to finish drawing
+   the recipe before the first frame of movement, so it doesn't jump */
 body.sheet-opening #view-recipe,
 body.sheet-opening #recipe-dock {
-  animation: sheet-up 0.32s cubic-bezier(0.22, 0.8, 0.3, 1);
+  animation: sheet-up 0.3s cubic-bezier(0.22, 0.8, 0.3, 1) 40ms both;
   will-change: transform;
 }
 
 body.sheet-opening .recipe-backdrop {
-  animation: shade-in 0.32s ease-out;
+  animation: shade-in 0.3s ease-out both;
+  will-change: opacity;
 }
+
+/* Recipes come and go like cards: moved whole, never faded, so the page
+   underneath doesn't show through */
+@keyframes recipe-from-right {
+  from { transform: translate3d(100%, 0, 0); }
+}
+
+@keyframes recipe-from-left {
+  from { transform: translate3d(-100%, 0, 0); }
+}
+
+#view-recipe.slide-from-right { animation-name: recipe-from-right; }
+#view-recipe.slide-from-left { animation-name: recipe-from-left; }
 
 body.sheet-closing #view-recipe,
 body.sheet-closing #recipe-dock {
@@ -1996,6 +2029,7 @@ body.sheet-closing #recipe-dock {
 body.sheet-closing .recipe-backdrop {
   opacity: 0;
   transition: opacity 0.2s ease-in;
+  will-change: opacity;
 }
 
 @media (prefers-reduced-motion: reduce) {

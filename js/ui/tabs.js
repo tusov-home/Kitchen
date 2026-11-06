@@ -225,8 +225,11 @@ function slideOut(view, direction, whenDone) {
     return;
   }
   view.style.transition = "transform 0.16s ease-in, opacity 0.16s ease-in";
-  view.style.transform = "translateX(" + (direction > 0 ? -1 : 1) * window.innerWidth * 0.6 + "px)";
-  view.style.opacity = "0";
+  // A recipe leaves whole, like a card; a page fades into the next one.
+  const card = getScreen() === "recipe";
+  const distance = window.innerWidth * (card ? 1.05 : 0.6);
+  view.style.transform = "translate3d(" + (direction > 0 ? -1 : 1) * distance + "px, 0, 0)";
+  view.style.opacity = card ? "" : "0";
   let done = false;
   const finish = function () {
     if (!done) {

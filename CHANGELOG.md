@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-06 u
+- The suggestion has two round arrows in its bottom corners, like the ensō: clockwise for another idea, counterclockwise to go back.
+- Smoother recipes: swiping moves them like cards, and opening and closing wait until the recipe is drawn.
+
 ## 2026-11-06 t
 - Pressing a button or card now pushes it down, instead of a blue flash. The suggestion presses in, then the recipe rises from below and sinks back when closed.
 - Smoother swiping: pages move on their own layer, at most once per screen refresh, and costly effects are gone.

@@ -68,8 +68,8 @@ function route() {
       go("#/", true); // recipe no longer exists
       return;
     }
-    // Coming from the recipes page, it's already drawn under the sheet.
-    if (cameFrom !== "list") {
+    // It's already drawn under the sheet, unless the app started here.
+    if (cameFrom !== "list" && cameFrom !== "recipe") {
       renderList();
     }
     views.recipe.scrollTop = 0;
@@ -115,7 +115,7 @@ function route() {
 
 function playSheetOpening() {
   document.body.classList.add("sheet-opening");
-  setTimeout(() => document.body.classList.remove("sheet-opening"), 340);
+  setTimeout(() => document.body.classList.remove("sheet-opening"), 380);
 }
 
 // When recipes change (also from the other phone), refresh what's shown.
