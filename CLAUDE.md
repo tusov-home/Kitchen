@@ -70,8 +70,12 @@ explains the app itself (features, files, shortcuts, sync setup).
   sumi ink, moss, hinoki wood; dark = charred wood + rice paper). No
   cream + orange, no emoji, thin line SVG icons, titles in Zen Old
   Mincho, text in Zen Kaku Gothic New (self-hosted in `fonts/`, OFL).
-- The brushed ensō (`icons/enso-mark.png`, used as a CSS mask) is the one
-  signature element. Keep everything else quiet: no all-caps labels,
+- Materials give the depth: timber top and tab bars, stone walls and panels
+  lit from above, and a faint maple branch in the suggestion. It stays part
+  of the background (`--maple-strength`), not a picture on top. Textures
+  come from `tools/make_textures.py` and live in `textures/` (light + dark).
+- The brushed ensō (`icons/enso-mark.png`, used as a CSS mask) stays as the
+  logo and active tab mark. Keep everything else quiet: no all-caps labels,
   generous spacing, soft rectangles rather than pills.
 - Recipes page order: today's suggestion → search → framed "All recipes"
   row, filling the phone's height while folded. List, Filter, Plan

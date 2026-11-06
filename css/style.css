@@ -1639,21 +1639,22 @@ body {
 }
 
 /* ---------- Materials ----------
-   Timber frames the screen, stone carries the content, and one bamboo
-   branch hangs in the suggestion. Textures are drawn by
+   Timber frames the screen, stone carries the content, and a maple
+   branch shows faintly on the wall of the suggestion. Textures are drawn by
    tools/make_textures.py; each has a light and a dark version. */
 
 :root {
   --stone: url("../textures/stone-light.webp");
   --timber: url("../textures/timber-light.webp");
-  --bamboo: url("../textures/bamboo-light.webp");
-  --bamboo-shadow: url("../textures/bamboo-shadow-light.webp");
+  --maple: url("../textures/maple-light.webp");
+  --maple-shadow: url("../textures/maple-shadow-light.webp");
   --timber-shade: rgb(255 248 235 / 0.28);
   --lit-edge: rgb(255 255 255 / 0.7);
   --drop: rgb(52 48 38 / 0.2);
   --niche: rgb(52 48 38 / 0.16);
   --window-light: rgb(255 255 255 / 0.5);
-  --shadow-strength: 0.32;
+  --shadow-strength: 0.16;
+  --maple-strength: 0.42;
   --wall-glaze: rgb(236 237 231 / 0.45);
   --on-timber: #4a4235;
 }
@@ -1662,14 +1663,15 @@ body {
   :root {
     --stone: url("../textures/stone-dark.webp");
     --timber: url("../textures/timber-dark.webp");
-    --bamboo: url("../textures/bamboo-dark.webp");
-    --bamboo-shadow: url("../textures/bamboo-shadow-dark.webp");
+    --maple: url("../textures/maple-dark.webp");
+    --maple-shadow: url("../textures/maple-shadow-dark.webp");
     --timber-shade: rgb(16 12 9 / 0.25);
     --lit-edge: rgb(255 255 255 / 0.06);
     --drop: rgb(0 0 0 / 0.55);
     --niche: rgb(0 0 0 / 0.5);
     --window-light: rgb(226 224 205 / 0.075);
-    --shadow-strength: 0.8;
+    --shadow-strength: 0.5;
+    --maple-strength: 0.6;
     --wall-glaze: rgb(28 30 27 / 0.45);
     --on-timber: #b3ad9f;
   }
@@ -1709,7 +1711,7 @@ html {
 }
 
 /* The suggestion is a niche in the wall: set back, with daylight falling
-   in from the side and a branch hanging in front of it. */
+   in from the side and a branch just visible against the wall. */
 .suggestion {
   position: relative;
   isolation: isolate;
@@ -1721,7 +1723,7 @@ html {
   box-shadow: inset 0 10px 18px -8px var(--niche), inset 0 0 0 1px var(--border), 0 1px 0 var(--lit-edge);
 }
 
-/* The branch, and below it its shadow on the wall (replaces the big ensō) */
+/* The branch, and behind it its soft shadow (replaces the big ensō) */
 .suggestion::before,
 .suggestion::after {
   content: "";
@@ -1732,34 +1734,34 @@ html {
   width: min(52%, 15rem);
   height: auto;
   aspect-ratio: 900 / 1100;
-  background: var(--bamboo) right top / 100% no-repeat;
+  background: var(--maple) right top / 100% no-repeat;
   pointer-events: none;
   -webkit-mask: none;
   mask: none;
-  opacity: 1;
+  opacity: var(--maple-strength);
 }
 
 .suggestion::before {
   top: 2.2rem;
   right: 1.1rem;
-  background-image: var(--bamboo-shadow);
+  background-image: var(--maple-shadow);
   opacity: var(--shadow-strength);
 }
 
 /* With the whole phone to itself, the branch can grow */
 #view-list:has(#all-panel[hidden]) .suggestion::before,
 #view-list:has(#all-panel[hidden]) .suggestion::after {
-  top: -2.5rem;
-  right: -3rem;
-  width: min(84%, 24rem);
+  top: -0.75rem;
+  right: -1.5rem;
+  width: min(100%, 26rem);
 }
 
 #view-list:has(#all-panel[hidden]) .suggestion::before {
-  top: -0.5rem;
-  right: -2rem;
+  top: 0.75rem;
+  right: -0.75rem;
 }
 
-/* On a short phone a leaf may reach the title: a soft halo keeps it readable */
+/* The title may cross a leaf: a soft halo keeps it readable */
 .suggestion-title {
   text-shadow: 0 0 4px var(--surface), 0 0 16px var(--surface);
 }

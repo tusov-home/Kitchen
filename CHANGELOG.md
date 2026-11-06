@@ -1,5 +1,8 @@
 # Changelog
 
+## 2026-11-06 a
+- New materials: timber top and tab bars, stone for the walls and panels, and a faint Japanese maple branch on the wall of the suggestion. They replace the big ensō there. All are drawn by code and work offline.
+
 ## 2026-11-05 i
 - **Add to shopping list** on the recipe page (shortcut A) adds its ingredients to the current list, for the servings shown. If the recipe is already on the list, it asks first, because the amounts would add up.
 
