@@ -1,5 +1,8 @@
 # Changelog
 
+## 2026-11-06 e
+- The **+** button to add a recipe is back on the recipes page, on the same row as the search box.
+
 ## 2026-11-06 d
 - Removed the timber from the top bar and tab bar. They are now the same stone as the wall, with a thin line.
 

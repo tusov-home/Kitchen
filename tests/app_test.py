@@ -327,7 +327,7 @@ def test_laptop_second_device(p, sheet):
     panel = page.locator("#all-panel")
     expect(panel).to_be_hidden()
     expect(page.locator("#suggestion")).to_be_visible()
-    expect(page.locator("#add-recipe")).to_be_hidden()
+    expect(page.locator("#add-recipe")).to_be_visible()
     # Searching unfolds it, and clearing the search folds it again
     page.keyboard.press("/")
     page.keyboard.type("shak")

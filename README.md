@@ -12,7 +12,7 @@ Kitchen lives in the `tusov-home` organization so it has its own web address. Pa
 
 ## Use it
 
-- **Add a recipe:** copy the recipe from Claude, unfold **All recipes**, tap **+** and paste. The first line becomes the title (you can change it). Add tags like `quick, weekend, chicken`.
+- **Add a recipe:** copy the recipe from Claude, tap **+** next to the search box and paste. The first line becomes the title (you can change it). Add tags like `quick, weekend, chicken`.
 - **Find it again:** search by name, tag or ingredient, or tap a tag to filter.
 - **Cook it:** open the recipe. **✓ Cooked today** adds the date to the notes; **Edit** lets you change anything and add notes ("less chilli next time").
 - **Servings:** use **− / +** on a recipe to cook for more or fewer people. Ingredient amounts change (highlighted); the method stays as written. The base number comes from "Serves 2" in the text, or set it in **Edit → Servings**. Without it, the stepper multiplies (×½, ×1½, ×2 …).

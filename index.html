@@ -38,11 +38,14 @@
       </div>
     </section>
 
-    <!-- Second: search -->
-    <label class="search-box">
-      <svg class="line-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg>
-      <input id="search" class="search" type="search" placeholder="Search recipes or ingredients" aria-label="Search recipes" title="Search (/)">
-    </label>
+    <!-- Second: search, and adding a recipe -->
+    <div class="search-row">
+      <label class="search-box">
+        <svg class="line-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg>
+        <input id="search" class="search" type="search" placeholder="Recipe or ingredient" aria-label="Search recipes" title="Search (/)">
+      </label>
+      <button id="add-recipe" class="icon-button add-button" type="button" title="Add recipe (N)" aria-label="Add recipe"><svg class="line-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 5v14M5 12h14"/></svg></button>
+    </div>
 
     <!-- Everything else stays folded until asked for -->
     <h2 class="list-title">
@@ -56,7 +59,6 @@
     <div class="list-tools">
       <button id="filter-toggle" class="text-button" type="button" aria-expanded="false" aria-controls="filter-panel" title="Filter and sort (F)">Filter</button>
       <button id="plan-toggle" class="text-button" type="button" title="Pick recipes for a shopping list (P)">Plan shopping</button>
-      <button id="add-recipe" class="icon-button add-button" type="button" title="Add recipe (N)" aria-label="Add recipe"><svg class="line-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 5v14M5 12h14"/></svg></button>
     </div>
     <p id="plan-hint" class="hint plan-hint" hidden>Tap the recipes you want to cook</p>
 
@@ -76,7 +78,7 @@
     <ul id="recipe-list" class="recipe-list"></ul>
     <div id="empty-list" class="empty" hidden>
       <p class="empty-title">No recipes yet</p>
-      <p>When a recipe in Claude is just how you want it, copy it and tap <strong>+</strong> above.</p>
+      <p>When a recipe in Claude is just how you want it, copy it and tap <strong>+</strong> next to the search box.</p>
     </div>
     <p id="no-results" class="empty" hidden>No recipes match your search.</p>
     </div>

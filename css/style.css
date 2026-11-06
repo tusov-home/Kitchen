@@ -520,9 +520,23 @@ button.owner-initial {
   color: var(--text);
 }
 
+.search-row {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.search-row .search-box {
+  flex: 1;
+  min-width: 0; /* lets the box shrink on narrow phones */
+}
+
+/* A square as tall as the search box */
 .add-button {
-  margin-left: 0.15rem;
-  border: 1px solid var(--border);
+  flex-shrink: 0;
+  width: 3.1rem;
+  height: 3.1rem;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
 }
 
 .plan-hint {
@@ -1625,6 +1639,7 @@ html {
 
 /* Stone: raised slabs, lit from above */
 .search-box,
+.add-button,
 .all-toggle,
 .recipe-card {
   background:
