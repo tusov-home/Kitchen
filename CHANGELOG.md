@@ -1,5 +1,8 @@
 # Changelog
 
+## 2026-11-06 x
+- The suggestion's bottom corners belong to the arrows only, so a tap near them never opens the recipe.
+
 ## 2026-11-06 w
 - No vibration on swipes. The recipes page stays still behind an opening or closing recipe. The arrows turn the suggestion over like a playing card.
 

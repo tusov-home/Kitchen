@@ -128,8 +128,9 @@ export function renderSuggestion(recipes, visible) {
   link.href = href;
   reason.textContent = pick.reason;
   reason.hidden = !pick.reason;
-  nextButton.hidden = list.length < 2;
-  previousButton.hidden = list.length < 2 || loadOffset(today) === 0;
+  // Switched off, not removed: its corner keeps catching taps.
+  nextButton.disabled = list.length < 2;
+  previousButton.disabled = list.length < 2 || loadOffset(today) === 0;
 }
 
 // Swiping on the recipe goes on through today's other ideas.

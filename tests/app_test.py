@@ -390,13 +390,13 @@ def test_laptop_second_device(p, sheet):
     page.keyboard.press("t")
     expect(t_button).to_have_attribute("aria-pressed", "false")
     expect(page.locator("#suggestion-link")).to_have_text("Miso Aubergine with Soba")
-    expect(page.locator("#suggestion-next")).to_be_hidden()
+    expect(page.locator("#suggestion-next")).to_be_disabled()
     page.reload()  # the choice is remembered on this device
     expect(k_button).to_have_attribute("aria-pressed", "true")
     expect(t_button).to_have_attribute("aria-pressed", "false")
     page.keyboard.press("t")
     page.keyboard.press("k")
-    expect(page.locator("#suggestion-next")).to_be_visible()
+    expect(page.locator("#suggestion-next")).to_be_enabled()
     # F from the folded page opens the list with its filters
     page.keyboard.press("f")
     expect(panel).to_be_visible()
@@ -963,7 +963,7 @@ def test_meals_and_sauces(p):
     expect(page.locator("#sauce-count")).to_have_text("1")
     # The suggestion only picks meals
     expect(page.locator("#suggestion-link")).to_have_text("Miso Aubergine with Soba")
-    expect(page.locator("#suggestion-next")).to_be_hidden()
+    expect(page.locator("#suggestion-next")).to_be_disabled()
     assert not page.evaluate("document.documentElement.scrollHeight > window.innerHeight")
     # Search finds both, with a label on the sauce
     page.fill("#search", "i")
@@ -1237,12 +1237,12 @@ def test_recipe_swipe(p):
     page.reload()
     shown = page.locator("#suggestion-link").inner_text()
     # Undo goes back to the previous idea, and is gone at the first one
-    expect(page.locator("#suggestion-previous")).to_be_hidden()
+    expect(page.locator("#suggestion-previous")).to_be_disabled()
     page.click("#suggestion-next")
     expect(page.locator("#suggestion-link")).not_to_have_text(shown)
     page.click("#suggestion-previous")
     expect(page.locator("#suggestion-link")).to_have_text(shown)
-    expect(page.locator("#suggestion-previous")).to_be_hidden()
+    expect(page.locator("#suggestion-previous")).to_be_disabled()
     page.wait_for_timeout(500)  # the soft fade finishes
     # Anywhere on the panel opens it, but "Another idea" is still its own button
     for part in ("#suggestion-label", "#suggestion-reason"):
@@ -1254,6 +1254,14 @@ def test_recipe_swipe(p):
         const r = document.getElementById('suggestion-next').getBoundingClientRect();
         return document.elementFromPoint(r.x + 5, r.y + r.height / 2).id;
     })()""") == "suggestion-next"
+    # Both bottom corners belong to the arrows, even the switched-off one
+    for x_part, expected in (("left + 4", "suggestion-previous"), ("right - 4", "suggestion-next")):
+        hit = page.evaluate(f"""(() => {{
+            const r = document.getElementById('suggestion').getBoundingClientRect();
+            const e = document.elementFromPoint(r.{x_part}, r.bottom - 8);
+            return e.closest('button') ? e.closest('button').id : e.id;
+        }})()""")
+        assert hit == expected, (x_part, hit)
     page.click("#suggestion")
     expect(title).to_have_text(shown)
     page.wait_for_timeout(400)

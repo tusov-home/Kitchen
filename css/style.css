@@ -1929,9 +1929,29 @@ html {
 
 /* One round arrow in each bottom corner of the panel, echoing the ensō:
    counterclockwise goes back, clockwise brings another idea */
+/* The arrows own the bottom corners: each button reaches right into its
+   corner, so a tap near it never opens the recipe by mistake */
 .suggestion-actions {
   justify-content: space-between;
-  margin: 1.25rem -0.5rem -0.25rem;
+  margin: 0.5rem -1.4rem -1.25rem;
+}
+
+.idea-button,
+.idea-button:hover {
+  width: 4.5rem;
+  height: 4.5rem;
+  border-radius: 0;
+  background: transparent; /* the corner area itself stays invisible */
+}
+
+/* A switched-off arrow is invisible but still guards its corner */
+.idea-button:disabled {
+  opacity: 1;
+  cursor: default;
+}
+
+.idea-button:disabled .round-arrow {
+  visibility: hidden;
 }
 
 #suggestion-next {
