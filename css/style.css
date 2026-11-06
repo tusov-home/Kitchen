@@ -1905,7 +1905,7 @@ html:has(#view-recipe:not([hidden])) {
 .brand-mark[data-state="syncing"] { animation: enso-turn 1.2s linear infinite; }
 
 @keyframes enso-turn {
-  to { transform: rotate(360deg); }
+  to { transform: rotate(-360deg); }
 }
 
 @media (prefers-reduced-motion: reduce) {
