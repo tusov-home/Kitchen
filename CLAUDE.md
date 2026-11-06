@@ -13,7 +13,7 @@ explains the app itself (features, files, shortcuts, sync setup).
   (Chrome/Edge, uses keyboard shortcuts a lot). Both use **dark mode**.
 - Tõnis wants to learn as we go: end each change with a short
   "What changed, and why" (files touched, one new concept explained
-  plainly). Keep answers short and practical. Ask 1–4 questions before
+  plainly), except in quick design mode below. Keep answers short and practical. Ask 1–4 questions before
   bigger features; build small clear changes straight away.
 
 ## Rules for every change
@@ -46,6 +46,23 @@ explains the app itself (features, files, shortcuts, sync setup).
    `gh run list` and `gh run view` work from a session; `gh api .../pages`
    and fetching the live site from the shell are blocked, so judge by the
    run. It can take a minute before the run appears.
+
+## Quick design mode
+
+Tõnis changes design ideas often and wants to feel them quickly. For
+look-only changes (colours, spacing, wording, moving a button), which touch
+only `css/style.css`, `index.html` or display code and no data or sync:
+
+- Run `python3 tests/app_test.py` once instead of twice, plus the node tests.
+- Screenshot only the changed page; dark mode at one phone width is enough,
+  unless the change could break a narrow layout.
+- Still bump `APP_VERSION`, add a one-line CHANGELOG entry and report green.
+- Report in one or two lines. Skip "What changed, and why" unless he asks or
+  a new concept really came up. Update the README only if the steps changed.
+- He may send several ideas in one message: do them all in one publish.
+
+Anything touching saved data, sync, `sw.js` or `Code.gs` gets the full rules
+above. If a look-only change turns out bigger than expected, say so.
 
 ## Data and sync (don't break these)
 
