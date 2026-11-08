@@ -1,5 +1,8 @@
 # Changelog
 
+## 2026-11-08 f
+- Start screen: the pot is now exactly the size and place of Android's own start icon, the text sits below it, and it shows for at least 2 seconds.
+
 ## 2026-11-08 e
 - Starting the app shows the pot with a wobbling lid and rising steam: "Something's cooking…".
 

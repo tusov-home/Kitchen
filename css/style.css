@@ -2463,11 +2463,6 @@ body.has-tabbar:has(#timer-strip:not([hidden])) .toast {
   position: fixed;
   z-index: 100;
   inset: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 1.5rem;
   background: var(--bg);
   color: var(--text);
   transition: opacity 0.3s ease;
@@ -2485,9 +2480,15 @@ body.has-tabbar:has(#timer-strip:not([hidden])) .toast {
   pointer-events: none;
 }
 
+/* Exactly where and how big Android shows the icon (a 240 px square in the
+   middle), so the still pot seems to come alive */
 .splash-pot {
-  width: 7.5rem;
-  height: auto;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 240px;
+  height: 240px;
+  transform: translate(-50%, -50%);
   fill: currentColor;
   overflow: visible;
 }
@@ -2526,8 +2527,14 @@ body.has-tabbar:has(#timer-strip:not([hidden])) .toast {
   100% { opacity: 0; transform: translateY(-14px); }
 }
 
+/* Below the icon's square, where Android shows nothing */
 .splash-text {
+  position: absolute;
+  top: calc(50% + 140px);
+  right: 0;
+  left: 0;
   margin: 0;
+  text-align: center;
   color: var(--muted);
   font-family: var(--font-title);
   font-size: 1.15rem;

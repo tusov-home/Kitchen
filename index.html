@@ -18,7 +18,11 @@
   <!-- Shown while the app starts: the pot from the app icon, its lid
        wobbling. main.js lifts it away once everything is ready. -->
   <div id="splash" class="splash" role="status">
-    <svg class="splash-pot" viewBox="100 80 312 310" aria-hidden="true" focusable="false">
+    <!-- The whole app icon square (512 units), drawn as Android draws it on
+         its own start screen: 240 px wide, in the middle of the screen. The
+         pot sits in it exactly as in icons/icon-maskable-512.png. -->
+    <svg class="splash-pot" viewBox="0 0 512 512" aria-hidden="true" focusable="false">
+      <g transform="translate(256 256) scale(0.82) translate(-256 -235)">
       <g class="splash-steam">
         <rect x="196" y="100" width="16" height="36" rx="8"/>
         <rect x="248" y="100" width="16" height="36" rx="8"/>
@@ -31,6 +35,7 @@
       <rect x="120" y="238" width="50" height="34" rx="17"/>
       <rect x="342" y="238" width="50" height="34" rx="17"/>
       <rect x="152" y="216" width="208" height="154" rx="40"/>
+      </g>
     </svg>
     <p class="splash-text">Something’s cooking…</p>
   </div>
