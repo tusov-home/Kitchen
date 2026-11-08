@@ -40,7 +40,9 @@ export function renderPantryBadge() {
   setBadge("pantry-count", lowOrOut(pantry.getAll()).length);
 }
 
-function itemRow(item) {
+// One pantry line: the name (tap to rename, move or delete) and its
+// Have / Low / Out button. Also used in the search on the recipes page.
+export function itemRow(item) {
   const row = document.createElement("li");
   row.className = "pantry-item status-" + item.status;
 

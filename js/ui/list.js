@@ -3,6 +3,9 @@
 // and search results open in one sheet on top (#view-browse), which holds
 // the list and its filters.
 import * as state from "../state.js";
+import { pantry } from "../pantryState.js";
+import { searchPantry } from "../lib/pantry.js";
+import { itemRow } from "./pantry.js";
 import * as storage from "../storage.js";
 import { visibleRecipes, allTags, allOwners, averageRating, kindOf } from "../lib/recipes.js";
 import { renderSuggestion, initSuggestion } from "./suggestion.js";
@@ -10,6 +13,9 @@ import { setQueue } from "./recipeQueue.js";
 import { renderPlanRow } from "./plan.js";
 
 const searchInput = document.getElementById("search");
+const pantryResults = document.getElementById("pantry-results");
+const pantryResultsList = document.getElementById("pantry-results-list");
+const recipeResultsHeading = document.getElementById("recipe-results-heading");
 const tagFilter = document.getElementById("tag-filter");
 const list = document.getElementById("recipe-list");
 const emptyList = document.getElementById("empty-list");
@@ -150,8 +156,15 @@ export function renderList() {
     list.appendChild(item);
   }
 
+  // Searching also looks in the pantry, so something running low can be
+  // marked right here.
+  const pantryHits = searching ? searchPantry(pantry.getAll(), searchInput.value) : [];
+  pantryResults.hidden = pantryHits.length === 0;
+  pantryResultsList.replaceChildren(...pantryHits.map(itemRow));
+  recipeResultsHeading.hidden = shown.length === 0;
+
   emptyList.hidden = all.length > 0;
-  noResults.hidden = all.length === 0 || shown.length > 0;
+  noResults.hidden = all.length === 0 || shown.length > 0 || pantryHits.length > 0;
   noResults.textContent = pool.length === 0 ? "No sauces or condiments yet. Tap + to add one." : "No recipes match your search.";
 
   // How many in each row.

@@ -3,7 +3,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
   guessSection, nextStatus, normalisePantryItem, groupPantry, lowOrOut, pantryCovers, findInPantry,
-  effectiveSections, defaultSectionId, sectionNameProblem, reorderSections, normaliseSection, OTHER_SECTION,
+  effectiveSections, defaultSectionId, sectionNameProblem, reorderSections, normaliseSection, OTHER_SECTION, searchPantry,
 } from "../js/lib/pantry.js";
 import { dueLabel } from "../js/lib/dates.js";
 
@@ -127,4 +127,17 @@ test("due labels", () => {
   assert.equal(dueLabel("2026-11-07", today), "Sat");
   assert.equal(dueLabel("2026-11-20", today), "20 Nov");
   assert.equal(dueLabel(null, today), "");
+});
+
+test("searchPantry: anywhere in the name, starts first, ignores case and accents", () => {
+  const items = [
+    { id: "1", title: "Brown rice" },
+    { id: "2", title: "Rice vinegar" },
+    { id: "3", title: "Crème fraîche" },
+    { id: "4", title: "Oats" },
+  ];
+  assert.deepEqual(searchPantry(items, "RICE").map((item) => item.id), ["2", "1"]);
+  assert.deepEqual(searchPantry(items, "creme").map((item) => item.id), ["3"]);
+  assert.deepEqual(searchPantry(items, "  "), []);
+  assert.deepEqual(searchPantry(items, "zz"), []);
 });

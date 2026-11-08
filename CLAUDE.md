@@ -103,7 +103,8 @@ above. If a look-only change turns out bigger than expected, say so.
   phone's height; search and + in the bottom bar (`#list-dock`).
 - Everything opens the same way, as a sheet on top of the recipes page:
   Meals, Sauces and search results (one sheet, `#view-browse`, addresses
-  `#/meals`, `#/sauces`, `#/search`, Filter at its top), the plan, a recipe.
+  `#/meals`, `#/sauces`, `#/search`, Filter at its top; search also lists
+  matching pantry items first, with their status button), the plan, a recipe.
   A recipe lies on the sheet it came from and closes back to it (`under` in
   `main.js`). One project is a sheet on top of the projects page. Closing:
   pull down, tap above, Back, Esc.

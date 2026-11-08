@@ -2307,3 +2307,16 @@ body.shade-out .recipe-backdrop {
 .idea-button:disabled {
   visibility: hidden;
 }
+
+/* Search results: pantry items first, then recipes, each with a quiet heading */
+.results-heading {
+  margin: 1rem 0 0.4rem;
+  color: var(--muted);
+  font-family: var(--font-title);
+  font-size: 1rem;
+  font-weight: 400;
+}
+
+.pantry-results .results-heading:first-child {
+  margin-top: 0.75rem;
+}

@@ -273,6 +273,8 @@ pantry.onChange(function () {
   renderPantryBadge();
   if (current.screen === "pantry") {
     renderPantry();
+  } else if (current.screen === "browse") {
+    renderList(); // the pantry part of a search
   } else if (current.screen === "shopping") {
     renderShopping();
   }

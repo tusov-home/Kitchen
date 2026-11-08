@@ -187,3 +187,21 @@ export const STAPLES = [
   ["Eggs", "Fridge"], ["Butter", "Fridge"], ["Milk", "Fridge"], ["Greek yogurt", "Fridge"],
   ["Parmesan", "Fridge"], ["Frozen peas", "Freezer"],
 ];
+
+// Pantry items matching a search, for the search on the recipes page.
+// Matches anywhere in the name, ignoring case and accents ("creme" finds
+// "Crème fraîche"); names starting with the search come first, then A–Z.
+export function searchPantry(items, query) {
+  const plain = (text) => text.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+  const wanted = plain(query.trim());
+  if (!wanted) {
+    return [];
+  }
+  return items
+    .filter((item) => plain(item.title).includes(wanted))
+    .sort((a, b) => {
+      const startsA = plain(a.title).startsWith(wanted) ? 0 : 1;
+      const startsB = plain(b.title).startsWith(wanted) ? 0 : 1;
+      return startsA - startsB || a.title.localeCompare(b.title, undefined, { sensitivity: "base" });
+    });
+}

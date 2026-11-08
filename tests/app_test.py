@@ -860,6 +860,27 @@ def test_pantry_tabs(p, sheet):
     expect(page.locator(".pantry-item", has_text="Rice").locator(".status-pill")).to_have_text("Have")
     expect(page.locator("#pantry-count")).to_be_hidden()
 
+    # The search on the recipes page finds pantry items too: one tap marks low
+    open_tab(page, "list")
+    page.click("#search")
+    page.keyboard.type("ric")
+    expect(page.locator("#view-browse")).to_be_visible()
+    hits = page.locator("#pantry-results .pantry-item")
+    expect(hits.first).to_contain_text("Rice")
+    page.screenshot(path=SHOTS / "phone-search-pantry.png")
+    hits.filter(has_text="Rice").first.locator(".status-pill").click()
+    expect(hits.filter(has_text="Rice").first.locator(".status-pill")).to_have_text("Low")
+    expect(page.locator("#pantry-count")).to_have_text("1")
+    expect(page.locator("#view-browse")).to_be_visible()  # still in the results
+    page.fill("#search", "")
+    expect(page.locator("#view-browse")).to_be_hidden()
+    open_tab(page, "pantry")
+    rice_pill = page.locator(".pantry-item", has_text="Rice").first.locator(".status-pill")
+    expect(rice_pill).to_have_text("Low")
+    rice_pill.click()
+    rice_pill.click()  # Out → Have again
+    expect(rice_pill).to_have_text("Have")
+
     # A recipe shopping list moves what you have to "Check you have"
     page.fill("#pantry-add-input", "White miso")
     page.keyboard.press("Enter")

@@ -1,5 +1,8 @@
 # Changelog
 
+## 2026-11-08 a
+- Search on the recipes page also finds pantry items, listed first with their Have / Low / Out button, so one tap marks something running low.
+
 ## 2026-11-07 f
 - One width for everything: pages, sheets and the bars at the bottom share the same edges.
 - The search bar and + look like the shopping list's "Add" field; all bottom bars match.
