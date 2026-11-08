@@ -129,7 +129,8 @@ above. If a look-only change turns out bigger than expected, say so.
   The screen stays on while a recipe is open or a timer runs
   (`js/ui/screenAwake.js`). Times in the text ("20 min") start timers:
   chips above the bottom bar on every page, per phone (`kitchen.timers.v1`,
-  never synced), chime + vibration until Done.
+  never synced), chime + vibration until Done. Method steps show each
+  mentioned ingredient's total in brackets (`js/lib/methodAmounts.js`).
   No Back button (phone Back, pull down, or tap above the sheet).
 - Dialogs and the recipe form must not pop up the phone keyboard on open:
   the heading takes the focus (`tabindex="-1"`), never a text box.

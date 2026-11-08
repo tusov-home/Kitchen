@@ -174,6 +174,9 @@ def test_phone(p, sheet):
     expect(body).to_contain_text("400 g soba noodles")
     expect(body).to_contain_text("2 tbsp sesame")
     expect(body).to_contain_text("Roast at 220 °C for 20 minutes")
+    # The method shows each ingredient's total in brackets, at 4 servings too
+    expect(body.locator("ol li").first).to_have_text("Halve the aubergines (4) and score them.")
+    expect(body.locator("ol .amount-hint").first).to_have_text("(4)")
     page.screenshot(path=SHOTS / "phone-3-recipe.png")
     page.go_back()
     expect(page.locator("#view-plan")).to_be_visible()

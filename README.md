@@ -14,6 +14,7 @@ Kitchen lives in the `tusov-home` organization so it has its own web address. Pa
 
 - **Meals and sauces:** every recipe is a **Meal** or a **Sauce or condiment**; choose in the recipe form. The daily suggestion only picks meals; search covers both. Recipes from before this count as meals, and the owner can change the type.
 - **Add a recipe:** copy the recipe from Claude, tap **+** next to the search box, tap the text box and paste. On the laptop, N then Ctrl+V is enough. The first line becomes the title (you can change it). Add tags like `quick, weekend, chicken`.
+- **Amounts in the method:** when a step mentions an ingredient, its total amount from the ingredients list follows in brackets ("Cook the noodles (200 g)"), at the planned servings, so there's no scrolling up and down. Ingredients without an amount (salt to taste), and steps that already say how much ("Cook 100 g noodles"), are left as written.
 - **Timers:** times in a recipe ("20 min", "1 hour 30 minutes", "10–12 minutes") are underlined; tap one to start a timer, named after its step ("Roast"). Several can run at once, as chips above the bottom bar on every page: tap the clock to pause or go on, the name to open the recipe, × to stop. When time is up the chip turns green, chimes and vibrates until you tap **Done** (or press X). Timers stay on the phone that started them and survive a reload. If the app is in the background, the alarm comes when you return to it.
 - **Screen stays on** while a recipe is open (Chrome on Android, Edge and Chrome on Windows), so it doesn't go dark mid-cooking. Closing the recipe lets it dim as usual.
 - **Find it again:** type in the search bar at the bottom of the recipes page (name, tag or ingredient); the results open in a sheet on top while you type. Matching **pantry** items come first, each with its Have / Low / Out button, so you can mark something running low without scrolling the whole pantry. Empty the box, or close the sheet, to go back.
@@ -174,6 +175,7 @@ js/ui/screenAwake.js  keeps the phone screen on while a recipe is open or a time
 js/ui/timers.js       tappable times in recipes, the timer chips, the chime
 js/timerState.js      the timers on this phone (saved, not synced)
 js/lib/timers.js      finding times in text, timer names, the clock
+js/lib/methodAmounts.js  finds ingredients in method steps and adds their amounts
 js/ui/shortcuts.js    all keyboard shortcuts in one table
 js/ui/toast.js        short pop-up messages
 apps-script/Code.gs   the Google Sheet side of sync (stores each item as JSON; one tab per collection)

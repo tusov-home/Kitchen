@@ -6,12 +6,19 @@
 // With options.scale (e.g. 2 for double), amounts in the ingredients
 // part are multiplied and highlighted. The method is never scaled, so
 // oven temperatures and cooking times stay as they are.
+//
+// After the ingredients, a step that mentions an ingredient gets its total
+// amount in brackets ("Add the noodles (400 g)"), at the same scale.
 import { scaleLine } from "./scale.js";
+import { ingredientRefs, addAmounts } from "./methodAmounts.js";
 import { STARTS_WITH_AMOUNT, headingOf, createSectionTracker } from "./sections.js";
 
 // Invisible markers around scaled amounts, turned into <span>s after escaping.
 const MARK_START = "\u0001";
 const MARK_END = "\u0002";
+// The same for the "(400 g)" added to method steps.
+const HINT_START = "\u0003";
+const HINT_END = "\u0004";
 
 
 function escapeHtml(text) {
@@ -28,7 +35,8 @@ function inline(text) {
     .replace(/__(.+?)__/g, "<strong>$1</strong>")
     .replace(/(^|[^*])\*([^*\s][^*]*?)\*(?!\*)/g, "$1<em>$2</em>")
     .replace(/`([^`]+)`/g, "<code>$1</code>")
-    .replace(new RegExp(MARK_START + "(.*?)" + MARK_END, "g"), '<span class="scaled">$1</span>');
+    .replace(new RegExp(MARK_START + "(.*?)" + MARK_END, "g"), '<span class="scaled">$1</span>')
+    .replace(new RegExp(HINT_START + "(.*?)" + HINT_END, "g"), '<span class="amount-hint">$1</span>');
 }
 
 function tableCells(line) {
@@ -51,6 +59,22 @@ export function renderMarkdown(source, options) {
   // Is there a clear "Ingredients" section? If not, we only scale
   // bullet points that start with an amount.
   const tracker = createSectionTracker(lines);
+  // Amounts for the method: only once there's a clear ingredients part, and
+  // only for what comes after it.
+  const refs = tracker.hasIngredientSection ? ingredientRefs(source, factor) : [];
+  let pastIngredients = false;
+  function withAmounts(text) {
+    if (!pastIngredients || tracker.isInIngredients() || !refs.length) {
+      return text;
+    }
+    return addAmounts(text, refs, (hint) => HINT_START + hint + HINT_END);
+  }
+  function noteHeading(text, level) {
+    tracker.heading(text, level);
+    if (tracker.isInIngredients()) {
+      pastIngredients = true;
+    }
+  }
 
   function mark(text) {
     return MARK_START + text + MARK_END;
@@ -130,7 +154,7 @@ export function renderMarkdown(source, options) {
     const heading = trimmed.match(/^(#{1,6})\s+(.*)$/);
     if (heading) {
       closeAll();
-      tracker.heading(heading[2], heading[1].length);
+      noteHeading(heading[2], heading[1].length);
       // h1 is the recipe title, so headings start at h2.
       const level = Math.min(heading[1].length + 1, 4);
       html.push("<h" + level + ">" + inline(heading[2]) + "</h" + level + ">");
@@ -153,7 +177,7 @@ export function renderMarkdown(source, options) {
         html.push("<" + type + ">");
         listType = type;
       }
-      html.push("<li>" + inline(scaled((bullet || numbered)[1], type)) + "</li>");
+      html.push("<li>" + inline(withAmounts(scaled((bullet || numbered)[1], type))) + "</li>");
       continue;
     }
 
@@ -161,14 +185,14 @@ export function renderMarkdown(source, options) {
     const pseudo = headingOf(trimmed);
     if (pseudo !== null && pseudo.level === 7) {
       closeAll();
-      tracker.heading(pseudo.text, 7);
+      noteHeading(pseudo.text, 7);
       paragraph.push(trimmed);
       closeParagraph();
       continue;
     }
 
     closeList();
-    paragraph.push(scaled(trimmed, "paragraph"));
+    paragraph.push(withAmounts(scaled(trimmed, "paragraph")));
   }
 
   closeAll();

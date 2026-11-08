@@ -1,5 +1,8 @@
 # Changelog
 
+## 2026-11-08 g
+- The method shows each ingredient's total amount in brackets where a step mentions it ("Cook the noodles (200 g)"), at the planned servings.
+
 ## 2026-11-08 f
 - Start screen: the pot is now exactly the size and place of Android's own start icon, the text sits below it, and it shows for at least 2 seconds.
 

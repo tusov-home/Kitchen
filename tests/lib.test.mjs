@@ -235,3 +235,12 @@ test("the jump bar finds ingredients and method headings", () => {
   assert.deepEqual(findJumps(["Intro", "Zutaten", "Zubereitung"]), { ingredients: 1, method: 2 });
   assert.deepEqual(findJumps(["To serve"]), { ingredients: -1, method: -1 });
 });
+
+test("markdown adds total amounts to method steps, at the same scale", () => {
+  const md = "## Ingredients\n- 200 g soba noodles\n- 2 aubergines\n\n## Method\n1. Halve the aubergines.\n2. Cook the noodles.";
+  const html = renderMarkdown(md, { scale: 2 });
+  assert.match(html, /Halve the aubergines <span class="amount-hint">\(4\)<\/span>\./);
+  assert.match(html, /Cook the noodles <span class="amount-hint">\(400 g\)<\/span>\./);
+  // the ingredients list itself gets no brackets
+  assert.doesNotMatch(html, /soba noodles <span class="amount-hint">/);
+});
