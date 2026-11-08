@@ -2457,3 +2457,86 @@ body:has(#timer-strip:not([hidden])) .view:not([hidden])::after {
 body.has-tabbar:has(#timer-strip:not([hidden])) .toast {
   bottom: calc(var(--tabbar-h) + var(--dock-h, 0rem) + env(safe-area-inset-bottom) + 4rem);
 }
+
+/* --- Start screen: the pot from the app icon, lid wobbling --- */
+.splash {
+  position: fixed;
+  z-index: 100;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  background: var(--bg);
+  color: var(--text);
+  transition: opacity 0.3s ease;
+}
+
+/* The same charred black as Android's own start screen, so they blend */
+@media (prefers-color-scheme: dark) {
+  .splash {
+    background: #1c1e1b;
+  }
+}
+
+.splash.splash-out {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.splash-pot {
+  width: 7.5rem;
+  height: auto;
+  fill: currentColor;
+  overflow: visible;
+}
+
+/* The lid lifts a little and rocks, as if something bubbles underneath */
+.splash-lid {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: lid-wobble 1.1s ease-in-out infinite;
+}
+
+@keyframes lid-wobble {
+  0%, 100% { transform: translateY(0) rotate(0); }
+  20% { transform: translateY(-6px) rotate(-3deg); }
+  40% { transform: translateY(-2px) rotate(2.5deg); }
+  60% { transform: translateY(-5px) rotate(-1.5deg); }
+  80% { transform: translateY(0) rotate(0.8deg); }
+}
+
+/* Steam rises and fades, one wisp after another */
+.splash-steam rect {
+  animation: steam-rise 1.6s ease-out infinite;
+}
+
+.splash-steam rect:nth-child(2) {
+  animation-delay: 0.3s;
+}
+
+.splash-steam rect:nth-child(3) {
+  animation-delay: 0.6s;
+}
+
+@keyframes steam-rise {
+  0% { opacity: 0; transform: translateY(10px); }
+  40% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-14px); }
+}
+
+.splash-text {
+  margin: 0;
+  color: var(--muted);
+  font-family: var(--font-title);
+  font-size: 1.15rem;
+  letter-spacing: 0.02em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .splash-lid,
+  .splash-steam rect {
+    animation: none;
+  }
+}

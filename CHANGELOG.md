@@ -1,5 +1,8 @@
 # Changelog
 
+## 2026-11-08 e
+- Starting the app shows the pot with a wobbling lid and rising steam: "Something's cooking…".
+
 ## 2026-11-08 d
 - Timers: tap a time in a recipe ("20 min") to start a timer. Several can run at once, as chips above the bottom bar on every page; tap the clock to pause, × to stop, the name to open the recipe.
 - When time is up the chip turns green and chimes and vibrates until you tap Done (or press X).

@@ -15,6 +15,25 @@
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+  <!-- Shown while the app starts: the pot from the app icon, its lid
+       wobbling. main.js lifts it away once everything is ready. -->
+  <div id="splash" class="splash" role="status">
+    <svg class="splash-pot" viewBox="100 80 312 310" aria-hidden="true" focusable="false">
+      <g class="splash-steam">
+        <rect x="196" y="100" width="16" height="36" rx="8"/>
+        <rect x="248" y="100" width="16" height="36" rx="8"/>
+        <rect x="300" y="100" width="16" height="36" rx="8"/>
+      </g>
+      <g class="splash-lid">
+        <rect x="228" y="152" width="56" height="34" rx="16"/>
+        <rect x="136" y="182" width="240" height="28" rx="14"/>
+      </g>
+      <rect x="120" y="238" width="50" height="34" rx="17"/>
+      <rect x="342" y="238" width="50" height="34" rx="17"/>
+      <rect x="152" y="216" width="208" height="154" rx="40"/>
+    </svg>
+    <p class="splash-text">Something’s cooking…</p>
+  </div>
   <header class="topbar">
     <a href="#/" id="brand" class="brand"><span id="brand-mark" class="brand-mark" data-state="off" aria-hidden="true"></span><span class="visually-hidden">Kitchen</span><sup id="brand-version" class="brand-version"></sup></a>
     <!-- The pages. Swipe left/right to move between them. -->

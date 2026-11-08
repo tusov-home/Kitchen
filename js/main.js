@@ -412,3 +412,15 @@ initPwa();
 window.addEventListener("hashchange", route);
 route();
 sync.startAutoSync();
+hideSplash();
+
+// The start screen stays at least a moment, so the wobble reads as a
+// greeting rather than a flicker; then it fades away.
+function hideSplash() {
+  const splash = document.getElementById("splash");
+  const wait = Math.max(0, 900 - performance.now());
+  setTimeout(function () {
+    splash.classList.add("splash-out");
+    setTimeout(() => splash.remove(), 350);
+  }, wait);
+}
