@@ -1,7 +1,9 @@
-// Keeps the phone screen on while a recipe is open, so it doesn't go dark
-// with floury hands. Uses the browser's Screen Wake Lock; where that isn't
+// Keeps the phone screen on while a recipe is open or a timer runs, so it
+// doesn't go dark with floury hands. Uses the browser's Screen Wake Lock; where that isn't
 // available (older browsers), nothing happens and the screen behaves as usual.
 
+// Why the screen should stay on: { recipe: true, timers: false }.
+const reasons = {};
 let wanted = false;
 let lock = null;
 
@@ -30,10 +32,11 @@ function letGo() {
   }
 }
 
-// on: true while a recipe is open.
-export function keepScreenOn(on) {
-  wanted = on;
-  if (on) {
+// reason: "recipe" or "timers"; on: whether that reason holds now.
+export function keepScreenOn(reason, on) {
+  reasons[reason] = on;
+  wanted = Object.values(reasons).some(Boolean);
+  if (wanted) {
     take();
   } else {
     letGo();

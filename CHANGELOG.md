@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-11-08 d
+- Timers: tap a time in a recipe ("20 min") to start a timer. Several can run at once, as chips above the bottom bar on every page; tap the clock to pause, × to stop, the name to open the recipe.
+- When time is up the chip turns green and chimes and vibrates until you tap Done (or press X).
+- The screen also stays on while a timer runs.
+
 ## 2026-11-08 c
 - The phone screen stays on while a recipe is open, and dims as usual again once it's closed.
 

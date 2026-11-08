@@ -16,6 +16,7 @@ import { initName } from "./ui/name.js";
 import { initEditor, openEditor, saveFromEditor, cancelEditor } from "./ui/editor.js";
 import { initSettings, setSettingsStatus, renderSettings } from "./ui/settings.js";
 import { keepScreenOn } from "./ui/screenAwake.js";
+import { initTimers, dismissAlarms } from "./ui/timers.js";
 import { initShortcuts } from "./ui/shortcuts.js";
 import { initPwa, onInstallAvailable, install } from "./pwa.js";
 import * as shoppingState from "./shoppingState.js";
@@ -225,7 +226,7 @@ function route() {
     }
   }
   renderTabs(current.screen, views[current.screen]);
-  keepScreenOn(current.screen === "recipe");
+  keepScreenOn("recipe", current.screen === "recipe");
   // The page under a sheet stays where you left it.
   const backUnder = (current.screen === "list" && isSheet(cameFrom)) || (current.screen === "projects" && cameFrom === "project");
   if (!isSheet(current.screen) && !backUnder) {
@@ -330,6 +331,7 @@ document.getElementById("add-recipe").addEventListener("click", function () {
 });
 
 initList(onSearch);
+initTimers();
 initHaptics();
 initAsk();
 initRecipe();
@@ -356,6 +358,7 @@ initShortcuts(
     toggleMeals: () => toggleKind("meal"),
     toggleSauces: () => toggleKind("sauce"),
     toggleFilters: filterKey,
+    dismissAlarms: dismissAlarms,
     suggestT: () => toggleSuggestionOwner("T"),
     suggestK: () => toggleSuggestionOwner("K"),
     editRecipe: function () {

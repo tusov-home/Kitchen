@@ -10,6 +10,7 @@ so sync can be tested without the internet. Made-up recipes only.
 import json
 import os
 import subprocess
+import re
 import sys
 import time
 from pathlib import Path
@@ -1602,6 +1603,84 @@ def test_screen_stays_on(p):
     print("screen stays on: ok")
 
 
+TIMER_RECIPE = """Quick toast
+Serves 1
+
+## Method
+1. Roast at 220 °C for 20 minutes.
+2. Toast the seeds 2 seconds, then rest 5 min."""
+
+
+def test_timers(p):
+    """Times in a recipe start timers; several run at once; time's up rings."""
+    ctx = p.chromium.launch().new_context(**p.devices["Pixel 7"])
+    ctx.add_init_script("if (!localStorage.getItem('kitchen.settings.v1')) localStorage.setItem('kitchen.settings.v1', JSON.stringify({myName: 'Kadi'}))")
+    ctx.add_init_script("window.__buzz = 0; navigator.vibrate = (pattern) => { if (pattern) window.__buzz += 1; return true; };")
+    page = ctx.new_page()
+    errors = []
+    watch_errors(page, errors)
+    page.goto(BASE)
+    page.click("#add-recipe")
+    page.fill("#edit-text", TIMER_RECIPE)
+    page.click("#edit-form button[type=submit]")
+    expect(page.locator("#view-recipe")).to_be_visible()
+    links = page.locator("#recipe-body .time-link")
+    expect(links).to_have_text(["20 minutes", "2 seconds", "5 min"])
+    expect(page.locator("#timer-strip")).to_be_hidden()
+    # Two timers at once, named after their step
+    links.nth(0).click()
+    expect(page.locator("#toast")).to_contain_text("Timer started: Roast, 20:00")
+    links.nth(2).click()
+    chips = page.locator(".timer-chip")
+    expect(chips).to_have_count(2)
+    expect(chips.locator(".timer-name")).to_have_text(["Roast", "Rest"])
+    expect(chips.nth(0).locator(".timer-time")).to_have_text(re.compile(r"^19:5\d$"))
+    # A second tap on the same time doesn't start a twin
+    links.nth(0).click()
+    expect(page.locator("#toast")).to_contain_text("Roast is already running")
+    expect(chips).to_have_count(2)
+    # Tap the clock to pause, again to go on; × stops it
+    chips.nth(1).locator(".timer-time").click()
+    expect(chips.nth(1)).to_have_class(re.compile("paused"))
+    paused = chips.nth(1).locator(".timer-time").inner_text()
+    page.wait_for_timeout(1300)
+    expect(chips.nth(1).locator(".timer-time")).to_have_text(paused)
+    chips.nth(1).locator(".timer-time").click()
+    expect(chips.nth(1)).not_to_have_class(re.compile("paused"))
+    chips.nth(1).locator(".timer-stop").click()
+    expect(chips).to_have_count(1)
+    # The chips stay on every page, and survive a reload
+    close_recipe(page)
+    expect(page.locator("#timer-strip")).to_be_visible()
+    page.reload()
+    expect(chips).to_have_count(1)
+    expect(chips.locator(".timer-name")).to_have_text("Roast")
+    # The chip's name opens its recipe
+    chips.locator(".timer-name").click()
+    expect(page.locator("#view-recipe")).to_be_visible()
+    expect(page.locator("#recipe-title")).to_have_text("Quick toast")
+    # Time's up: the chip turns green, buzzes, and Done (or X) stops it
+    page.locator("#recipe-body .time-link").nth(1).click()
+    ringing = page.locator(".timer-chip.ringing")
+    expect(ringing).to_have_count(1, timeout=6000)
+    expect(ringing.locator(".timer-time")).to_have_text("Done")
+    page.wait_for_function("window.__buzz >= 1")
+    page.screenshot(path=SHOTS / "phone-timers.png")
+    ringing.locator(".timer-time").click()
+    expect(ringing).to_have_count(0)
+    page.locator("#recipe-body .time-link").nth(1).click()
+    expect(ringing).to_have_count(1, timeout=6000)
+    page.evaluate("document.activeElement.blur()")
+    page.keyboard.press("x")
+    expect(ringing).to_have_count(0)
+    expect(chips).to_have_count(1)  # Roast keeps going
+    chips.locator(".timer-stop").click()
+    expect(page.locator("#timer-strip")).to_be_hidden()
+    assert not errors, errors
+    ctx.close()
+    print("timers: ok")
+
+
 def main():
     server = subprocess.Popen(
         [sys.executable, "-m", "http.server", str(PORT)],
@@ -1623,6 +1702,7 @@ def main():
             test_recipe_layout(p)
             test_recipe_swipe(p)
             test_screen_stays_on(p)
+            test_timers(p)
             test_pantry_categories(p, FakeSheet())
             test_site_missing(p)
             test_update_after_publish(p)

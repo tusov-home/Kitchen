@@ -126,7 +126,10 @@ above. If a look-only change turns out bigger than expected, say so.
   Pull down from the top closes the recipe. Swipe left = next
   recipe, swipe right = add to the cooking plan, then OK = next, Cancel = undo.
   Servings are set in the plan; a planned recipe shows the planned amounts.
-  The screen stays on while a recipe is open (`js/ui/screenAwake.js`).
+  The screen stays on while a recipe is open or a timer runs
+  (`js/ui/screenAwake.js`). Times in the text ("20 min") start timers:
+  chips above the bottom bar on every page, per phone (`kitchen.timers.v1`,
+  never synced), chime + vibration until Done.
   No Back button (phone Back, pull down, or tap above the sheet).
 - Dialogs and the recipe form must not pop up the phone keyboard on open:
   the heading takes the focus (`tabindex="-1"`), never a text box.

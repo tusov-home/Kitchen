@@ -45,6 +45,18 @@ export function saveShopping(lists) {
   return writeJson(SHOPPING_KEY, lists);
 }
 
+// Running kitchen timers: on this phone only, never synced.
+const TIMERS_KEY = "kitchen.timers.v1";
+
+export function loadTimers() {
+  const list = readJson(TIMERS_KEY, []);
+  return Array.isArray(list) ? list : [];
+}
+
+export function saveTimers(timers) {
+  return writeJson(TIMERS_KEY, timers);
+}
+
 export function loadSettings() {
   // myName: who rates on this phone (each phone has its own).
   return Object.assign({ syncUrl: "", lastSync: 0, myName: "" }, readJson(SETTINGS_KEY, {}));

@@ -9,7 +9,7 @@
 // below means: always ask the site whether a file changed. Without it, a
 // phone can get a new page together with old code and styling.
 
-const CACHE = "kitchen-app-v22";
+const CACHE = "kitchen-app-v23";
 
 const APP_FILES = [
   "./",
@@ -62,6 +62,9 @@ const APP_FILES = [
   "js/ui/editor.js",
   "js/ui/settings.js",
   "js/ui/screenAwake.js",
+  "js/ui/timers.js",
+  "js/timerState.js",
+  "js/lib/timers.js",
   "js/ui/shortcuts.js",
   "js/ui/toast.js",
   "icons/icon-192.png",

@@ -26,6 +26,7 @@ const SHORTCUTS = [
   { keys: "n", label: "N", action: "addProject", where: ["projects"], text: "Projects: add a project" },
   { keys: "e", label: "E", action: "editProject", where: ["project"], text: "Project: edit" },
   { keys: "l", label: "L", action: "openShopping", where: ["list", "browse", "recipe"], text: "Open shopping list" },
+  { keys: "x", label: "X", action: "dismissAlarms", where: ["any"], text: "Timers: stop the alarm" },
   { keys: "?", label: "?", action: "showHelp", where: ["any"], text: "Show this list" },
 ];
 

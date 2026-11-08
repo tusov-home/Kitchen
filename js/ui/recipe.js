@@ -1,6 +1,7 @@
 // Shows one recipe, ready to cook from: notes and the recipe text. In the
 // cooking plan, the amounts follow the servings set there.
 import * as state from "../state.js";
+import { linkTimes, startFromButton } from "./timers.js";
 import { ask } from "./ask.js";
 import * as plan from "../planState.js";
 import { bodyWithoutTitle, canEdit } from "../lib/recipes.js";
@@ -45,6 +46,7 @@ function renderBody(recipe) {
     ? "Amounts for " + Math.round(recipe.servings * factor) + " servings, as in the cooking plan"
     : "Amounts × " + formatAmount(factor) + ", as in the cooking plan";
   body.innerHTML = renderMarkdown(bodyWithoutTitle(recipe.text, recipe.title), { scale: factor });
+  linkTimes(body); // "20 min" becomes a button that starts a timer
   renderJump(body);
 }
 
@@ -175,6 +177,12 @@ export function swipeRecipe(direction) {
 }
 
 export function initRecipe() {
+  body.addEventListener("click", function (event) {
+    const time = event.target.closest(".time-link");
+    if (time) {
+      startFromButton(time, currentId);
+    }
+  });
   addedDialog.addEventListener("close", function () {
     if (addedDialog.returnValue === "ok") {
       showNextRecipe();
