@@ -15,6 +15,7 @@ import { initAsk } from "./ui/ask.js";
 import { initName } from "./ui/name.js";
 import { initEditor, openEditor, saveFromEditor, cancelEditor } from "./ui/editor.js";
 import { initSettings, setSettingsStatus, renderSettings } from "./ui/settings.js";
+import { keepScreenOn } from "./ui/screenAwake.js";
 import { initShortcuts } from "./ui/shortcuts.js";
 import { initPwa, onInstallAvailable, install } from "./pwa.js";
 import * as shoppingState from "./shoppingState.js";
@@ -224,6 +225,7 @@ function route() {
     }
   }
   renderTabs(current.screen, views[current.screen]);
+  keepScreenOn(current.screen === "recipe");
   // The page under a sheet stays where you left it.
   const backUnder = (current.screen === "list" && isSheet(cameFrom)) || (current.screen === "projects" && cameFrom === "project");
   if (!isSheet(current.screen) && !backUnder) {

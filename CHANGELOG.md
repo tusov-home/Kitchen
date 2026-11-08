@@ -1,5 +1,8 @@
 # Changelog
 
+## 2026-11-08 c
+- The phone screen stays on while a recipe is open, and dims as usual again once it's closed.
+
 ## 2026-11-08 b
 - The app icon is the steaming pot again, now in black and white (rice paper on charred black). The ensō stays inside the app.
 

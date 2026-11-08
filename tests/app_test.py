@@ -1562,6 +1562,46 @@ def test_update_after_publish(p):
         server.terminate()
 
 
+def test_screen_stays_on(p):
+    """While a recipe is open the screen stays on (Screen Wake Lock)."""
+    ctx = p.chromium.launch().new_context(**p.devices["Pixel 7"])
+    ctx.add_init_script("if (!localStorage.getItem('kitchen.settings.v1')) localStorage.setItem('kitchen.settings.v1', JSON.stringify({myName: 'Kadi'}))")
+    # A stand-in wake lock that counts how often it's held
+    ctx.add_init_script("""
+        window.__locks = 0;
+        Object.defineProperty(navigator, 'wakeLock', { value: { request: async () => {
+            window.__locks += 1;
+            const lock = new EventTarget();
+            lock.release = async () => { window.__locks -= 1; lock.dispatchEvent(new Event('release')); };
+            return lock;
+        } } });
+    """)
+    page = ctx.new_page()
+    errors = []
+    watch_errors(page, errors)
+    page.goto(BASE)
+    locks = lambda: page.evaluate("window.__locks")
+    page.click("#add-recipe")
+    page.fill("#edit-text", RECIPE)
+    page.click("#edit-form button[type=submit]")
+    expect(page.locator("#view-recipe")).to_be_visible()
+    page.wait_for_function("window.__locks === 1")
+    # Closing the recipe lets the screen dim again
+    page.go_back()
+    expect(page.locator("#view-recipe")).to_be_hidden()
+    page.wait_for_function("window.__locks === 0")
+    # Opening it again takes the lock again, once
+    show_meals(page)
+    page.click(".recipe-card")
+    expect(page.locator("#view-recipe")).to_be_visible()
+    page.wait_for_function("window.__locks === 1")
+    page.wait_for_timeout(300)
+    assert locks() == 1, locks()
+    assert not errors, errors
+    ctx.close()
+    print("screen stays on: ok")
+
+
 def main():
     server = subprocess.Popen(
         [sys.executable, "-m", "http.server", str(PORT)],
@@ -1582,6 +1622,7 @@ def main():
             test_meals_and_sauces(p)
             test_recipe_layout(p)
             test_recipe_swipe(p)
+            test_screen_stays_on(p)
             test_pantry_categories(p, FakeSheet())
             test_site_missing(p)
             test_update_after_publish(p)

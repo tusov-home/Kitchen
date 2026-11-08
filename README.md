@@ -14,6 +14,7 @@ Kitchen lives in the `tusov-home` organization so it has its own web address. Pa
 
 - **Meals and sauces:** every recipe is a **Meal** or a **Sauce or condiment**; choose in the recipe form. The daily suggestion only picks meals; search covers both. Recipes from before this count as meals, and the owner can change the type.
 - **Add a recipe:** copy the recipe from Claude, tap **+** next to the search box, tap the text box and paste. On the laptop, N then Ctrl+V is enough. The first line becomes the title (you can change it). Add tags like `quick, weekend, chicken`.
+- **Screen stays on** while a recipe is open (Chrome on Android, Edge and Chrome on Windows), so it doesn't go dark mid-cooking. Closing the recipe lets it dim as usual.
 - **Find it again:** type in the search bar at the bottom of the recipes page (name, tag or ingredient); the results open in a sheet on top while you type. Matching **pantry** items come first, each with its Have / Low / Out button, so you can mark something running low without scrolling the whole pantry. Empty the box, or close the sheet, to go back.
 - **Everything opens the same way:** Meals, Sauces & condiments, search results, the cooking plan and a recipe all open as sheets on top of the recipes page. Close any of them by pulling down from the top, tapping above it, phone Back, or Esc on the laptop. A recipe opened from a list or the plan closes back to that list or plan.
 - **Cook it:** open the recipe. Ticking it as cooked in the plan's review adds the date to the notes; **Edit** lets you change anything and add notes ("less chilli next time").
@@ -167,6 +168,7 @@ js/ui/projects.js     the projects list and add/edit dialog
 js/ui/project.js      one project: status, steps, things to buy, notes
 js/ui/editor.js       add/edit form
 js/ui/settings.js     settings page: your name, sync, backup, privacy
+js/ui/screenAwake.js  keeps the phone screen on while a recipe is open
 js/ui/shortcuts.js    all keyboard shortcuts in one table
 js/ui/toast.js        short pop-up messages
 apps-script/Code.gs   the Google Sheet side of sync (stores each item as JSON; one tab per collection)
