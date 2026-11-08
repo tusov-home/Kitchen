@@ -2225,21 +2225,39 @@ body.shade-out .recipe-backdrop {
   }
 }
 
-/* Another idea turns the card over, like a playing card: the next recipe is
-   on its back. Clockwise (next) turns it one way, back turns it the other. */
+/* Another idea turns the card over, like a playing card picked up by hand:
+   one edge lifts, the card rises towards you with a slight tilt and swings
+   over, then lands on its back with a little settle. The next recipe is on
+   its back. Next turns it one way, back the other. */
 #suggestion {
   perspective: none;
 }
 
-@keyframes card-out-next { to { transform: perspective(900px) rotateY(-90deg); } }
-@keyframes card-in-next { from { transform: perspective(900px) rotateY(90deg); } }
-@keyframes card-out-back { to { transform: perspective(900px) rotateY(90deg); } }
-@keyframes card-in-back { from { transform: perspective(900px) rotateY(-90deg); } }
+@keyframes card-out-next {
+  0% { transform: perspective(900px); }
+  35% { transform: perspective(900px) translate3d(-2%, -3px, 30px) rotateY(-18deg) rotateZ(-1.5deg); }
+  100% { transform: perspective(900px) translate3d(-6%, -8px, 70px) rotateY(-90deg) rotateZ(-3deg); }
+}
+@keyframes card-in-next {
+  0% { transform: perspective(900px) translate3d(6%, -8px, 70px) rotateY(90deg) rotateZ(3deg); }
+  70% { transform: perspective(900px) translate3d(0, 1px, 0) rotateY(-4deg) rotateZ(0); }
+  100% { transform: perspective(900px); }
+}
+@keyframes card-out-back {
+  0% { transform: perspective(900px); }
+  35% { transform: perspective(900px) translate3d(2%, -3px, 30px) rotateY(18deg) rotateZ(1.5deg); }
+  100% { transform: perspective(900px) translate3d(6%, -8px, 70px) rotateY(90deg) rotateZ(3deg); }
+}
+@keyframes card-in-back {
+  0% { transform: perspective(900px) translate3d(-6%, -8px, 70px) rotateY(-90deg) rotateZ(-3deg); }
+  70% { transform: perspective(900px) translate3d(0, 1px, 0) rotateY(4deg) rotateZ(0); }
+  100% { transform: perspective(900px); }
+}
 
-.suggestion.flip-out-next { animation: card-out-next 0.13s ease-in forwards; }
-.suggestion.flip-in-next { animation: card-in-next 0.17s ease-out; }
-.suggestion.flip-out-back { animation: card-out-back 0.13s ease-in forwards; }
-.suggestion.flip-in-back { animation: card-in-back 0.17s ease-out; }
+.suggestion.flip-out-next { animation: card-out-next 0.2s cubic-bezier(0.4, 0, 0.9, 0.6) forwards; }
+.suggestion.flip-in-next { animation: card-in-next 0.3s cubic-bezier(0.2, 0.6, 0.35, 1); }
+.suggestion.flip-out-back { animation: card-out-back 0.2s cubic-bezier(0.4, 0, 0.9, 0.6) forwards; }
+.suggestion.flip-in-back { animation: card-in-back 0.3s cubic-bezier(0.2, 0.6, 0.35, 1); }
 
 .suggestion.flip-out-next,
 .suggestion.flip-in-next,

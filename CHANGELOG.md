@@ -1,5 +1,8 @@
 # Changelog
 
+## 2026-11-08 h
+- The suggestion card now turns over like a card picked up by hand: it lifts, tilts, swings over and settles.
+
 ## 2026-11-08 g
 - The method shows each ingredient's total amount in brackets where a step mentions it ("Cook the noodles (200 g)"), at the planned servings.
 
