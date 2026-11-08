@@ -1,5 +1,8 @@
 # Changelog
 
+## 2026-11-08 b
+- The app icon is the steaming pot again, now in black and white (rice paper on charred black). The ensō stays inside the app.
+
 ## 2026-11-08 a
 - Search on the recipes page also finds pantry items, listed first with their Have / Low / Out button, so one tap marks something running low.
 

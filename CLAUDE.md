@@ -96,7 +96,8 @@ above. If a look-only change turns out bigger than expected, say so.
   a plant (took too much attention) and timber bars (felt like a game), so
   no pictures and no wood.
 - The brushed ensō (`icons/enso-mark.png`, used as a CSS mask) is the one
-  signature element. Keep everything else quiet: no all-caps labels,
+  signature element inside the app. The app icon on the home screen is a
+  steaming pot in black and white (`tools/make_icons.py` draws all sizes). Keep everything else quiet: no all-caps labels,
   generous spacing, soft rectangles rather than pills.
 - Recipes page order: today's suggestion → "Cooking plan" row (only with
   planned meals) → "Meals" and "Sauces & condiments" rows, filling the

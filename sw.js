@@ -9,7 +9,7 @@
 // below means: always ask the site whether a file changed. Without it, a
 // phone can get a new page together with old code and styling.
 
-const CACHE = "kitchen-app-v20";
+const CACHE = "kitchen-app-v21";
 
 const APP_FILES = [
   "./",
